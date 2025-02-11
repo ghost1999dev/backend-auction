@@ -94,3 +94,7 @@ export const deleteCompany = async (req, res) => {
 export const uploadImageCompany = async (req, res) => {
     updateImage(req, res, CompaniesModel)
 }
+
+export const holaMundo = async (req, res) => {
+    console.log("hola mundo")
+}

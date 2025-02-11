@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+
+# Archivos de log
+logs
+*.log
+
+# Directorios de salida y compilación
+dist/
+build/
+
+# Archivos de entorno y dependencias
+.env
+
+# Caché
+.cache/
+
+# Archivos del editor y sistema operativo
+.DS_Store
+.idea/
+.vscode/
+
+# Archivos de test
+junit.xml
+
+# PM2
+.pids

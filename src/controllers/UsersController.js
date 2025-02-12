@@ -5,6 +5,14 @@ import updateImage from "./ImagesController.js"
 // import helper to hash password
 import hashPassword from "../helpers/hashPassword.js"
 
+/**
+ * create user
+ * 
+ * function to create user
+ * @param {object} req - request object
+ * @param {object} res - response object
+ * @returns {object} user created
+ */
 export const createUser = async (req, res) => {
     try {
         let { name, email, password, role, image } = req.body
@@ -16,15 +24,21 @@ export const createUser = async (req, res) => {
     }
 }
 
+/**
+ * get users
+ * 
+ * function to get all users
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} users registered
+ */
 export const getUsers = async (req, res) => {
     try {
-        // get all users from database where status is true
-        // const users = await UsersModel.findAll({
-        //     where: {
-        //         status: true
-        //     }
-        // })
-        const users = await UsersModel.findAll()
+        const users = await UsersModel.findAll({
+        where: {
+            status: true
+         }
+        })
         const usersWithImage = users.map(user => {
             return {
                 ...user.dataValues,
@@ -37,7 +51,14 @@ export const getUsers = async (req, res) => {
     }
 }
 
-// function to get user by id
+/**
+ * get user by id
+ * 
+ * function to get user by id
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user registered
+ */
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params
@@ -53,7 +74,14 @@ export const getUserById = async (req, res) => {
     }
 }
 
-// function to update user
+/**
+ * update user
+ * 
+ * function to update user
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user updated
+ */
 export const updateUser = async (req, res) => {
     try {
         // get id from params
@@ -80,7 +108,14 @@ export const updateUser = async (req, res) => {
     }
 }
 
-// function to update user password
+/**
+ * update password
+ * 
+ * function to update password
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user updated
+ */
 export const updatePassword = async (req, res) => {
     try {
         const { id } = req.params
@@ -99,7 +134,15 @@ export const updatePassword = async (req, res) => {
     }
 }
 
-// function to delete user
+/**
+ * delete user 
+ * 
+ * function to delete user
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user deleted
+ * 
+*/
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params
@@ -117,7 +160,14 @@ export const deleteUser = async (req, res) => {
     }
 }
 
-// function to upload image
+/**
+ * upload image
+ * 
+ * function to upload image
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} image uploaded
+ */
 export const uploadImageUser = async (req, res) => {
     updateImage(req, res, UsersModel)
 }

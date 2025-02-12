@@ -1,6 +1,13 @@
-import multer from "multer"
-import path from "path"
+import multer from "multer" // package to upload image
+import path from "path" // package to get path
 
+/**
+ * upload image
+ * 
+ * function to upload image
+ * @param {function} cb - callback function
+ * @returns {string} path of image
+ */
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "src/images")
@@ -10,6 +17,7 @@ const storage = multer.diskStorage({
     }
 })
 
+// set multer storage
 const upload = multer({ storage: storage })
 
 export default upload

@@ -1,3 +1,12 @@
+/**
+ * update image
+ * 
+ * function to update image
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @param {Object} model - model to update image
+ * @returns {Object} image updated
+ */
 const updateImage = async (req, res, model) => {
     try {
         const { id } = req.params

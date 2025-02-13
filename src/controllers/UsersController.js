@@ -1,9 +1,12 @@
+import validator from "validator"
 // import users model
 import UsersModel from "../models/UsersModel.js"
 // import image controller
 import updateImage from "./ImagesController.js"
-// import helper to hash password
+// import helpers
 import hashPassword from "../helpers/hashPassword.js"
+import sendVerificationEmail from "../helpers/verificationEmail.js"
+import generateToken from "../helpers/generateToken.js"
 
 /**
  * create user
@@ -16,9 +19,23 @@ import hashPassword from "../helpers/hashPassword.js"
 export const createUser = async (req, res) => {
     try {
         let { name, email, password, role, image } = req.body
+
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ message: "Invalid email" })
+        }
+
+        const existingEmail = await UsersModel.findOne({ where: { email } })
+        if (existingEmail) {
+            return res.status(400).json({ message: "Email already exists" })
+        }
+
         password = hashPassword(password)
-        const user = await UsersModel.create({ name, email, password, role, image })
-        res.status(201).json({ message: "User created successfully", user })
+        const user = await UsersModel.create({ name, email, password, role, image, isVerfied: false })
+        
+        const token = generateToken(email)
+        sendVerificationEmail(email, token)
+        
+        res.status(201).json({ message: "User created successfully. please check your email to verify your account", user })
     } catch (error) {
         res.status(500).json({ message: "Error creating user", error: error.message })
     }

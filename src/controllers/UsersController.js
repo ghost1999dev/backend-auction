@@ -30,7 +30,7 @@ export const createUser = async (req, res) => {
         }
 
         password = hashPassword(password)
-        const user = await UsersModel.create({ name, email, password, role, image, isVerfied: false })
+        const user = await UsersModel.create({ name, email, password, role, image, isVerified: false })
         
         const token = generateToken(email)
         sendVerificationEmail(email, token)
@@ -185,6 +185,43 @@ export const deleteUser = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} image uploaded
  */
+
 export const uploadImageUser = async (req, res) => {
     updateImage(req, res, UsersModel)
+}
+
+/**
+ * verify user
+ * 
+ * function to verify user
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user verified or not
+ */
+export const verifyUser = (req, res) => {
+    try {
+        const token = req.query.token
+
+        if (!token) {
+            return res.status(400).json({ message: "Token not found" })
+        }
+
+        jwt.verify(token, 'bluepixel', async (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ message: "Token not valid or expired" })
+            }
+
+            const user = await UsersModel.findOneAndUpdate({ 
+                where: { 
+                    email: decoded.email 
+                }, 
+                isVerified: true })
+            if (!user) {
+                return res.status(404).json({ message: "User not found" })
+            }
+            res.status(200).json({ message: "User verified successfully", user })
+        })
+    } catch (error) {
+        res.status(500).json({ message: "Error verifying user", error })
+    }
 }

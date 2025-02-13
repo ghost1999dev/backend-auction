@@ -30,7 +30,7 @@ export const createUser = async (req, res) => {
         }
 
         password = hashPassword(password)
-        const user = await UsersModel.create({ name, email, password, role, image, isVerified: false })
+        const user = await UsersModel.create({ name, email, password, role, image, status: false })
         
         const token = generateToken(email)
         sendVerificationEmail(email, token)
@@ -79,7 +79,7 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params
-        const user = await UsersModel.findByPk(id)
+        const user = await UsersModel.findByPk(id, { where: { status: true } })
         if (user) {
             res.status(200).json({ message: "User retrieved successfully", user })
         }
@@ -185,7 +185,6 @@ export const deleteUser = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} image uploaded
  */
-
 export const uploadImageUser = async (req, res) => {
     updateImage(req, res, UsersModel)
 }
@@ -215,7 +214,7 @@ export const verifyUser = (req, res) => {
                 where: { 
                     email: decoded.email 
                 }, 
-                isVerified: true })
+                status: true })
             if (!user) {
                 return res.status(404).json({ message: "User not found" })
             }

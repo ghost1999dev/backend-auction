@@ -1,4 +1,5 @@
 import validator from "validator"
+import jwt from 'jsonwebtoken'
 // import users model
 import UsersModel from "../models/UsersModel.js"
 // import image controller
@@ -20,17 +21,13 @@ export const createUser = async (req, res) => {
     try {
         let { name, email, password, role, image } = req.body
 
-        if (!validator.isEmail(email)) {
-            return res.status(400).json({ message: "Invalid email" })
-        }
-
-        const existingEmail = await UsersModel.findOne({ where: { email } })
-        if (existingEmail) {
-            return res.status(400).json({ message: "Email already exists" })
-        }
+        // const existingEmail = await UsersModel.findOne({ where: { email } })
+        // if (existingEmail) {
+        //     return res.status(400).json({ message: "Email already exists" })
+        // }
 
         password = hashPassword(password)
-        const user = await UsersModel.create({ name, email, password, role, image, status: false })
+        const user = await UsersModel.create({ name, email, password, role, image })
         
         const token = generateToken(email)
         sendVerificationEmail(email, token)
@@ -79,8 +76,8 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params
-        const user = await UsersModel.findByPk(id, { where: { status: true } })
-        if (user) {
+        const user = await UsersModel.findByPk(id)
+        if (user.status === true) {
             res.status(200).json({ message: "User retrieved successfully", user })
         }
         else {
@@ -101,18 +98,13 @@ export const getUserById = async (req, res) => {
  */
 export const updateUser = async (req, res) => {
     try {
-        // get id from params
         const { id } = req.params
-        // get updated user data from request body
-        const { name, email, password, role, image } = req.body
-        // get user from database
+        const { name, email, image } = req.body
+        
         const user = await UsersModel.findByPk(id)
-        // update user in database if user exists
         if (user) {
             user.name = name
             user.email = email
-            user.password = password
-            user.role = role
             user.image = image
             await user.save()
             res.status(200).json({ message: "User updated successfully", user })
@@ -197,9 +189,9 @@ export const uploadImageUser = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} user verified or not
  */
-export const verifyUser = (req, res) => {
+export const verifyUser = async (req, res) => {
     try {
-        const token = req.query.token
+        const {token} = req.params
 
         if (!token) {
             return res.status(400).json({ message: "Token not found" })
@@ -210,15 +202,17 @@ export const verifyUser = (req, res) => {
                 return res.status(401).json({ message: "Token not valid or expired" })
             }
 
-            const user = await UsersModel.findOneAndUpdate({ 
-                where: { 
-                    email: decoded.email 
-                }, 
-                status: true })
+            const emailDecoded = decoded.email
+
+            const user = await UsersModel.findOne({ where: { email: emailDecoded } })
             if (!user) {
                 return res.status(404).json({ message: "User not found" })
             }
-            res.status(200).json({ message: "User verified successfully", user })
+            else {
+                user.status = true
+                await user.save()
+                res.status(200).json({ message: "User verified successfully", user })
+            }
         })
     } catch (error) {
         res.status(500).json({ message: "Error verifying user", error })

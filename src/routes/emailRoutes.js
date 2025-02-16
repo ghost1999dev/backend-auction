@@ -16,18 +16,18 @@ const blockedEmails = new Map();
 const transporter = nodemailer.createTransport({
     service: 'Gmail', 
     auth: {
-        user: 'correo@gmail.com', 
-        pass: 'contraseña para terceros',
+        user: 'and3r.segovia@gmail.com', 
+        pass: 'oreu twkk conn nmgh',
     },
 });
 
 // Función para enviar el correo de verificación
 async function sendVerificationEmail(email, code) {
     const mailOptions = {
-        from: 'correo@gmail.com',
+        from: 'and3r.segovia@gmail.com',
         to: email,
         subject: 'Verifica tu correo electrónico',
-        text: `Tu código de verificación es: ${code}`,
+        text: `Tu código de verificación es: ${code}\n\n¡Advertencia! Este código expirará en 10 minutos.`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -57,7 +57,8 @@ router.post('/request-verification', async (req, res) => {
 });
 
 // Ruta para confirmar la verificación del correo
-router.post('/confirm-verification', (req, res) => {
+// Ruta para confirmar la verificación del correo
+router.post('/confirm-verification', async (req, res) => {
     const { email, code } = req.body;
 
     if (!email || !code) {
@@ -105,9 +106,26 @@ router.post('/confirm-verification', (req, res) => {
         }
     }
 
-    // Si es correcto eliminar el codigo.
+    // Si es correcto
     verificationCodes.delete(email);
-    return res.status(200).json({ message: 'Correo verificado correctamente.' });
+
+    // Configurar el correo de confirmación
+    const mailOptions = {
+        from: 'and3r.segovia@gmail.com', 
+        to: email, 
+        subject: 'Cuenta verificada exitosamente',
+        text: '¡Felicidades! Tu cuenta ha sido verificada exitosamente.', 
+        html: '<p>¡Felicidades! Tu cuenta ha sido verificada exitosamente.</p>', 
+    };
+
+    try {
+        // Enviar el correo de confirmación
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json({ message: 'Correo verificado correctamente. Se ha enviado un correo de confirmación.' });
+    } catch (error) {
+        console.error('Error enviando el correo de confirmación:', error);
+        return res.status(500).json({ error: 'Hubo un error al enviar el correo de confirmación.' });
+    }
 });
 
 export default router;

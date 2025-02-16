@@ -5,26 +5,24 @@ import { v4 as uuidv4 } from 'uuid';
 const router = express.Router();
 
 // Almacenamiento temporal para códigos de verificación con datos adicionales
-// Estructura: email => { code: string, expiresAt: number, attempts: number }
 const verificationCodes = new Map();
 
 // Almacenamiento temporal para correos bloqueados
-// Estructura: email => timestamp de expiración del bloqueo
 const blockedEmails = new Map();
 
 // Configuración de Nodemailer para enviar correos
 const transporter = nodemailer.createTransport({
     service: 'Gmail', 
     auth: {
-        user: 'and3r.segovia@gmail.com', 
-        pass: 'oreu twkk conn nmgh',
+        user: 'correo@gmail.com', 
+        pass: 'contraseña de aplicacion para terceros',
     },
 });
 
 // Función para enviar el correo de verificación
 async function sendVerificationEmail(email, code) {
     const mailOptions = {
-        from: 'and3r.segovia@gmail.com',
+        from: 'correo@gmail.com',
         to: email,
         subject: 'Verifica tu correo electrónico',
         text: `Tu código de verificación es: ${code}\n\n¡Advertencia! Este código expirará en 10 minutos.`,
@@ -56,7 +54,6 @@ router.post('/request-verification', async (req, res) => {
     }
 });
 
-// Ruta para confirmar la verificación del correo
 // Ruta para confirmar la verificación del correo
 router.post('/confirm-verification', async (req, res) => {
     const { email, code } = req.body;
@@ -111,11 +108,10 @@ router.post('/confirm-verification', async (req, res) => {
 
     // Configurar el correo de confirmación
     const mailOptions = {
-        from: 'and3r.segovia@gmail.com', 
+        from: 'correo@gmail.com', 
         to: email, 
         subject: 'Cuenta verificada exitosamente',
         text: '¡Felicidades! Tu cuenta ha sido verificada exitosamente.', 
-        html: '<p>¡Felicidades! Tu cuenta ha sido verificada exitosamente.</p>', 
     };
 
     try {

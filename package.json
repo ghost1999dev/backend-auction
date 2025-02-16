@@ -20,6 +20,7 @@
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "pg": "^8.13.1",
-    "sequelize": "^6.37.5"
+    "sequelize": "^6.37.5",
+    "uuid": "^11.0.5"
   }
 }

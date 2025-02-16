@@ -16,15 +16,15 @@ const blockedEmails = new Map();
 const transporter = nodemailer.createTransport({
     service: 'Gmail', 
     auth: {
-        user: 'and3r.segovia@gmail.com', 
-        pass: 'oreu twkk conn nmgh',
+        user: 'correo@gmail.com', 
+        pass: 'contraseña para terceros',
     },
 });
 
 // Función para enviar el correo de verificación
 async function sendVerificationEmail(email, code) {
     const mailOptions = {
-        from: 'and3r.segovia@gmail.com',
+        from: 'correo@gmail.com',
         to: email,
         subject: 'Verifica tu correo electrónico',
         text: `Tu código de verificación es: ${code}`,

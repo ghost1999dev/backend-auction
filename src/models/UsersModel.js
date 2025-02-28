@@ -21,6 +21,11 @@ const UsersModel = sequelize.define("users", {
     image: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
 },{
     timestamps: true,

@@ -35,11 +35,11 @@ export const getCompanyById = async (req, res) => {
             const company = await CompaniesModel.findAll({
                 include: [{
                     model: UsersModel,
-                    attributes: ["name", "email", "role"]
-                }],
-                where: {
-                    status: true
-                }
+                    attributes: ["name", "email", "role"],
+                    where: {
+                        status: true
+                    }
+                }]
             })
             res.status(200).json({ message: "Company retrieved successfully", company })
         }
@@ -64,7 +64,10 @@ export const getCompanies = async (req, res) => {
         const companies = await CompaniesModel.findAll({
             include: [{
                 model: UsersModel,
-                attributes: ["name", "email", "role"]
+                attributes: ["name", "email", "role"],
+                where: {
+                    status: true
+                }
             }]
         })
         res.status(200).json({ message: "Companies retrieved successfully", companies })

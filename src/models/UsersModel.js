@@ -1,36 +1,40 @@
-import sequelize from "../config/connection.js"
-import { DataTypes } from "sequelize"
+import sequelize from "../config/connection.js";
+import { DataTypes } from "sequelize";
 
-const UsersModel = sequelize.define("users", {
+const UsersModel = sequelize.define(
+  "users",
+  {
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     password: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     role: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     image: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     status: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
-},{
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+  },
+  {
     timestamps: true,
     createdAt: "created_at",
-    updatedAt: "updated_at"
-})
+    updatedAt: "updated_at",
+  },
+);
 
-export default UsersModel
+export default UsersModel;

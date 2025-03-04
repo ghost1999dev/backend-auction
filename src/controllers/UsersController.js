@@ -6,7 +6,6 @@ import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 // import helpers
 import hashPassword from "../helpers/hashPassword.js";
-import sendVerificationEmail from "../helpers/verificationEmail.js";
 import generateToken from "../helpers/generateToken.js";
 
 /**

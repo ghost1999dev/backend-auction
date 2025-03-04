@@ -4,7 +4,7 @@ import emailRoutes from './routes/emailRoutes.js';
 import path from "path"
 import { fileURLToPath } from 'url';
 // import routes 
-import UserRoutes from "./routes/UserRoutes.js"
+import UserRoutes from "./routes/userRoutes.js"
 import CompanyRoutes from "./routes/companyRoutes.js"
 
 const app = express()

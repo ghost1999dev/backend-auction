@@ -1,29 +1,56 @@
 {
   "name": "auctio_backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API para sistema de subastas en línea",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "node src/index.js",
+    "dev": "nodemon --quiet src/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "test": "NODE_ENV=test jest --watchAll",
+    "prepare": "echo 'Skipping npm audit' && exit 0",
+    "migrate": "sequelize-cli db:migrate",
+    "seed": "sequelize-cli db:seed:all"
   },
   "type": "module",
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "auction",
+    "backend",
+    "nodejs",
+    "express",
+    "sequelize"
+  ],
+  "author": "backend-auction",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ghost1999dev/backend-auction.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
-    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "googleapis": "^144.0.0",
+    "googleapis": "^146.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
-    "nodemon": "^3.1.9",
-    "passport": "^0.7.0",
-    "passport-github2": "^0.1.12",
-    "pg": "^8.13.1",
+    "pg": "^8.13.3",
     "sequelize": "^6.37.5",
-    "uuid": "^11.0.5"
+    "superagent": "^10.1.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.2",
+    "sequelize-cli": "^6.6.2",
+    "supertest": "^7.0.0"
   }
 }

@@ -1,14 +1,35 @@
-import express from "express"
-import { createCompany, uploadImageCompany, getCompanyById, getCompanies, updateCompany, deleteCompany } from "../controllers/CompaniesController.js"
-import upload from "../helpers/uploadImage.js"
+import express from "express";
+import {
+  createCompany,
+  getCompanyById,
+  getCompanies,
+  updateCompany,
+  deleteCompany,
+  uploadImageCompany,
+  holaMundo,
+} from "../controllers/CompaniesController.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/", getCompanies)
-router.get("/:id", getCompanyById)
-router.put("/:id", updateCompany)
-router.delete("/:id", deleteCompany)
-router.post("/", createCompany)
-router.post("/upload/:id", upload.single("image"), uploadImageCompany)
+// Ruta para crear una compañía
+router.post("/companies", createCompany);
 
-export default router
+// Ruta para obtener una compañía por su ID
+router.get("/companies/:id", getCompanyById);
+
+// Ruta para obtener todas las compañías
+router.get("/companies", getCompanies);
+
+// Ruta para actualizar una compañía
+router.put("/companies/:id", updateCompany);
+
+// Ruta para eliminar una compañía (cambiar su estado a false)
+router.delete("/companies/:id", deleteCompany);
+
+// Ruta para subir una imagen de la compañía
+router.post("/companies/:id/upload-image", uploadImageCompany);
+
+// Ruta de prueba
+router.get("/hola-mundo", holaMundo);
+
+export default router;

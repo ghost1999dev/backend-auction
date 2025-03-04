@@ -19,8 +19,8 @@ app.use('/users', UserRoutes)
 app.use('/companies', CompanyRoutes)
 app.use('/email', emailRoutes);
 
-// sequelize.sync().then(() => {
-//     console.log("Database synced")
-// })
+sequelize.sync().then(() => {
+    console.log("Database synced")
+})
 
 export default app

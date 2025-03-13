@@ -6,7 +6,6 @@ import {
   updateCompany,
   deleteCompany,
   uploadImageCompany,
-  holaMundo,
 } from "../controllers/CompaniesController.js";
 
 const router = express.Router();
@@ -28,8 +27,5 @@ router.delete("/companies/:id", deleteCompany);
 
 // Ruta para subir una imagen de la compañía
 router.post("/companies/:id/upload-image", uploadImageCompany);
-
-// Ruta de prueba
-router.get("/hola-mundo", holaMundo);
 
 export default router;

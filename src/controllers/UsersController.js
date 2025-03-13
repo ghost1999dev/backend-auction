@@ -6,7 +6,7 @@ import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 // import helpers
 import hashPassword from "../helpers/hashPassword.js";
-import generateToken from "../helpers/generateToken.js";
+//import generateToken from "../helpers/generateToken.js";
 
 /**
  * create user

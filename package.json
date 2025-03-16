@@ -5,16 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon --quiet src/index.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --write .",
-    "test": "NODE_ENV=test jest --watchAll",
-    "prepare": "echo 'Skipping npm audit' && exit 0",
-    "migrate": "sequelize-cli db:migrate",
-    "seed": "sequelize-cli db:seed:all"
+    "dev": "nodemon src/index.js"  
   },
-  "type": "module",
   "keywords": [
     "auction",
     "backend",
@@ -24,14 +16,11 @@
   ],
   "author": "backend-auction",
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ghost1999dev/backend-auction.git"
-  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
+  "type": "module",
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

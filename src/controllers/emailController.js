@@ -11,10 +11,11 @@ const blockedEmails = new Map();
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: process.env.SENDEMAIL,
-    pass: process.env.PASSWORD, 
+    user: "moisesviera30@gmail.com", 
+    pass: "yajm pgix fuyq omsi",        
   },
 });
+
 
 async function sendVerificationEmail(email, code) {
   const mailOptions = {

@@ -7,7 +7,6 @@ import {
 const router = Router();
 
 router.post("/request-verification", requestVerification);
-
 router.post("/confirm-verification", confirmVerification);
 
 export default router;

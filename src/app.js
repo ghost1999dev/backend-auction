@@ -46,6 +46,7 @@ class Server{
         this.app.use(express.json());
         this.app.use(helmet()); 
         this.app.use(express.urlencoded({ extended: true }))
+        this.app.use('./images', express.static(path.join(this.__dirname, './images')))
     }
 
     routes(){
@@ -53,7 +54,6 @@ class Server{
         app.use('/users', UserRoutes)
         app.use('/companies', CompanyRoutes)
         app.use('/email', emailRoutes);
-        
     }
 
     listen(){

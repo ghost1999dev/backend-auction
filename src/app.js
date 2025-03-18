@@ -60,6 +60,7 @@ class Server{
         app.use(this.apiPaths.users, UserRoutes)
         app.use(this.apiPaths.companies, CompanyRoutes)
         app.use(this.apiPaths.email, emailRoutes);
+        
     }
 
     listen(){

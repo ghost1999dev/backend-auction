@@ -31,7 +31,7 @@ async function sendVerificationEmail(email, code) {
 /**
  * Controlador para solicitar la verificación del correo
  */
-export const requestVerification = async (req, res) => {
+export const emailVerification = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -60,7 +60,7 @@ export const requestVerification = async (req, res) => {
 /**
  * Controlador para confirmar la verificación del correo
  */
-export const confirmVerification = async (req, res) => {
+export const confirmEmail = async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {

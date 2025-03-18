@@ -21,21 +21,14 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const apiPaths = {
-    index: '/',
-    users: '/users',
-    companies: '/companies',
-    email: '/email'
-}
 
 class Server{
-    constructor(app, PORT, NODE_ENV, __filename, __dirname, apiPaths){
+    constructor(app, PORT, NODE_ENV, __filename, __dirname){
         this.app = app
         this.PORT = PORT
         this.NODE_ENV = NODE_ENV
         this.__filename = __filename
         this.__dirname = __dirname
-        this.apiPaths = apiPaths
         this.middlewars();
 		this.routes();
     }
@@ -56,10 +49,10 @@ class Server{
     }
 
     routes(){
-        app.use(this.apiPaths.index, indexRoutes)
-        app.use(this.apiPaths.users, UserRoutes)
-        app.use(this.apiPaths.companies, CompanyRoutes)
-        app.use(this.apiPaths.email, emailRoutes);
+        app.use('/', indexRoutes)
+        app.use('/users', UserRoutes)
+        app.use('/companies', CompanyRoutes)
+        app.use('/email', emailRoutes);
         
     }
 
@@ -78,7 +71,6 @@ const server = new Server(
     NODE_ENV, 
     __filename, 
     __dirname, 
-    apiPaths
 );
 
 server.listen()

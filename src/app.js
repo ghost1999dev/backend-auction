@@ -52,8 +52,7 @@ class Server{
         app.use('/', indexRoutes)
         app.use('/users', UserRoutes)
         app.use('/companies', CompanyRoutes)
-        app.use('/email', emailRoutes);
-        
+        app.use('/email', emailRoutes)
     }
 
     listen(){

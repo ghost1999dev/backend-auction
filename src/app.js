@@ -3,6 +3,7 @@ import sequelize from "./config/connection.js"
 import emailRoutes from './routes/emailRoutes.js';
 import path from "path"
 import { fileURLToPath } from 'url';
+import { passport } from "./helpers/passport.js";
 // import routes 
 import UserRoutes from "./routes/userRoutes.js"
 import CompanyRoutes from "./routes/companyRoutes.js"

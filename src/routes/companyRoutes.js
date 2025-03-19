@@ -17,6 +17,11 @@ router.post("/companies", createCompany);
 router.get("/companies/:id", getCompanyById);
 
 // Ruta para obtener todas las compañías
+/**
+ * 
+ * 
+ * TODO ERROR
+ */
 router.get("/companies", getCompanies);
 
 // Ruta para actualizar una compañía

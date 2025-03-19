@@ -7,7 +7,11 @@ import {
   AddNewCompany,
   UploadLogoCompany,
 } from "../controllers/CompaniesController.js";
-
+/**
+ * 
+ * Companies Routes
+ * 
+ */
 const router = express.Router();
 router.post("/create", AddNewCompany);
 router.get("/show/:id", DetailsCompanyId);

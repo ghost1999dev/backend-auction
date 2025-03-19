@@ -7,6 +7,10 @@ import {
 
 const router = Router();
 
+/**
+ * Email Routes
+ */
+
 router.post("/email/verification", emailVerification);
 router.post("/email/confirm", confirmEmail);
 

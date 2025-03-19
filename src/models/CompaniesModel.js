@@ -2,6 +2,12 @@ import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import UsersModel from "./UsersModel.js";
 
+
+/**
+ * Companies model.
+ * @module CompaniesModel
+ */
+
 const CompaniesModel = sequelize.define(
   "companies",
   {

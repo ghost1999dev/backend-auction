@@ -1,6 +1,12 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 
+/**
+ * Users model.
+ * @module UsersModel
+ * @description Represents a user with properties such as name, email, password, role, image, and status.
+ */
+
 const UsersModel = sequelize.define(
   "users",
   {

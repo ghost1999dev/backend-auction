@@ -16,13 +16,12 @@ import {
 } from "../controllers/UsersController.js";
 
 const router = Router();
-router.post("/users", createUser);
-router.get("/users-all", getUsers);
-router.get("/users/:id", getUserById);
-router.put("/users/:id", updateUser);
-router.put("/users/:id/password", updatePassword);
-router.delete("/users/:id", deleteUser);
-router.post("/users/upload-image", uploadImageUser);
-router.get("/users/verify/:token", verifyUser);
-
+router.post("/create", createUser);
+router.get("/show/all", getUsers);
+router.get("/show/:id", getUserById);
+router.put("/update/:id", updateUser);
+router.put("/update-password/:id", updatePassword);
+router.delete("/delete/:id", deleteUser);
+router.post("/upload-image", uploadImageUser);
+router.get("/verify/:token", verifyUser);
 export default router;

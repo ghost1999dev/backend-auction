@@ -9,7 +9,7 @@ import UsersModel from "../models/UsersModel.js";
  * @param {Object} res - response object
  * @returns {Object} company created
  */
-export const createCompany = async (req, res) => {
+export const AddNewCompany = async (req, res) => {
   try {
     const { user_id, company_name, logo, tax_id } = req.body;
     const company = await CompaniesModel.create({
@@ -32,7 +32,7 @@ export const createCompany = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} company retrieved
  */
-export const getCompanyById = async (req, res) => {
+export const DetailsCompanyId = async (req, res) => {
   try {
     const { id } = req.params;
     const getCompany = await CompaniesModel.findByPk(id);
@@ -67,7 +67,7 @@ export const getCompanyById = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} companies retrieved
  */
-export const getCompanies = async (req, res) => {
+export const ListAllCompany = async (req, res) => {
   try {
     const companies = await CompaniesModel.findAll({
       include: [
@@ -96,7 +96,7 @@ export const getCompanies = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} company updated
  */
-export const updateCompany = async (req, res) => {
+export const UpdateCompanyId = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { company_name, logo, tax_id } = req.body;
@@ -125,7 +125,7 @@ export const updateCompany = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} company deleted
  */
-export const deleteCompany = async (req, res) => {
+export const DeleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
     const company = await CompaniesModel.findByPk(id);
@@ -151,7 +151,7 @@ export const deleteCompany = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} image uploaded
  */
-export const uploadImageCompany = async (req, res) => {
+export const UploadLogoCompany = async (req, res) => {
   updateImage(req, res, CompaniesModel);
 };
 

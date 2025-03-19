@@ -43,22 +43,6 @@ class Server {
     this.routes();
   }
 
-<<<<<<< HEAD
-    async dbConnection() {
-		try {
-			await getConnection();
-		} catch (error) {
-			throw new Error("You Error is: " + error);
-		}
-	}
-
-    middlewars() {
-        this.app.use(cors());
-        this.app.use(express.json());
-        this.app.use(helmet()); 
-        this.app.use(express.urlencoded({ extended: true }))
-        this.app.use('./images', express.static(path.join(this.__dirname, './images')))
-=======
   /**
    * Establishes a connection to the database.
    * @async
@@ -69,18 +53,9 @@ class Server {
       await getConnection();
     } catch (error) {
       throw new Error("Database connection error: " + error);
->>>>>>> d31f2be (feat: Mejora de la documentación y limpieza de código en varios archivos)
     }
   }
 
-<<<<<<< HEAD
-    routes(){
-        app.use('/', indexRoutes)
-        app.use('/users', UserRoutes)
-        app.use('/companies', CompanyRoutes)
-        app.use('/email', emailRoutes);
-    }
-=======
   /**
    * Configures global middlewares.
    */
@@ -90,7 +65,6 @@ class Server {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
   }
->>>>>>> d31f2be (feat: Mejora de la documentación y limpieza de código en varios archivos)
 
   /**
    * Registers application routes.
@@ -112,17 +86,5 @@ class Server {
   }
 }
 
-<<<<<<< HEAD
-const server = new Server(
-    app, 
-    PORT, 
-    NODE_ENV, 
-    __filename, 
-    __dirname, 
-);
-
-server.listen()
-=======
 const server = new Server(app, PORT, NODE_ENV, __filename, __dirname);
 server.listen();
->>>>>>> d31f2be (feat: Mejora de la documentación y limpieza de código en varios archivos)

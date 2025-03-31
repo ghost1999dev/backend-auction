@@ -1,12 +1,8 @@
 import validator from "validator";
 import jwt from "jsonwebtoken";
-// import users model
 import UsersModel from "../models/UsersModel.js";
-// import image controller
 import updateImage from "./ImagesController.js";
-// import helpers
 import hashPassword from "../helpers/hashPassword.js";
-import generateToken from "../helpers/generateToken.js";
 
 /**
  * create user
@@ -33,9 +29,6 @@ export const createUser = async (req, res) => {
       role,
       image,
     });
-
-    const token = generateToken(email);
-    sendVerificationEmail(email, token);
 
     res
       .status(201)

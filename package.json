@@ -4,17 +4,9 @@
   "description": "Backend API para sistema de subastas en línea",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon --quiet src/index.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --write .",
-    "test": "NODE_ENV=test jest --watchAll",
-    "prepare": "echo 'Skipping npm audit' && exit 0",
-    "migrate": "sequelize-cli db:migrate",
-    "seed": "sequelize-cli db:seed:all"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
-  "type": "module",
   "keywords": [
     "auction",
     "backend",
@@ -24,18 +16,18 @@
   ],
   "author": "backend-auction",
   "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ghost1999dev/backend-auction.git"
-  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
+  "type": "module",
   "dependencies": {
+    "auctio_backend": "file:",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "googleapis": "^146.0.0",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",

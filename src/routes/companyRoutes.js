@@ -1,35 +1,23 @@
 import express from "express";
 import {
-  createCompany,
-  getCompanyById,
-  getCompanies,
-  updateCompany,
-  deleteCompany,
-  uploadImageCompany,
-  holaMundo,
+  ListAllCompany,
+  UpdateCompanyId,
+  DeleteCompany,
+  DetailsCompanyId,
+  AddNewCompany,
+  UploadLogoCompany,
 } from "../controllers/CompaniesController.js";
-
+/**
+ * 
+ * Companies Routes
+ * 
+ */
 const router = express.Router();
-
-// Ruta para crear una compañía
-router.post("/companies", createCompany);
-
-// Ruta para obtener una compañía por su ID
-router.get("/companies/:id", getCompanyById);
-
-// Ruta para obtener todas las compañías
-router.get("/companies", getCompanies);
-
-// Ruta para actualizar una compañía
-router.put("/companies/:id", updateCompany);
-
-// Ruta para eliminar una compañía (cambiar su estado a false)
-router.delete("/companies/:id", deleteCompany);
-
-// Ruta para subir una imagen de la compañía
-router.post("/companies/:id/upload-image", uploadImageCompany);
-
-// Ruta de prueba
-router.get("/hola-mundo", holaMundo);
+router.post("/create", AddNewCompany);
+router.get("/show/all", ListAllCompany);
+router.get("/show/:id", DetailsCompanyId);
+router.put("/update/:id", UpdateCompanyId);
+router.delete("/delete/:id", DeleteCompany);
+router.post("/upload-logo/:id", UploadLogoCompany);
 
 export default router;

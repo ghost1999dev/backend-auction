@@ -1,13 +1,17 @@
 import { Router } from "express";
 import {
-  requestVerification,
-  confirmVerification,
+ 
+  confirmEmail,
+  emailVerification,
 } from "../controllers/emailController.js";
 
 const router = Router();
 
-router.post("/request-verification", requestVerification);
+/**
+ * Email Routes
+ */
 
-router.post("/confirm-verification", confirmVerification);
+router.post("/email/verification", emailVerification);
+router.post("/email/confirm", confirmEmail);
 
 export default router;

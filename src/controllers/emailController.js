@@ -1,21 +1,39 @@
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
 
-dotenv.config()
+
+
+
+dotenv.config();
+
+
 
 const verificationCodes = new Map();
-
 const blockedEmails = new Map();
 
+/**
+ * SMTP transporter configured with Gmail credentials.
+ *
+ * @constant {import("nodemailer").Transporter}
+ */
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: process.env.SENDEMAIL,
-    pass: process.env.PASSWORD, 
+    user: "moisesviera30@gmail.com",
+    pass: "yajm pgix fuyq omsi",
   },
 });
 
+/**
+ * Sends a verification email containing a unique code that expires in 10 minutes.
+ *
+ * @async
+ * @function sendVerificationEmail
+ * @param {string} email - Recipient's email address.
+ * @param {string} code - Unique verification code.
+ * @returns {Promise<void>} Resolves when the email is sent.
+ */
 async function sendVerificationEmail(email, code) {
   const mailOptions = {
     from: process.env.SENDEMAIL,
@@ -28,9 +46,15 @@ async function sendVerificationEmail(email, code) {
 }
 
 /**
- * Controlador para solicitar la verificación del correo
+ * Controller for requesting email verification.
+ *
+ * @async
+ * @function emailVerification
+ * @param {import("express").Request} req - Express request object.
+ * @param {import("express").Response} res - Express response object.
+ * @returns {Promise<import("express").Response>} JSON response with verification status.
  */
-export const requestVerification = async (req, res) => {
+export const emailVerification = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -41,7 +65,7 @@ export const requestVerification = async (req, res) => {
 
   verificationCodes.set(email, {
     code: verificationCode,
-    expiresAt: Date.now() + 10 * 60 * 1000, 
+    expiresAt: Date.now() + 10 * 60 * 1000,
     attempts: 0,
   });
 
@@ -57,9 +81,15 @@ export const requestVerification = async (req, res) => {
 };
 
 /**
- * Controlador para confirmar la verificación del correo
+ * Controller for confirming email verification.
+ *
+ * @async
+ * @function confirmEmail
+ * @param {import("express").Request} req - Express request object.
+ * @param {import("express").Response} res - Express response object.
+ * @returns {Promise<import("express").Response>} JSON response with confirmation status.
  */
-export const confirmVerification = async (req, res) => {
+export const confirmEmail = async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {
@@ -81,22 +111,18 @@ export const confirmVerification = async (req, res) => {
   const verificationData = verificationCodes.get(email);
 
   if (!verificationData) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "No se encontró un código de verificación para ese correo. Por favor, solicite uno nuevo.",
-      });
+    return res.status(400).json({
+      error:
+        "No se encontró un código de verificación para ese correo. Por favor, solicite uno nuevo.",
+    });
   }
 
   if (Date.now() > verificationData.expiresAt) {
     verificationCodes.delete(email);
-    return res
-      .status(400)
-      .json({
-        error:
-          "El código de verificación ha expirado. Por favor, solicite uno nuevo.",
-      });
+    return res.status(400).json({
+      error:
+        "El código de verificación ha expirado. Por favor, solicite uno nuevo.",
+    });
   }
 
   if (verificationData.code !== code) {
@@ -104,7 +130,7 @@ export const confirmVerification = async (req, res) => {
     verificationCodes.set(email, verificationData);
 
     if (verificationData.attempts >= 5) {
-      blockedEmails.set(email, Date.now() + 15 * 60 * 1000); 
+      blockedEmails.set(email, Date.now() + 15 * 60 * 1000);
       verificationCodes.delete(email);
       return res.status(429).json({
         error:

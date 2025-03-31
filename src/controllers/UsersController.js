@@ -30,9 +30,6 @@ export const createUser = async (req, res) => {
       image,
     });
 
-    const token = generateToken(email);
-    sendVerificationEmail(email, token);
-
     res
       .status(201)
       .json({

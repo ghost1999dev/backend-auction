@@ -47,6 +47,9 @@ export const DetailsCompanyId = async (req, res) => {
             },
           },
         ],
+        where: {
+          id: id
+        }
       });
       res
         .status(200)

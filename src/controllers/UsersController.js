@@ -1,10 +1,9 @@
-import validator from "validator";
 import jwt from "jsonwebtoken";
 import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
-import { emailVerificationService } from "./emailController.js";
-import { confirmEmailService } from "./emailController.js";
+import { emailVerificationService } from "../helpers/emailVerification.js";
+import { confirmEmailService } from "../helpers/emailVerification.js";
 
 
 export const verficationEmail = async (req, res) => {

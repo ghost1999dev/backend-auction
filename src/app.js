@@ -11,7 +11,6 @@ import helmet from "helmet";
 import indexRoutes from "./routes/indexRoutes.js";
 import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
-import emailRoutes from "./routes/emailRoutes.js";
 
 config();
 const app = express();
@@ -73,7 +72,6 @@ class Server {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
-    this.app.use("/email", emailRoutes);
   }
 
   /**

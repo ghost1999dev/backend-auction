@@ -3,6 +3,33 @@ import jwt from "jsonwebtoken";
 import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
+import { emailVerificationService } from "./emailController.js";
+import { confirmEmailService } from "./emailController.js";
+
+
+export const verficationEmail = async (req, res) => {
+  try {
+    let { email } = req.body;
+
+     const existingEmail = await UsersModel.findOne({ where: { email } })
+     if (existingEmail) {
+         return res.status(400).json({ message: "Email already exists" })
+    }else{
+      const response = await emailVerificationService(email);
+      
+      if(response.status===200){
+        return res.status(200).json(response);
+      }else{
+        return res.status(response.status).json({ message: response.message });
+      }
+    }
+
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error creating user", error: error.message });
+  }
+};
 
 /**
  * create user
@@ -14,29 +41,28 @@ import hashPassword from "../helpers/hashPassword.js";
  */
 export const createUser = async (req, res) => {
   try {
-    let { name, email, password, role, image } = req.body;
+    let { name, email, code, password, role, image} = req.body;
 
-    // const existingEmail = await UsersModel.findOne({ where: { email } })
-    // if (existingEmail) {
-    //     return res.status(400).json({ message: "Email already exists" })
-    // }
+        const response = await confirmEmailService(email, code);
+        if(response.status===200){
+            password = hashPassword(password);
+          const user = await UsersModel.create({
+            name,
+            email,
+            password,
+            role,
+            image,
+          });
+      
+          return res
+            .status(200)
+            .json({ 
+              message:
+                "User created successfully. please check your email to verify your account",
+              user,
+            });
+    }
 
-    password = hashPassword(password);
-    const user = await UsersModel.create({
-      name,
-      email,
-      password,
-      role,
-      image,
-    });
-
-    res
-      .status(201)
-      .json({
-        message:
-          "User created successfully. please check your email to verify your account",
-        user,
-      });
   } catch (error) {
     res
       .status(500)

@@ -8,9 +8,11 @@ import {
   deleteUser,
   uploadImageUser,
   verifyUser,
+  verficationEmail,
 } from "../controllers/UsersController.js";
 
 const router = Router();
+router.post("/validate-email", verficationEmail);
 router.post("/create", createUser);
 router.get("/show/all", getUsers);
 router.get("/show/:id", getUserById);

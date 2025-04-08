@@ -4,11 +4,13 @@ import process from "node:process";
 import { fileURLToPath } from "url";
 import { getConnection } from "./config/connection.js";
 import { config } from "dotenv";
+import swaggerUi from "swagger-ui-express"
+import { swaggerSpec } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
 ////////// NNUEVAS FUNCIONES
 import passport from "passport";
-import "./middlewares/google.js";
+//import "./middlewares/google.js";
 
 
 // Import routes
@@ -84,6 +86,9 @@ class Server {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
+
+    // swagger documentation
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     /////////NUEVA FUNCIONES 
     this.app.use(
       "/auth",

@@ -1,4 +1,3 @@
-import swaggerUi from "swagger-ui-express"
 import swaggerJsDoc from "swagger-jsdoc"
 import { version } from "os"
 import { url } from "inspector"
@@ -35,7 +34,7 @@ const options = {
             }
         }
     },
-    apis: ["./src/routes/*.js"]
+    apis: ["../src/routes/*.js"]
 }
 
 export const swaggerSpec = swaggerJsDoc(options)

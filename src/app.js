@@ -6,8 +6,6 @@ import { getConnection } from "./config/connection.js";
 import { config } from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
-import swaggerUi from "swagger-ui-express";
-import swaggerJsDoc from "swagger-jsdoc"; 
 ////////// NNUEVAS FUNCIONES
 import passport from "passport";
 import "./middlewares/google.js";

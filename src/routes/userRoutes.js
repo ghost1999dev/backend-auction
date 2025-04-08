@@ -12,8 +12,23 @@ import {
 } from "../controllers/UsersController.js";
 
 const router = Router();
+
+
 router.post("/validate-email", verficationEmail);
 router.post("/create", createUser);
+/**
+ * @swagger
+ * /users:
+ *  get:
+ *    description: Show all users
+ *    tags: [Users]
+ *    summary: get all users
+ *    responses:
+ *      200:
+ *        description: Returns a list of users
+ *      500:
+ *        description: Server error
+ */
 router.get("/show/all", getUsers);
 router.get("/show/:id", getUserById);
 router.put("/update/:id", updateUser);

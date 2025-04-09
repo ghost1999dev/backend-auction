@@ -74,7 +74,6 @@ class Server {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     /////// NNUEVAS FUNCIONES
-    this.app.use(express.json());
     this.app.use(passport.initialize());
 
   }

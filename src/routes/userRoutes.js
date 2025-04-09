@@ -13,23 +13,107 @@ import {
 
 const router = Router();
 
-
+/**
+ * @swagger
+ * tags: 
+ *   name: Users
+ *   description: Operations about users (login, register, etc.)
+ */
+ 
+/**
+ * @swagger
+ * /users/validate-email:
+ *  post:
+ *    tags: [Users]
+ *    summary: Validates the email
+ *    description: Verify if the email is valid
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                description: Email to verify
+ *                example: example@example.com
+ *            required:
+ *              - email
+ *    responses:
+ *      200:
+ *        description: Returns verification code
+ *      400: 
+ *        description: Email already exists
+ *      500:
+ *        description: Server error
+ */
 router.post("/validate-email", verficationEmail);
+
+/**
+ * @swagger
+ * /users/create:
+ *  post:
+ *    tags: [Users]
+ *    summary: Create a new user
+ *    RequestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/userCreate'
+ *    responses:
+ *      200:
+ *        description: Returns a new user
+ *      500:
+ *        description: Server error
+ */
 router.post("/create", createUser);
 /**
  * @swagger
- * /users:
+ * /users/show/all:
  *  get:
- *    description: Show all users
  *    tags: [Users]
- *    summary: get all users
+ *    summary: Get all users
  *    responses:
  *      200:
- *        description: Returns a list of users
+ *        description: Returns all users
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: array
+ *                items:
+ *                  $ref: '#/components/schemas/User'
  *      500:
  *        description: Server error
  */
 router.get("/show/all", getUsers);
+/**
+ * @swagger
+ * /users/show/{id}:
+ *  get:
+ *    tags: [Users]
+ *    summary: Get a user by id
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: User id
+ *    responses:
+ *      200:
+ *        description: Returns a user
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/User'
+ *      404:
+ *        description: User not found
+ *      500:
+ *        description: Server error
+ * 
+ */
 router.get("/show/:id", getUserById);
 router.put("/update/:id", updateUser);
 router.put("/update-password/:id", updatePassword);

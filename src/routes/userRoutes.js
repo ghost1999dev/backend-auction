@@ -115,6 +115,33 @@ router.get("/show/all", getUsers);
  * 
  */
 router.get("/show/:id", getUserById);
+/**
+ * @swagger
+ * /users/update/{id}:
+ *  put:
+ *    tags: [Users]
+ *    summary: Update a user
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: User id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/userUpdate'
+ *    responses:
+ *      200:
+ *        description: Returns updated user
+ *      404:
+ *        description: User not found
+ *      500:
+ *        description: Server error
+ */
 router.put("/update/:id", updateUser);
 router.put("/update-password/:id", updatePassword);
 router.delete("/delete/:id", deleteUser);

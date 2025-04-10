@@ -9,6 +9,7 @@ import {
   uploadImageUser,
   verifyUser,
   verficationEmail,
+  updateUserFields,
 } from "../controllers/UsersController.js";
 
 const router = Router();
@@ -232,6 +233,8 @@ router.delete("/delete/:id", deleteUser);
  *        description: Server error
  */
 router.post("/upload-image", uploadImageUser);
+
+router.patch("/update-fields/:id", updateUserFields);
 
 export default router;
 

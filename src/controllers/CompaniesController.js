@@ -85,15 +85,21 @@ export const DetailsCompanyId = async (req, res) => {
 export const ListAllCompany = async (req, res) => {
   try {
     const companies = await CompaniesModel.findAll({
-      include: [
-        {
-          model: UsersModel,
-          attributes: ["name", "email", "role"],
-          where: {
-            status: true,
-          },
+      include: [{
+        model: UsersModel,
+        attributes: [
+          "role_id",
+          "name", 
+          "email", 
+          "address", 
+          "phone", 
+          "image", 
+        ],
+        where: {
+          status: 1,
         },
-      ],
+        required: true
+      }],
     });
     res
       .status(200)

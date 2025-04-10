@@ -25,7 +25,7 @@ const CompaniesModel = sequelize.define(
       allowNull: false,
       unique: true,
     },
-    bussiness_type: {
+    business_type: {
       type: DataTypes.STRING,
       allowNull: false
     },

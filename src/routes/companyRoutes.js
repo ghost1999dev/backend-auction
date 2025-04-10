@@ -173,6 +173,9 @@ export default router;
  *    companyCreate:
  *      type: object
  *      properties:
+ *        user_id:
+ *          type: integer
+ *          format: int32
  *        nrc_number:
  *          type: string
  *        bussiness_type:

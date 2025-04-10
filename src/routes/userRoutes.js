@@ -234,8 +234,6 @@ router.delete("/delete/:id", deleteUser);
  */
 router.post("/upload-image", uploadImageUser);
 
-router.patch("/update-fields/:id", updateUserFields);
-
 export default router;
 
 

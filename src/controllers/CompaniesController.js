@@ -11,11 +11,11 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const AddNewCompany = async (req, res) => {
   try {
-    const { user_id, nrc_number, bussiness_type, web_site, nit_number } = req.body;
+    const { user_id, nrc_number, business_type, web_site, nit_number } = req.body;
     const company = await CompaniesModel.create({
       user_id,
       nrc_number,
-      bussiness_type,
+      business_type,
       web_site,
       nit_number,
     });
@@ -38,28 +38,37 @@ export const AddNewCompany = async (req, res) => {
 export const DetailsCompanyId = async (req, res) => {
   try {
     const { id } = req.params;
-    const getCompany = await CompaniesModel.findByPk(id);
-    if (getCompany) {
-      const company = await CompaniesModel.findAll({
-        include: [
-          {
-            model: UsersModel,
-            attributes: ["name", "email", "role"],
-            where: {
-              status: true,
-            },
-          },
+
+    if (!id) throw new Error("Company id is required");
+
+    const company = await CompaniesModel.findOne({
+      include: [{
+        model: UsersModel,
+        attributes: [
+          "role_id",
+          "name", 
+          "email", 
+          "address", 
+          "phone", 
+          "image", 
         ],
         where: {
-          id: id
-        }
-      });
-      res
-        .status(200)
-        .json({ message: "Company retrieved successfully", company });
-    } else {
+          status: 1,
+        },
+        required: true
+      }],
+      where: {
+        id: id
+      }
+    })
+
+    if (company) {
+      res.status(200).json({ message: "Company retrieved successfully", company });
+    }
+    else {
       res.status(404).json({ message: "Company not found" });
     }
+    
   } catch (error) {
     res.status(500).json({ message: "Error retrieving company", error });
   }

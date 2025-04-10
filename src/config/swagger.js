@@ -1,6 +1,10 @@
 import swaggerJsDoc from "swagger-jsdoc"
-import { version } from "os"
-import { url } from "inspector"
+import { fileURLToPath } from "url"
+import { dirname } from "path"
+import path from "path"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const options = {
     definition: {
@@ -34,7 +38,23 @@ const options = {
             }
         }
     },
-    apis: ["../src/routes/*.js"]
+    apis: [
+        path.join(__dirname, "../routes/*.js")
+    ],
+}
+
+export const swaggerUiOptions = {
+    swaggerOptions: {
+        defaultModelsExpandDepth: 3,
+        displayOperationId: true,
+        showRequestHeaders: true,
+        showExtensions: true,
+        filter: true,
+        validatorUrl: false,
+        docExpansion: "list",
+        showCommonExtensions: true,
+    },
+    customSiteTitle: "auction API",
 }
 
 export const swaggerSpec = swaggerJsDoc(options)

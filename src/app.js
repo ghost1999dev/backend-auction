@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import { getConnection } from "./config/connection.js";
 import { config } from "dotenv";
 import swaggerUi from "swagger-ui-express"
-import { swaggerSpec } from "./config/swagger.js";
+import { swaggerSpec, swaggerUiOptions } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
 ////////// NNUEVAS FUNCIONES
@@ -20,7 +20,7 @@ import CompanyRoutes from "./routes/companyRoutes.js";
 
 //////NUEVAS FUNCIONES
 import { loginRouter } from "./routes/authRoutes.js";
-
+import sequelize from "./config/connection.js";
 
 config();
 const app = express();
@@ -88,7 +88,7 @@ class Server {
     this.app.use("/companies", CompanyRoutes);
 
     // swagger documentation
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
     /////////NUEVA FUNCIONES 
     this.app.use(
       "/auth",

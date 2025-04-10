@@ -1,5 +1,6 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
+import RolesModel from "./RolesModel.js";
 
 /**
  * Users model.
@@ -63,5 +64,6 @@ const UsersModel = sequelize.define(
       timestamps: true,
     });
 
-  export default UsersModel;
+  UsersModel.belongsTo(RolesModel, { foreignKey: "role_id" });
 
+  export default UsersModel;

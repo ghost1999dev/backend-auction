@@ -195,16 +195,3 @@ export const DeleteCompany = async (req, res) => {
     res.status(500).json({ message: "Error deleting company", error });
   }
 };
-
-/**
- * upload image
- *
- * function to upload image
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} image uploaded
- */
-export const UploadLogoCompany = async (req, res) => {
-  updateImage(req, res, CompaniesModel);
-};
-

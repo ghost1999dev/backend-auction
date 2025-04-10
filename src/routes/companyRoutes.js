@@ -2,7 +2,6 @@ import express from "express";
 import {
   ListAllCompany,
   UpdateCompanyId,
-  DeleteCompany,
   DetailsCompanyId,
   AddNewCompany,
 } from "../controllers/CompaniesController.js";
@@ -117,31 +116,6 @@ router.get("/show/:id", DetailsCompanyId);
  *        description: Server error
  */
 router.put("/update/:id", UpdateCompanyId);
-
-/**
- * @swagger
- * /companies/delete/{id}:
- *  delete:
- *    tags: [Companies]
- *    summary: Delete a company
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Company id
- *    responses:
- *      200:
- *        description: Returns deleted company
- *      400:
- *        description: Nrc number or nit number already exists
- *      404:
- *        description: Company not found
- *      500:
- *        description: Server error
- */
-router.delete("/delete/:id", DeleteCompany);
 
 export default router;
 

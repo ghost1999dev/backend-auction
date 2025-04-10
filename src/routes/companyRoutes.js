@@ -5,7 +5,6 @@ import {
   DeleteCompany,
   DetailsCompanyId,
   AddNewCompany,
-  UploadLogoCompany,
 } from "../controllers/CompaniesController.js";
 /**
  * 

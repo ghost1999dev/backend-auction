@@ -40,27 +40,41 @@ export const verficationEmail = async (req, res) => {
  */
 export const createUser = async (req, res) => {
   try {
-    let { name, email, code, password, role, image} = req.body;
+    let { 
+      role_id, 
+      name, 
+      email,
+      code, 
+      password, 
+      address,
+      phone,
+      image, 
+      account_type } = req.body;
 
-        const response = await confirmEmailService(email, code);
-        if(response.status===200){
-            password = hashPassword(password);
+      const response = await confirmEmailService(email, code);
+      if(response.status===200){
+          password = hashPassword(password);
           const user = await UsersModel.create({
-            name,
-            email,
-            password,
-            role,
-            image,
-          });
+          role_id,
+          name,
+          email,
+          password,
+          address,
+          phone,
+          image,
+          account_type,
+          status: 1,
+          last_login: new Date(),
+        });
       
-          return res
-            .status(200)
-            .json({ 
-              message:
-                "User created successfully. please check your email to verify your account",
-              user,
-            });
-    }
+        return res
+          .status(200)
+          .json({ 
+            message:
+              "User created successfully. please check your email to verify your account",
+            user,
+          });
+      }
 
   } catch (error) {
     res

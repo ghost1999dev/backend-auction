@@ -148,13 +148,13 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, image } = req.body;
+    const { name, address, phone } = req.body;
 
     const user = await UsersModel.findByPk(id);
     if (user) {
       user.name = name;
-      user.email = email;
-      user.image = image;
+      user.address = address;
+      user.phone = phone;
       await user.save();
       res.status(200).json({ message: "User updated successfully", user });
     } else {

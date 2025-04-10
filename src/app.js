@@ -10,7 +10,7 @@ import cors from "cors";
 import helmet from "helmet";
 ////////// NNUEVAS FUNCIONES
 import passport from "passport";
-//import "./middlewares/google.js";
+import "./middlewares/google.js";
 
 
 // Import routes

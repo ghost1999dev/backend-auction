@@ -11,14 +11,17 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const AddNewCompany = async (req, res) => {
   try {
-    const { user_id, company_name, logo, tax_id } = req.body;
+    const { user_id, nrc_number, bussiness_type, web_site, nit_number } = req.body;
     const company = await CompaniesModel.create({
       user_id,
-      company_name,
-      logo,
-      tax_id,
+      nrc_number,
+      bussiness_type,
+      web_site,
+      nit_number,
     });
+
     res.status(201).json({ message: "Company created successfully", company });
+  
   } catch (error) {
     res.status(500).json({ message: "Error creating company", error });
   }

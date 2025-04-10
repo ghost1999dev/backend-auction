@@ -7,9 +7,7 @@ import {
   updatePassword,
   deleteUser,
   uploadImageUser,
-  verifyUser,
   verficationEmail,
-  updateUserFields,
 } from "../controllers/UsersController.js";
 
 const router = Router();
@@ -176,6 +174,8 @@ router.put("/update/:id", updateUser);
  *    responses:
  *      200:
  *        description: Returns updated user
+ *      400:
+ *        description: Current password is incorrect
  *      404:
  *        description: User not found
  *      500:

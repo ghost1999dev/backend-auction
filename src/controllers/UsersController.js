@@ -75,7 +75,6 @@ export const createUser = async (req, res) => {
             user,
           });
       }
-
   } catch (error) {
     res
       .status(500)
@@ -94,10 +93,8 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await UsersModel.findAll({
-      where: {
-        status: 1,
-      },
-    });
+      attributes: { exclude: ['password', 'createdAt'] },
+    })
     const usersWithImage = users.map((user) => {
       return {
         ...user.dataValues,
@@ -125,7 +122,11 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await UsersModel.findByPk(id);
+    const user = await UsersModel.findByPk(id, {
+      attributes: {
+        exclude: ['password', 'createdAt']
+      }
+    });
     if (user.status === 1) {
       res.status(200).json({ message: "User retrieved successfully", user });
     } else {
@@ -147,13 +148,13 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, image } = req.body;
+    const { name, address, phone } = req.body;
 
     const user = await UsersModel.findByPk(id);
     if (user) {
       user.name = name;
-      user.email = email;
-      user.image = image;
+      user.address = address;
+      user.phone = phone;
       await user.save();
       res.status(200).json({ message: "User updated successfully", user });
     } else {
@@ -175,12 +176,17 @@ export const updateUser = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     const { id } = req.params;
-    const { password } = req.body;
+    const { currentPassword, Newpassword } = req.body;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.password = hashPassword(password);
-      await user.save();
-      res.status(200).json({ message: "Password updated successfully", user });
+      if (user.password === hashPassword(currentPassword)) {
+        user.password = hashPassword(Newpassword);
+        await user.save();
+        res.status(200).json({ message: "Password updated successfully", user });
+      }
+      else {
+        res.status(400).json({ message: "Current password is incorrect" });
+      }
     } else {
       res.status(404).json({ message: "User not found" });
     }
@@ -203,7 +209,7 @@ export const deleteUser = async (req, res) => {
     const { id } = req.params;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.status = false;
+      user.status = 0;
       await user.save();
       res.status(200).json({ message: "User deleted successfully", user });
     } else {

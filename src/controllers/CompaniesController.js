@@ -58,7 +58,7 @@ export const DetailsCompanyId = async (req, res) => {
       res.status(404).json({ message: "Company not found" });
     }
   } catch (error) {
-    res;
+    res.status(500).json({ message: "Error retrieving company", error });
   }
 };
 

@@ -40,28 +40,41 @@ export const verficationEmail = async (req, res) => {
  */
 export const createUser = async (req, res) => {
   try {
-    let { name, email, code, password, role, image} = req.body;
+    let { 
+      role_id, 
+      name, 
+      email,
+      code, 
+      password, 
+      address,
+      phone,
+      image, 
+      account_type } = req.body;
 
-        const response = await confirmEmailService(email, code);
-        if(response.status===200){
-            password = hashPassword(password);
+      const response = await confirmEmailService(email, code);
+      if(response.status===200){
+          password = hashPassword(password);
           const user = await UsersModel.create({
-            name,
-            email,
-            password,
-            role,
-            image,
-          });
+          role_id,
+          name,
+          email,
+          password,
+          address,
+          phone,
+          image,
+          account_type,
+          status: 1,
+          last_login: new Date(),
+        });
       
-          return res
-            .status(200)
-            .json({ 
-              message:
-                "User created successfully. please check your email to verify your account",
-              user,
-            });
-    }
-
+        return res
+          .status(200)
+          .json({ 
+            message:
+              "User created successfully. please check your email to verify your account",
+            user,
+          });
+      }
   } catch (error) {
     res
       .status(500)
@@ -80,10 +93,8 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await UsersModel.findAll({
-      where: {
-        status: 1,
-      },
-    });
+      attributes: { exclude: ['password', 'createdAt'] },
+    })
     const usersWithImage = users.map((user) => {
       return {
         ...user.dataValues,
@@ -111,7 +122,11 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await UsersModel.findByPk(id);
+    const user = await UsersModel.findByPk(id, {
+      attributes: {
+        exclude: ['password', 'createdAt']
+      }
+    });
     if (user.status === 1) {
       res.status(200).json({ message: "User retrieved successfully", user });
     } else {
@@ -133,13 +148,13 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, image } = req.body;
+    const { name, address, phone } = req.body;
 
     const user = await UsersModel.findByPk(id);
     if (user) {
       user.name = name;
-      user.email = email;
-      user.image = image;
+      user.address = address;
+      user.phone = phone;
       await user.save();
       res.status(200).json({ message: "User updated successfully", user });
     } else {
@@ -161,12 +176,17 @@ export const updateUser = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     const { id } = req.params;
-    const { password } = req.body;
+    const { currentPassword, Newpassword } = req.body;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.password = hashPassword(password);
-      await user.save();
-      res.status(200).json({ message: "Password updated successfully", user });
+      if (user.password === hashPassword(currentPassword)) {
+        user.password = hashPassword(Newpassword);
+        await user.save();
+        res.status(200).json({ message: "Password updated successfully", user });
+      }
+      else {
+        res.status(400).json({ message: "Current password is incorrect" });
+      }
     } else {
       res.status(404).json({ message: "User not found" });
     }
@@ -189,7 +209,7 @@ export const deleteUser = async (req, res) => {
     const { id } = req.params;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.status = false;
+      user.status = 0;
       await user.save();
       res.status(200).json({ message: "User deleted successfully", user });
     } else {
@@ -210,41 +230,4 @@ export const deleteUser = async (req, res) => {
  */
 export const uploadImageUser = async (req, res) => {
   updateImage(req, res, UsersModel);
-};
-
-/**
- * verify user
- *
- * function to verify user
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} user verified or not
- */
-export const verifyUser = async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    if (!token) {
-      return res.status(400).json({ message: "Token not found" });
-    }
-
-    jwt.verify(token, "bluepixel", async (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: "Token not valid or expired" });
-      }
-
-      const emailDecoded = decoded.email;
-
-      const user = await UsersModel.findOne({ where: { email: emailDecoded } });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      } else {
-        user.status = true;
-        await user.save();
-        res.status(200).json({ message: "User verified successfully", user });
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error verifying user", error });
-  }
 };

@@ -158,4 +158,3 @@ export const confirmEmailService = async (email, code) => {
     };
   }
 };
-

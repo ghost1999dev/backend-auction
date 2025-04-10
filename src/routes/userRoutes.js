@@ -7,9 +7,7 @@ import {
   updatePassword,
   deleteUser,
   uploadImageUser,
-  verifyUser,
   verficationEmail,
-  updateUserFields,
 } from "../controllers/UsersController.js";
 
 const router = Router();

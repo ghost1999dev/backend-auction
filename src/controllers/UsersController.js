@@ -75,7 +75,6 @@ export const createUser = async (req, res) => {
             user,
           });
       }
-
   } catch (error) {
     res
       .status(500)
@@ -94,10 +93,8 @@ export const createUser = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await UsersModel.findAll({
-      where: {
-        status: 1,
-      },
-    });
+      attributes: { exclude: ['password', 'createdAt'] },
+    })
     const usersWithImage = users.map((user) => {
       return {
         ...user.dataValues,

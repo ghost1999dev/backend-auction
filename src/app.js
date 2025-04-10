@@ -4,14 +4,23 @@ import process from "node:process";
 import { fileURLToPath } from "url";
 import { getConnection } from "./config/connection.js";
 import { config } from "dotenv";
+import swaggerUi from "swagger-ui-express"
+import { swaggerSpec, swaggerUiOptions } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
+////////// NNUEVAS FUNCIONES
+import passport from "passport";
+import "./middlewares/google.js";
+
 
 // Import routes
 import indexRoutes from "./routes/indexRoutes.js";
 import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
-import emailRoutes from "./routes/emailRoutes.js";
+
+//////NUEVAS FUNCIONES
+import { loginRouter } from "./routes/authRoutes.js";
+import sequelize from "./config/connection.js";
 
 config();
 const app = express();
@@ -64,6 +73,9 @@ class Server {
     this.app.use(express.json());
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
+    /////// NNUEVAS FUNCIONES
+    this.app.use(passport.initialize());
+
   }
 
   /**
@@ -73,9 +85,22 @@ class Server {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
-    this.app.use("/email", emailRoutes);
-  }
 
+    // swagger documentation
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+    /////////NUEVA FUNCIONES 
+    this.app.use(
+      "/auth",
+      passport.authenticate("auth-google", {
+        scope: [
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email",
+        ],
+        session: false,
+      }),
+      loginRouter
+    );
+  }
   /**
    * Starts the server and listens on the specified port.
    */

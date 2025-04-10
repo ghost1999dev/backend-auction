@@ -10,37 +10,58 @@ import { DataTypes } from "sequelize";
 const UsersModel = sequelize.define(
   "users",
   {
+      id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    role_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     email: {
       type: DataTypes.STRING,
+      unique: true,
       allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
-    role: {
+    address: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
+    phone : {
+      type: DataTypes.STRING,
+      allowNull: true,
+     },
     image: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    account_type: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     status: {
-      type: DataTypes.BOOLEAN,
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: false,
+      defaultValue: 1 // 1 = activo, 0 = inactivo
     },
+    last_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    }, 
   },
-  {
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  },
-);
+    {      
+      timestamps: true,
+    });
 
-export default UsersModel;
+  export default UsersModel;
+

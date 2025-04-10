@@ -169,29 +169,3 @@ export const UpdateCompanyId = async (req, res, next) => {
     res.status(500).json({ message: "Error updating company", error });
   }
 };
-
-/**
- * delte company
- *
- * function to delete company
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} company deleted
- */
-export const DeleteCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const company = await CompaniesModel.findByPk(id);
-    if (company) {
-      company.status = false;
-      await company.save();
-      res
-        .status(200)
-        .json({ message: "Company deleted successfully", company });
-    } else {
-      res.status(404).json({ message: "Company not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting company", error });
-  }
-};

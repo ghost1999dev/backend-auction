@@ -36,6 +36,8 @@ const router = express.Router();
  *    responses:
  *      201:
  *        description: Returns a new company
+ *      400:
+ *        description: Nrc number or nit number already exists
  *      500:
  *        description: Server error
  */
@@ -133,6 +135,8 @@ router.put("/update/:id", UpdateCompanyId);
  *    responses:
  *      200:
  *        description: Returns deleted company
+ *      400:
+ *        description: Nrc number or nit number already exists
  *      404:
  *        description: Company not found
  *      500:

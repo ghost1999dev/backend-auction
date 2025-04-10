@@ -12,6 +12,14 @@ import UsersModel from "../models/UsersModel.js";
 export const AddNewCompany = async (req, res) => {
   try {
     const { user_id, nrc_number, business_type, web_site, nit_number } = req.body;
+    
+    const existingNrcNumber = await CompaniesModel.findOne({ where: { nrc_number } })
+    const existingNitNumber = await CompaniesModel.findOne({ where: { nit_number } })
+
+    if (existingNrcNumber || existingNitNumber) {
+      return res.status(400).json({ message: "nrc number or nit number already exists" });
+    }
+    
     const company = await CompaniesModel.create({
       user_id,
       nrc_number,
@@ -120,13 +128,37 @@ export const ListAllCompany = async (req, res) => {
 export const UpdateCompanyId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { company_name, logo, tax_id } = req.body;
+    const { nrc_number, business_type, web_site, nit_number } = req.body;
     const company = await CompaniesModel.findByPk(id);
     if (company) {
-      company.company_name = company_name;
-      company.logo = logo;
-      company.tax_id = tax_id;
+
+      const existingNrcNumber = await CompaniesModel.findOne({ 
+        where: { 
+          nrc_number 
+        },
+        id: {
+          [Op.ne]: id
+        } 
+      })
+      const existingNitNumber = await CompaniesModel.findOne({ 
+        where: { 
+          nit_number 
+        },
+        id: {
+          [Op.ne]: id
+        }
+      })
+
+      if (existingNrcNumber || existingNitNumber) {
+        return res.status(400).json({ message: "nrc number or nit number already exists" });
+      }
+      
+      company.nrc_number = nrc_number;
+      company.business_type = business_type;
+      company.web_site = web_site;
+      company.nit_number = nit_number;
       await company.save();
+
       res
         .status(200)
         .json({ message: "Company updated successfully", company });

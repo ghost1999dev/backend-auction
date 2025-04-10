@@ -297,6 +297,8 @@ export default router;
  *        email:
  *          type: string
  *          format: email
+ *        code:
+ *          type: string
  *        password:
  *          type: string
  *        address:

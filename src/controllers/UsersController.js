@@ -248,3 +248,43 @@ export const verifyUser = async (req, res) => {
     res.status(500).json({ message: "Error verifying user", error });
   }
 };
+
+//NUEVAS FUNCIONES
+// Función para actualizar los campos password, address y phone
+export const updateUserFields = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password, address, phone } = req.body;
+
+    // Buscar usuario por ID
+    const user = await UsersModel.findByPk(id);
+
+    if (user) {
+      // Actualizar la contraseña si se proporciona
+      if (password) {
+        user.password = hashPassword(password); // Usando hashPassword para hashear la contraseña
+      }
+
+      // Actualizar address y phone si se proporcionan
+      if (address !== undefined) {
+        user.address = address;
+      }
+      if (phone !== undefined) {
+        user.phone = phone;
+      }
+
+      // Guardar los cambios en la base de datos
+      await user.save();
+
+      res.status(200).json({
+        message: "Campos actualizados correctamente",
+        user
+      });
+    } else {
+      res.status(404).json({ message: "Usuario no encontrado" });
+    }
+  } catch (error) {
+    console.error("Error al actualizar los campos del usuario:", error);
+    res.status(500).json({ message: "Ocurrió un error al actualizar los campos", error });
+  }
+};

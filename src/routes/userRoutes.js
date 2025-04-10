@@ -232,30 +232,6 @@ router.delete("/delete/:id", deleteUser);
  *        description: Server error
  */
 router.post("/upload-image", uploadImageUser);
-/** 
- * @swagger
- * /users/verify/{token}:
- *  get:
- *    tags: [Users]
- *    summary: Verify a user
- *    parameters:
- *      - in: path
- *        name: token
- *        schema:
- *          type: string
- *        required: true
- *        description: User token
- *    responses:
- *      200:
- *        description: Returns verified user
- *      401:
- *        description: Token not valid or expired
- *      404:
- *        description: User not found
- *      500:
- *        description: Server error
- */
-router.get("/verify/:token", verifyUser);
 
 export default router;
 

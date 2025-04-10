@@ -176,12 +176,17 @@ export const updateUser = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     const { id } = req.params;
-    const { password } = req.body;
+    const { currentPassword, Newpassword } = req.body;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.password = hashPassword(password);
-      await user.save();
-      res.status(200).json({ message: "Password updated successfully", user });
+      if (user.password === hashPassword(currentPassword)) {
+        user.password = hashPassword(Newpassword);
+        await user.save();
+        res.status(200).json({ message: "Password updated successfully", user });
+      }
+      else {
+        res.status(400).json({ message: "Current password is incorrect" });
+      }
     } else {
       res.status(404).json({ message: "User not found" });
     }

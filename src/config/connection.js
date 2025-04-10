@@ -1,14 +1,24 @@
 import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
+dotenv.config();
 
 /**
  * Sequelize instance configured for connecting to the database.
  *
  * @constant {Sequelize}
  */
-const sequelize = new Sequelize("auction_db", "dev", "31415", {
-  host: "31.220.97.169",
-  dialect: "postgres",
-  port: 5450,
+// const sequelize = new Sequelize("postgres", "postgres", "yoCiqPJ7FuiH2yA8", {
+//   host: "serially-breezy-flatfish.data-1.use1.tembo.io",
+//   dialect: "postgres",
+//   port: 5432,
+//   ssl: {
+//     rejectUnauthorized: true,
+//     ca: require("./ca.crt"),
+//   }
+// });
+
+const sequelize = new Sequelize('postgresql://postgres:yoCiqPJ7FuiH2yA8@serially-breezy-flatfish.data-1.use1.tembo.io:5432/postgres?sslmode=verify-full&sslrootcert='+process.env.CA_PATH, {
+   dialect: 'postgres',
 });
 
 /**

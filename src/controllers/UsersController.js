@@ -81,7 +81,7 @@ export const getUsers = async (req, res) => {
   try {
     const users = await UsersModel.findAll({
       where: {
-        status: true,
+        status: 1,
       },
     });
     const usersWithImage = users.map((user) => {
@@ -112,7 +112,7 @@ export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await UsersModel.findByPk(id);
-    if (user.status === true) {
+    if (user.status === 1) {
       res.status(200).json({ message: "User retrieved successfully", user });
     } else {
       res.status(404).json({ message: "User not found" });

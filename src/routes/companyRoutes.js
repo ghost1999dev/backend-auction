@@ -60,10 +60,85 @@ router.post("/create", AddNewCompany);
  *        description: Server error
  */
 router.get("/show/all", ListAllCompany);
+
+/**
+ * @swagger
+ * /companies/show/{id}:
+ *  get:
+ *    tags: [Companies]
+ *    summary: Get a company by id
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Company id
+ *    responses:
+ *      200:
+ *        description: Returns a company
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Company'
+ *      404:
+ *        description: Company not found
+ *      500:
+ *        description: Server error
+ */
 router.get("/show/:id", DetailsCompanyId);
+
+/**
+ * @swagger
+ * /companies/update/{id}:
+ *  put:
+ *    tags: [Companies]
+ *    summary: Update a company
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Company id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/companyUpdate'
+ *    responses:
+ *      200:
+ *        description: Returns updated company
+ *      404:
+ *        description: Company not found
+ *      500:
+ *        description: Server error
+ */
 router.put("/update/:id", UpdateCompanyId);
+
+/**
+ * @swagger
+ * /companies/delete/{id}:
+ *  delete:
+ *    tags: [Companies]
+ *    summary: Delete a company
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Company id
+ *    responses:
+ *      200:
+ *        description: Returns deleted company
+ *      404:
+ *        description: Company not found
+ *      500:
+ *        description: Server error
+ */
 router.delete("/delete/:id", DeleteCompany);
-router.post("/upload-logo/:id", UploadLogoCompany);
 
 export default router;
 

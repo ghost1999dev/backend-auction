@@ -40,27 +40,41 @@ export const verficationEmail = async (req, res) => {
  */
 export const createUser = async (req, res) => {
   try {
-    let { name, email, code, password, role, image} = req.body;
+    let { 
+      role_id, 
+      name, 
+      email,
+      code, 
+      password, 
+      address,
+      phone,
+      image, 
+      account_type } = req.body;
 
-        const response = await confirmEmailService(email, code);
-        if(response.status===200){
-            password = hashPassword(password);
+      const response = await confirmEmailService(email, code);
+      if(response.status===200){
+          password = hashPassword(password);
           const user = await UsersModel.create({
-            name,
-            email,
-            password,
-            role,
-            image,
-          });
+          role_id,
+          name,
+          email,
+          password,
+          address,
+          phone,
+          image,
+          account_type,
+          status: 1,
+          last_login: new Date(),
+        });
       
-          return res
-            .status(200)
-            .json({ 
-              message:
-                "User created successfully. please check your email to verify your account",
-              user,
-            });
-    }
+        return res
+          .status(200)
+          .json({ 
+            message:
+              "User created successfully. please check your email to verify your account",
+            user,
+          });
+      }
 
   } catch (error) {
     res
@@ -210,81 +224,4 @@ export const deleteUser = async (req, res) => {
  */
 export const uploadImageUser = async (req, res) => {
   updateImage(req, res, UsersModel);
-};
-
-/**
- * verify user
- *
- * function to verify user
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} user verified or not
- */
-export const verifyUser = async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    if (!token) {
-      return res.status(400).json({ message: "Token not found" });
-    }
-
-    jwt.verify(token, "bluepixel", async (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: "Token not valid or expired" });
-      }
-
-      const emailDecoded = decoded.email;
-
-      const user = await UsersModel.findOne({ where: { email: emailDecoded } });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      } else {
-        user.status = true;
-        await user.save();
-        res.status(200).json({ message: "User verified successfully", user });
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error verifying user", error });
-  }
-};
-
-//NUEVAS FUNCIONES
-// Función para actualizar los campos password, address y phone
-export const updateUserFields = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { password, address, phone } = req.body;
-
-    // Buscar usuario por ID
-    const user = await UsersModel.findByPk(id);
-
-    if (user) {
-      // Actualizar la contraseña si se proporciona
-      if (password) {
-        user.password = hashPassword(password); // Usando hashPassword para hashear la contraseña
-      }
-
-      // Actualizar address y phone si se proporcionan
-      if (address !== undefined) {
-        user.address = address;
-      }
-      if (phone !== undefined) {
-        user.phone = phone;
-      }
-
-      // Guardar los cambios en la base de datos
-      await user.save();
-
-      res.status(200).json({
-        message: "Campos actualizados correctamente",
-        user
-      });
-    } else {
-      res.status(404).json({ message: "Usuario no encontrado" });
-    }
-  } catch (error) {
-    console.error("Error al actualizar los campos del usuario:", error);
-    res.status(500).json({ message: "Ocurrió un error al actualizar los campos", error });
-  }
 };

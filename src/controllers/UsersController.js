@@ -122,7 +122,11 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await UsersModel.findByPk(id);
+    const user = await UsersModel.findByPk(id, {
+      attributes: {
+        exclude: ['password', 'createdAt']
+      }
+    });
     if (user.status === 1) {
       res.status(200).json({ message: "User retrieved successfully", user });
     } else {

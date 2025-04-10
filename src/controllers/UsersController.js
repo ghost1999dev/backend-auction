@@ -209,7 +209,7 @@ export const deleteUser = async (req, res) => {
     const { id } = req.params;
     const user = await UsersModel.findByPk(id);
     if (user) {
-      user.status = false;
+      user.status = 0;
       await user.save();
       res.status(200).json({ message: "User deleted successfully", user });
     } else {

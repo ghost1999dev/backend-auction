@@ -15,6 +15,10 @@ const DevelopersModel = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
+        bio: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
         user_id: {
             type: DataTypes.INTEGER,
             allowNull: false,

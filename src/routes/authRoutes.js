@@ -44,9 +44,16 @@ loginRouter.get("/api/session", (req, res) => {
   }
 });
 
+
 loginRouter.get("/api/logout", (req, res, next) => {
-  req.logout(err => {
-    if (err) return next(err);
-    res.redirect("http://localhost:4000/#/login");
+    req.logout(err => {
+      if (err) return next(err);
+      res.redirect("http://localhost:4000/#/login");
+    });
   });
-});
+  
+  loginRouter.get("/github", (req, res) => res.send(req.user));
+  
+  export { loginRouter };
+  
+

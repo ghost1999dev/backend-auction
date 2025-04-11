@@ -106,19 +106,12 @@ class Server {
     // Esta ruta maneja el callback (manejada por loginRouter)
     this.app.use(loginRouter);
 
-    this.app.get("/auth/github", passport.authenticate("auth-github"));
-
-    this.app.get(
-      "/auth/github/callback",
-      passport.authenticate("auth-github", {
-        successRedirect: "", 
-        failureRedirect: "",
+      this.app.get("/auth/github",
+        passport.authenticate("auth-github", {
+        scope: ["user:email"],
         session: false,
       })
     );
-
-        // Rutas de autenticación por JWT
-        this.app.use(jwtRouter);
   }
   
   /**

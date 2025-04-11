@@ -33,3 +33,4 @@ const router = Router()
  *      500:
  *        description: Server error
  */
+router.post("/create", AddNewDeveloper)

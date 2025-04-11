@@ -34,3 +34,22 @@ const router = Router()
  *        description: Server error
  */
 router.post("/create", AddNewDeveloper)
+
+/**
+ * @swagger
+ * /developers/show/all:
+ *  get:
+ *    tags: [Developers]
+ *    summary: Get all developers
+ *    responses:
+ *      200:
+ *        description: Returns all developers
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Developer'
+ *      500:
+ *        description: Server error
+ */

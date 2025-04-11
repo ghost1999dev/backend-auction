@@ -2,10 +2,8 @@ import express from "express";
 import {
   ListAllCompany,
   UpdateCompanyId,
-  DeleteCompany,
   DetailsCompanyId,
   AddNewCompany,
-  UploadLogoCompany,
 } from "../controllers/CompaniesController.js";
 /**
  * 
@@ -36,6 +34,8 @@ const router = express.Router();
  *    responses:
  *      201:
  *        description: Returns a new company
+ *      400:
+ *        description: Nrc number or nit number already exists
  *      500:
  *        description: Server error
  */
@@ -117,29 +117,6 @@ router.get("/show/:id", DetailsCompanyId);
  */
 router.put("/update/:id", UpdateCompanyId);
 
-/**
- * @swagger
- * /companies/delete/{id}:
- *  delete:
- *    tags: [Companies]
- *    summary: Delete a company
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Company id
- *    responses:
- *      200:
- *        description: Returns deleted company
- *      404:
- *        description: Company not found
- *      500:
- *        description: Server error
- */
-router.delete("/delete/:id", DeleteCompany);
-
 export default router;
 
 /**
@@ -173,6 +150,9 @@ export default router;
  *    companyCreate:
  *      type: object
  *      properties:
+ *        user_id:
+ *          type: integer
+ *          format: int32
  *        nrc_number:
  *          type: string
  *        bussiness_type:

@@ -54,3 +54,30 @@ router.post("/create", AddNewDeveloper)
  *        description: Server error
  */
 router.get("/show/all", ListAllDevelopers)
+
+/**
+ * @swagger
+ * /developers/show/{id}:
+ *  get:
+ *    tags: [Developers]
+ *    summary: Get a developer by id
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Developer id
+ *    responses:
+ *      200:
+ *        description: Returns a developer
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Developer'
+ *      404:
+ *        description: Developer not found
+ *      500:
+ *        description: Server error
+ */
+

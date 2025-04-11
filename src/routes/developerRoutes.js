@@ -53,3 +53,4 @@ router.post("/create", AddNewDeveloper)
  *      500:
  *        description: Server error
  */
+router.get("/show/all", ListAllDevelopers)

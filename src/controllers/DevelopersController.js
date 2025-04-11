@@ -88,7 +88,6 @@ export const DetailsDeveloperId = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} developers retrieved
  */
-
 export const ListAllDevelopers = async (req, res) => {
     try {
         const developers = await DevelopersModel.findAll({
@@ -118,5 +117,37 @@ export const ListAllDevelopers = async (req, res) => {
         res.status(200).json({ message: "Developers retrieved successfully", developers })
     } catch (error) {
         res.status(500).json({ message: "Error retrieving developers", error })
+    }
+}
+
+/**
+ * update developer
+ *
+ * function to update developer
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} developer updated
+ */
+export const UpdateDeveloperId = async (req, res ) => {
+    try {
+        const { id } = req.params
+        const { bio, linkedin, occupation, portfolio } = req.body
+
+        const developer = await DevelopersModel.findByPk(id)
+
+        if (developer) {
+            developer.bio = bio
+            developer.linkedin = linkedin
+            developer.occupation = occupation
+            developer.portfolio = portfolio
+            await developer.save()
+
+            res.status(200).json({ message: "Developer updated successfully", developer })
+        }
+        else {
+            res.status(404).json({ message: "Developer not found" })
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error updating developer", error })
     }
 }

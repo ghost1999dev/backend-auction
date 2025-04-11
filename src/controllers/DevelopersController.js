@@ -61,6 +61,7 @@ export const DetailsDeveloperId = async (req, res) => {
                     model: RolesModel,
                     attributes: ["role_name"],
                     as: "role",
+                    required: true,
                 }]
             }],
             where: {
@@ -76,5 +77,46 @@ export const DetailsDeveloperId = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: "Error retrieving developer", error })
+    }
+}
+
+/**
+ * get all developers
+ *
+ * function to get all developers
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} developers retrieved
+ */
+
+export const ListAllDevelopers = async (req, res) => {
+    try {
+        const developers = await DevelopersModel.findAll({
+            include: [{
+                model: UsersModel,
+                attributes: [
+                    "role_id",
+                    "name",
+                    "email",
+                    "address",
+                    "phone",
+                    "image",
+                ],
+                where: {
+                    status: 1,
+                },
+                required: true,
+                include: [{
+                    model: RolesModel,
+                    attributes: ["role_name"],
+                    as: "role",
+                    required: true,
+                }]
+            }],
+        })
+
+        res.status(200).json({ message: "Developers retrieved successfully", developers })
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving developers", error })
     }
 }

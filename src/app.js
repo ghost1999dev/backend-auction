@@ -90,7 +90,7 @@ class Server {
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
     /////////NUEVA FUNCIONES 
     this.app.use(
-      "/auth",
+      "/auth/google",
       passport.authenticate("auth-google", {
         scope: [
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -100,7 +100,19 @@ class Server {
       }),
       loginRouter
     );
+
+    this.app.get("/auth/github", passport.authenticate("auth-github"));
+
+    this.app.get(
+      "/auth/github/callback",
+      passport.authenticate("auth-github", {
+        successRedirect: "", 
+        failureRedirect: "",
+        session: false,
+      })
+    );
   }
+  
   /**
    * Starts the server and listens on the specified port.
    */

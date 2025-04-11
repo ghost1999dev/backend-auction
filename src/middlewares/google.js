@@ -1,10 +1,78 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GitHubStrategy } from "passport-github2";
 import { config } from "dotenv";
 import UsersModel from "../models/UsersModel.js";
 import ExternalAccount from "../models/ExternalAccount.js";
 
 config();
+
+passport.use(
+  "auth-github",
+  new GitHubStrategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: "http://localhost:4000/auth/github/callback",
+      scope: ["user:email"],
+    },
+    async function (accessToken, refreshToken, profile, done) {
+      try {
+        const email = profile.emails?.[0]?.value;
+        const name = profile.displayName || profile.username;
+        const photo = profile.photos?.[0]?.value;
+
+        if (!email) return done(new Error("No se pudo obtener el correo de GitHub"), null);
+
+        let user = await UsersModel.findOne({ where: { email } });
+
+        if (!user) {
+          user = await UsersModel.create({
+            role_id: 2,
+            name: name,
+            email: email,
+            image: photo,
+            account_type: 2,
+            status: 1,
+            last_login: new Date(),
+          });
+
+          await ExternalAccount.create({
+            user_id: user.id,
+            provider_id: profile.id,
+            provider: "github",
+          });
+        } else {
+          await UsersModel.update(
+            {
+              name,
+              image: photo,
+              last_login: new Date(),
+            },
+            { where: { id: user.id } }
+          );
+
+          const external = await ExternalAccount.findOne({
+            where: { user_id: user.id, provider: "github" },
+          });
+
+          if (!external) {
+            await ExternalAccount.create({
+              user_id: user.id,
+              provider_id: profile.id,
+              provider: "github",
+            });
+          }
+        }
+
+        done(null, user);
+      } catch (error) {
+        console.error("Error GitHub login:", error);
+        done(error, null);
+      }
+    }
+  )
+);
 
 passport.use(
   "auth-google",

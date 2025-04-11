@@ -4,6 +4,7 @@ import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
+import { generateToken } from "../utils/generateToken.js";
 
 
 export const verficationEmail = async (req, res) => {
@@ -231,3 +232,4 @@ export const deleteUser = async (req, res) => {
 export const uploadImageUser = async (req, res) => {
   updateImage(req, res, UsersModel);
 };
+

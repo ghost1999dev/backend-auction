@@ -1,10 +1,9 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
-import UsersModel from "./UsersModel.js";
 
 export const ExternalAccount = sequelize.define(
-    "external_account",
-     {
+  "external_account",
+  {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -16,14 +15,18 @@ export const ExternalAccount = sequelize.define(
     },
     provider: {
       type: DataTypes.STRING,
-      allowNull: false,// 'google', 'GitHub'
-    },},
-    {      
-      timestamps: true,
-    });
+      allowNull: false, // 'google', 'GitHub'
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-// Relaciones
-ExternalAccount.belongsTo(UsersModel, { foreignKey: 'user_id' });
+// Importación dinámica de UsersModel para evitar el ciclo
+(async () => {
+  const { default: UsersModel } = await import("./UsersModel.js");
+  ExternalAccount.belongsTo(UsersModel, { foreignKey: "user_id" });
+})();
 
 export default ExternalAccount;
-    

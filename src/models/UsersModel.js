@@ -1,6 +1,7 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import RolesModel from "./RolesModel.js";
+import ExternalAccount from "./ExternalAccount.js";
 
 /**
  * Users model.
@@ -63,6 +64,9 @@ const UsersModel = sequelize.define(
     {      
       timestamps: true,
     });
+    
+  // Asociación: Un usuario tiene muchas cuentas externas
+  UsersModel.hasMany(ExternalAccount, { foreignKey: "user_id" });
 
   UsersModel.belongsTo(RolesModel, { foreignKey: "role_id" });
 

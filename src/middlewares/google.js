@@ -4,6 +4,8 @@ import { Strategy as GitHubStrategy } from "passport-github2";
 import { config } from "dotenv";
 import UsersModel from "../models/UsersModel.js";
 import ExternalAccount from "../models/ExternalAccount.js";
+import jwt from 'jsonwebtoken';
+
 
 config();
 
@@ -80,7 +82,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:4000/auth/google",
+      callbackURL: "http://localhost:4000/auth/google/callback",
       scope: ['profile', 'email'] // Solicitar acceso al perfil y correo electrónico
     },
     async function (accessToken, refreshToken, profile, done) {
@@ -152,8 +154,15 @@ passport.use(
           console.log(`Usuario existente actualizado, ID: ${user.id}, último login: ${new Date()}`);
         }
         
-        // Devolver el usuario completo para la sesión
-        done(null, user);
+        // Crear un token JWT
+        const token = jwt.sign(
+          { userId: user.id, email: user.email }, // Puedes agregar más datos según lo que necesites en el token
+          process.env.JWT_SECRET, // Asegúrate de tener la clave secreta en el archivo .env
+          { expiresIn: '1h' } // Expiración del token, puedes ajustarlo según lo necesites
+        );
+        
+        // Devolver el usuario completo junto con el token
+        done(null, { user, token });
       } catch (error) {
         console.error("Error durante la autenticación con Google:", error);
         done(error, null);

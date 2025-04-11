@@ -82,3 +82,32 @@ router.get("/show/all", ListAllDevelopers)
  */
 
 router.get("/show/:id", DetailsDeveloperId)
+
+/**
+ * @swagger
+ * /developers/update/{id}:
+ *  put:
+ *    tags: [Developers]
+ *    summary: Update a developer
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Developer id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/developerUpdate'
+ *    responses:
+ *      200:
+ *        description: Returns updated developer
+ *      404:
+ *        description: Developer not found
+ *      500:
+ *        description: Server error
+ */
+

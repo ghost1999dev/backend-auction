@@ -8,6 +8,7 @@ import {
   deleteUser,
   uploadImageUser,
   verficationEmail,
+  updateUserFieldsGoogle
 } from "../controllers/UsersController.js";
 
 const router = Router();
@@ -234,7 +235,7 @@ router.delete("/delete/:id", deleteUser);
  */
 router.post("/upload-image", uploadImageUser);
 
-router.patch("/update-fields/:id", updateUserFields);
+router.patch("/update-fields/:id", updateUserFieldsGoogle);
 
 export default router;
 

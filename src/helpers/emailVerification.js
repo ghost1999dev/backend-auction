@@ -14,9 +14,12 @@ const blockedEmails = new Map();
  */
 const transporter = nodemailer.createTransport({
   service: "Gmail",
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user:  process.env.SENDEMAIL,
-    pass: process.env.PASSWORD,
+    user:  'turciosortezalberto@gmail.com',
+    pass: 'tybx jfzc xozs tont',
   },
 });
 
@@ -31,7 +34,7 @@ const transporter = nodemailer.createTransport({
  */
 async function sendVerificationEmail(email, code) {
   const mailOptions = {
-    from: process.env.SENDEMAIL,
+    from: 'turciosortezalberto@gmail.com',
     to: email,
     subject: "Verifica tu correo electrónico",
     text: `Tu código de verificación es: ${code}\n\n¡Advertencia! Este código expirará en 10 minutos.`,
@@ -137,7 +140,7 @@ export const confirmEmailService = async (email, code) => {
 
   verificationCodes.delete(email);
   const mailOptions = {
-    from: process.env.SENDEMAIL,
+    from: 'turciosortezalberto@gmail.com',
     to: email,
     subject: "Cuenta verificada exitosamente",
     text: "¡Felicidades! Tu cuenta ha sido verificada exitosamente.",

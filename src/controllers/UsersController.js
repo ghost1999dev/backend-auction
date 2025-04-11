@@ -231,3 +231,31 @@ export const deleteUser = async (req, res) => {
 export const uploadImageUser = async (req, res) => {
   updateImage(req, res, UsersModel);
 };
+
+export const updateUserFieldsGoogle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password, address, phone } = req.body;
+
+    // Buscar usuario por ID
+    const user = await UsersModel.findByPk(id);
+    if (user) {
+      // Actualizar los campos
+      if (password) user.password = hashPassword(password);
+      if (address !== undefined) user.address = address;
+      if (phone !== undefined) user.phone = phone;
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Campos actualizados correctamente",
+        user
+      });
+    } else {
+      res.status(404).json({ message: "Usuario no encontrado" });
+    }
+  } catch (error) {
+    console.error("Error al actualizar los campos:", error);
+    res.status(500).json({ message: "Error al actualizar los campos", error });
+  }
+};

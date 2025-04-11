@@ -111,3 +111,6 @@ router.get("/show/:id", DetailsDeveloperId)
  *        description: Server error
  */
 
+router.put("/update/:id", UpdateDeveloperId)
+
+export default router

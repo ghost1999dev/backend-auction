@@ -81,3 +81,4 @@ router.get("/show/all", ListAllDevelopers)
  *        description: Server error
  */
 
+router.get("/show/:id", DetailsDeveloperId)

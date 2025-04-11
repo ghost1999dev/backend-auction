@@ -22,7 +22,6 @@ import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
 
 //////NUEVAS FUNCIONES
-import { loginRouter } from "./routes/authRoutes.js";
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
 
@@ -79,6 +78,7 @@ class Server {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     /////// NNUEVAS FUNCIONES
+    
     // NUEVO: Soporte para sesiones
     this.app.use(passport.initialize());
 
@@ -98,13 +98,10 @@ class Server {
     /////////NUEVA FUNCIONES 
     // Rutas de autenticación con JWT:
     this.app.use(jwtRouter);
+    
     this.app.get("/protected", passport.authenticate("jwt", { session: false }), (req, res) => {
       res.json({ message: "Acceso autorizado", user: req.user });
     });
-  
-
-    // Esta ruta maneja el callback (manejada por loginRouter)
-    this.app.use(loginRouter);
 
       this.app.get("/auth/github",
         passport.authenticate("auth-github", {

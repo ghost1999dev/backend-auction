@@ -19,18 +19,18 @@ jwtRouter.get(
       id: req.user.id,
       email: req.user.email
     };
-    // Generar el token con expiración de 1 día (ajusta según tus necesidades)
+    // Generar el token con expiración de 1 día 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     res.json({ token });
   }
 );
-// 🔐 Ruta protegida
+// Ruta protegida
 jwtRouter.get(
     "/api/protected",
     passport.authenticate("jwt", { session: false }),
     (req, res) => {
       res.status(200).json({
-        message: "✅ Acceso autorizado",
+        message: " Acceso autorizado",
         user: req.user,
       });
     }

@@ -4,10 +4,10 @@ import { handleJWTLogin } from "../utils/generateToken.js";
 
 export const loginRouter = express.Router();
 
-loginRouter.get("/auth/google",
+loginRouter.get("/auth/google/callback",
     passport.authenticate("auth-google", {
       failureRedirect: "/login",
-      session: false, // IMPORTANTE: estamos usando JWT ahora
+      session: false, 
     }),
     (req, res) => {
       const token = jwt.sign(
@@ -16,7 +16,7 @@ loginRouter.get("/auth/google",
         { expiresIn: "1h" }
       );
   
-      // Redirige con token en la URL (puedes usar cookies también si prefieres)
+      // Redirige con token en la URL 
       res.redirect(`http://localhost:4000/#/main/dashboard?token=${token}`);
     }
   );

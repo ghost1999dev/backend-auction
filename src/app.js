@@ -101,16 +101,12 @@ class Server {
       loginRouter
     );
 
-    this.app.get("/auth/github", passport.authenticate("auth-github"));
-
-    this.app.get(
-      "/auth/github/callback",
-      passport.authenticate("auth-github", {
-        successRedirect: "", 
-        failureRedirect: "",
+      this.app.get("/auth/github",
+        passport.authenticate("auth-github", {
+        scope: ["user:email"],
         session: false,
-      })
-    );
+        }
+       ));
   }
   
   /**

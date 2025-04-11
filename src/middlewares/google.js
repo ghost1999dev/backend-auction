@@ -80,7 +80,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:4000/auth/google",
+      callbackURL: "http://localhost:4000/auth/google/callback",
       scope: ['profile', 'email'] // Solicitar acceso al perfil y correo electrónico
     },
     async function (accessToken, refreshToken, profile, done) {

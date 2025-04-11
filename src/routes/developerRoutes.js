@@ -114,3 +114,66 @@ router.get("/show/:id", DetailsDeveloperId)
 router.put("/update/:id", UpdateDeveloperId)
 
 export default router
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Developer:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32
+ *        bio:
+ *          type: string
+ *        user_id:
+ *          type: integer
+ *          format: int32
+ *        linkedin:
+ *          type: string
+ *        occupation:
+ *          type: string
+ *        portfolio:
+ *          type: string
+ *      required:
+ *        - id
+ *        - bio
+ *        - user_id
+ *        - linkedin
+ *        - occupation
+ *        - portfolio
+ * 
+ *    developerCreate:
+ *      type: object
+ *      properties:
+ *        bio:
+ *          type: string
+ *        user_id:
+ *          type: integer
+ *          format: int32
+ *        linkedin:
+ *          type: string
+ *        occupation:
+ *          type: string
+ *        portfolio:
+ *          type: string
+ *      required:
+ *        - bio
+ *        - user_id
+ *        - linkedin
+ *        - occupation
+ *        - portfolio
+ *  
+ *    developerUpdate:
+ *      type: object
+ *      properties:
+ *        bio:
+ *          type: string
+ *        linkedin:
+ *          type: string
+ *        occupation:
+ *          type: string
+ *        portfolio:
+ *          type: string    
+ */

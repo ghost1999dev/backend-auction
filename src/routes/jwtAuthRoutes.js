@@ -4,36 +4,53 @@ import jwt from "jsonwebtoken";
 
 const jwtRouter = express.Router();
 
-// Iniciar autenticación con Google sin sesión y usar JWT
+// --- LOGIN CON GOOGLE ---
 jwtRouter.get(
   "/auth/google/jwt",
   passport.authenticate("auth-google", { session: false, scope: ["profile", "email"] })
 );
 
-// Callback para Google: generar el token JWT y devolverlo
 jwtRouter.get(
   "/auth/google/callback",
   passport.authenticate("auth-google", { session: false, failureRedirect: "/login" }),
   (req, res) => {
     const payload = {
       id: req.user.id,
-      email: req.user.email
+      email: req.user.email,
     };
-    // Generar el token con expiración de 1 día 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     res.json({ token });
   }
 );
-// Ruta protegida
-jwtRouter.get(
-    "/api/protected",
-    passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-      res.status(200).json({
-        message: " Acceso autorizado",
-        user: req.user,
-      });
-    }
-  );
-export { jwtRouter };
 
+// --- LOGIN CON GITHUB ---
+jwtRouter.get(
+  "/auth/github/jwt",
+  passport.authenticate("auth-github", { session: false, scope: ["user:email"] })
+);
+
+jwtRouter.get(
+  "/auth/github/callback",
+  passport.authenticate("auth-github", { session: false, failureRedirect: "/login" }),
+  (req, res) => {
+    const payload = {
+      id: req.user.id,
+      email: req.user.email,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+    res.json({ token });
+  }
+);
+
+jwtRouter.get(
+  "/api/protected",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.status(200).json({
+      message: "Acceso autorizado",
+      user: req.user,
+    });
+  }
+);
+
+export { jwtRouter };

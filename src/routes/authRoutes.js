@@ -16,7 +16,6 @@ loginRouter.get("/auth/google/callback",
         { expiresIn: "1h" }
       );
   
-      // Redirige con token en la URL 
       res.redirect(`http://localhost:4000/#/main/dashboard?token=${token}`);
     }
   );

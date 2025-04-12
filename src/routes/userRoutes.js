@@ -8,6 +8,7 @@ import {
   deleteUser,
   uploadImageUser,
   verficationEmail,
+  AuthUser
 } from "../controllers/UsersController.js";
 
 const router = Router();
@@ -233,6 +234,42 @@ router.delete("/delete/:id", deleteUser);
  *        description: Server error
  */
 router.post("/upload-image", uploadImageUser);
+
+/**
+ * @swagger
+ * /users/auth:
+ *  post:
+ *    tags: [Users]
+ *    summary: Authenticate a user
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                format: email
+ *                description: Email to authenticate
+ *                example: example@example.com
+ *              password:
+ *                type: string
+ *                format: password
+ *                description: Password to authenticate
+ *                example: example123
+ *            required:
+ *              - email
+ *              - password
+ *    responses:
+ *      200:
+ *        description: Returns a token
+ *      400: 
+ *        description: Email or password incorrect
+ *      500:
+ *        description: Server error
+ */
+router.post("/auth", AuthUser);
 
 export default router;
 

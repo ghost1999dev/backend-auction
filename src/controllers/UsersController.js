@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
 import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
+import { generateToken } from "../utils/generateToken.js";
 
 
 export const verficationEmail = async (req, res) => {
@@ -259,3 +259,30 @@ export const updateUserFieldsGoogle = async (req, res) => {
     res.status(500).json({ message: "Error al actualizar los campos", error });
   }
 };
+/**
+ * authenticate user
+ *
+ * function to authenticate user
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user authenticated
+ */
+export const AuthUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await UsersModel.findOne({ where: { email } });
+    if (user) {
+      const userPassword = await user.password;
+      if (userPassword === hashPassword(password)) {
+        const token = generateToken(user);
+        res.status(200).json({ message: "User authenticated successfully", token });
+      }
+      else {
+        res.status(400).json({ message: "Incorrect email or password" });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error authenticating user", error });
+  }
+}

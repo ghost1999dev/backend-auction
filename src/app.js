@@ -8,9 +8,12 @@ import swaggerUi from "swagger-ui-express"
 import { swaggerSpec, swaggerUiOptions } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
+import session from "express-session";
+
 ////////// NNUEVAS FUNCIONES
 import passport from "passport";
 import "./middlewares/google.js";
+import "./middlewares/jwt.js";
 
 
 // Import routes
@@ -19,8 +22,9 @@ import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
 
 //////NUEVAS FUNCIONES
-import { loginRouter } from "./routes/authRoutes.js";
+import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
+
 
 config();
 const app = express();
@@ -74,7 +78,10 @@ class Server {
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
     /////// NNUEVAS FUNCIONES
+    
+    // NUEVO: Soporte para sesiones
     this.app.use(passport.initialize());
+
 
   }
 
@@ -89,18 +96,21 @@ class Server {
     // swagger documentation
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
     /////////NUEVA FUNCIONES 
-    this.app.use(
-      "/auth",
-      passport.authenticate("auth-google", {
-        scope: [
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-        ],
+    // Rutas de autenticación con JWT:
+    this.app.use(jwtRouter);
+    
+    this.app.get("/protected", passport.authenticate("jwt", { session: false }), (req, res) => {
+      res.json({ message: "Acceso autorizado", user: req.user });
+    });
+
+      this.app.get("/auth/github",
+        passport.authenticate("auth-github", {
+        scope: ["user:email"],
         session: false,
-      }),
-      loginRouter
+      })
     );
   }
+  
   /**
    * Starts the server and listens on the specified port.
    */

@@ -3,37 +3,6 @@ import passport from "passport";
 import { handleJWTLogin } from "../utils/generateToken.js";
 
 export const loginRouter = express.Router();
-
-loginRouter.get("/auth/google/callback",
-    passport.authenticate("auth-google", {
-      failureRedirect: "/login",
-      session: false, 
-    }),
-    (req, res) => {
-      const token = jwt.sign(
-        { id: req.user.id, email: req.user.email },
-        JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-  
-      res.redirect(`http://localhost:4200/#/main/dashboard?token=${token}`);
-    }
-  );
-  loginRouter.get("/auth/github/callback",
-    passport.authenticate("auth-github", {
-      failureRedirect: "/login",
-      session: false,
-    }),
-    (req, res) => {
-      const token = jwt.sign(
-        { id: req.user.id, email: req.user.email },
-        JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-  
-      res.redirect(`http://localhost:4000/#/main/dashboard?token=${token}`);
-    }
-  );
   
 loginRouter.get("/api/session", (req, res) => {
   if (req.isAuthenticated()) {
@@ -43,17 +12,12 @@ loginRouter.get("/api/session", (req, res) => {
   }
 });
 
-
 loginRouter.get("/api/logout", (req, res, next) => {
     req.logout(err => {
       if (err) return next(err);
       res.redirect("http://localhost:4000/#/login");
     });
-  });
+});
+    
+export { loginRouter };
   
-  loginRouter.get("/github", (req, res) => res.send(req.user));
-  
-  export { loginRouter };
-  
->>>>>>> 3aaf00822fc3746372b0aa09b2cd36a0a26b0215
-

@@ -6,7 +6,6 @@ import UsersModel from "../models/UsersModel.js";
 import ExternalAccount from "../models/ExternalAccount.js";
 import jwt from 'jsonwebtoken';
 
-
 config();
 
 passport.use(

@@ -11,14 +11,25 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const AddNewCompany = async (req, res) => {
   try {
-    const { user_id, company_name, logo, tax_id } = req.body;
+    const { user_id, nrc_number, business_type, web_site, nit_number } = req.body;
+    
+    const existingNrcNumber = await CompaniesModel.findOne({ where: { nrc_number } })
+    const existingNitNumber = await CompaniesModel.findOne({ where: { nit_number } })
+
+    if (existingNrcNumber || existingNitNumber) {
+      return res.status(400).json({ message: "nrc number or nit number already exists" });
+    }
+    
     const company = await CompaniesModel.create({
       user_id,
-      company_name,
-      logo,
-      tax_id,
+      nrc_number,
+      business_type,
+      web_site,
+      nit_number,
     });
+
     res.status(201).json({ message: "Company created successfully", company });
+  
   } catch (error) {
     res.status(500).json({ message: "Error creating company", error });
   }
@@ -35,30 +46,39 @@ export const AddNewCompany = async (req, res) => {
 export const DetailsCompanyId = async (req, res) => {
   try {
     const { id } = req.params;
-    const getCompany = await CompaniesModel.findByPk(id);
-    if (getCompany) {
-      const company = await CompaniesModel.findAll({
-        include: [
-          {
-            model: UsersModel,
-            attributes: ["name", "email", "role"],
-            where: {
-              status: true,
-            },
-          },
+
+    if (!id) throw new Error("Company id is required");
+
+    const company = await CompaniesModel.findOne({
+      include: [{
+        model: UsersModel,
+        attributes: [
+          "role_id",
+          "name", 
+          "email", 
+          "address", 
+          "phone", 
+          "image", 
         ],
         where: {
-          id: id
-        }
-      });
-      res
-        .status(200)
-        .json({ message: "Company retrieved successfully", company });
-    } else {
+          status: 1,
+        },
+        required: true
+      }],
+      where: {
+        id: id
+      }
+    })
+
+    if (company) {
+      res.status(200).json({ message: "Company retrieved successfully", company });
+    }
+    else {
       res.status(404).json({ message: "Company not found" });
     }
+    
   } catch (error) {
-    res;
+    res.status(500).json({ message: "Error retrieving company", error });
   }
 };
 
@@ -73,15 +93,21 @@ export const DetailsCompanyId = async (req, res) => {
 export const ListAllCompany = async (req, res) => {
   try {
     const companies = await CompaniesModel.findAll({
-      include: [
-        {
-          model: UsersModel,
-          attributes: ["name", "email", "role"],
-          where: {
-            status: true,
-          },
+      include: [{
+        model: UsersModel,
+        attributes: [
+          "role_id",
+          "name", 
+          "email", 
+          "address", 
+          "phone", 
+          "image", 
+        ],
+        where: {
+          status: 1,
         },
-      ],
+        required: true
+      }],
     });
     res
       .status(200)
@@ -102,13 +128,37 @@ export const ListAllCompany = async (req, res) => {
 export const UpdateCompanyId = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { company_name, logo, tax_id } = req.body;
+    const { nrc_number, business_type, web_site, nit_number } = req.body;
     const company = await CompaniesModel.findByPk(id);
     if (company) {
-      company.company_name = company_name;
-      company.logo = logo;
-      company.tax_id = tax_id;
+
+      const existingNrcNumber = await CompaniesModel.findOne({ 
+        where: { 
+          nrc_number 
+        },
+        id: {
+          [Op.ne]: id
+        } 
+      })
+      const existingNitNumber = await CompaniesModel.findOne({ 
+        where: { 
+          nit_number 
+        },
+        id: {
+          [Op.ne]: id
+        }
+      })
+
+      if (existingNrcNumber || existingNitNumber) {
+        return res.status(400).json({ message: "nrc number or nit number already exists" });
+      }
+      
+      company.nrc_number = nrc_number;
+      company.business_type = business_type;
+      company.web_site = web_site;
+      company.nit_number = nit_number;
       await company.save();
+
       res
         .status(200)
         .json({ message: "Company updated successfully", company });
@@ -119,42 +169,3 @@ export const UpdateCompanyId = async (req, res, next) => {
     res.status(500).json({ message: "Error updating company", error });
   }
 };
-
-/**
- * delte company
- *
- * function to delete company
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} company deleted
- */
-export const DeleteCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const company = await CompaniesModel.findByPk(id);
-    if (company) {
-      company.status = false;
-      await company.save();
-      res
-        .status(200)
-        .json({ message: "Company deleted successfully", company });
-    } else {
-      res.status(404).json({ message: "Company not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting company", error });
-  }
-};
-
-/**
- * upload image
- *
- * function to upload image
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} image uploaded
- */
-export const UploadLogoCompany = async (req, res) => {
-  updateImage(req, res, CompaniesModel);
-};
-

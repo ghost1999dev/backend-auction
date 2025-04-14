@@ -1,30 +1,38 @@
 import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 
-/**
- * Sequelize instance configured for connecting to the database.
- *
- * @constant {Sequelize}
- */
-const sequelize = new Sequelize("auction_db", "dev", "31415", {
-  host: "31.220.97.169",
-  dialect: "postgres",
-  port: 5450,
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const sequelize = new Sequelize({
+  dialect: 'postgres',
+  host: 'serially-breezy-flatfish.data-1.use1.tembo.io',
+  port: 5432,
+  database: 'postgres',
+  username: 'postgres',
+  password: 'yoCiqPJ7FuiH2yA8',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: true,
+      ca: readFileSync(resolve(__dirname, 'ca.crt')).toString()
+    }
+  }
 });
 
-/**
- * Establishes a connection to the database by authenticating the Sequelize instance.
- *
- * @async
- * @function getConnection
- * @returns {Promise<void>} Resolves when the connection is successful; logs an error otherwise.
- */
 export const getConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log("La conexión se ha establecido correctamente..");
+    console.log("Conexión establecida correctamente");
   } catch (err) {
-    console.error("No se puede conectar a la base de datos:", err);
+    console.error("Error de conexión:", err);
   }
 };
 
 export default sequelize;
+

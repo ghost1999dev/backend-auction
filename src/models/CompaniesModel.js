@@ -9,25 +9,38 @@ import UsersModel from "./UsersModel.js";
  */
 
 const CompaniesModel = sequelize.define(
-  "companies",
+  "company_profile",
   {
-    company_name: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    logo: {
+    nrc_number: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
-    tax_id: {
+    business_type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
+    },
+    web_site: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    nit_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true
     },
   },
   {
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
+    timestamps: true
   },
 );
 

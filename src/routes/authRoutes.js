@@ -15,7 +15,7 @@ loginRouter.get("/api/session", (req, res) => {
 loginRouter.get("/api/logout", (req, res, next) => {
     req.logout(err => {
       if (err) return next(err);
-      res.redirect("http://localhost:4000/#/login");
+      res.redirect("http://localhost:4200/#/login");
     });
 });
     

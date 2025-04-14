@@ -4,14 +4,27 @@ import process from "node:process";
 import { fileURLToPath } from "url";
 import { getConnection } from "./config/connection.js";
 import { config } from "dotenv";
+import swaggerUi from "swagger-ui-express"
+import { swaggerSpec, swaggerUiOptions } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
+import session from "express-session";
+
+////////// NNUEVAS FUNCIONES
+import passport from "passport";
+import "./middlewares/google.js";
+import "./middlewares/jwt.js";
+
 
 // Import routes
 import indexRoutes from "./routes/indexRoutes.js";
 import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
-import emailRoutes from "./routes/emailRoutes.js";
+
+//////NUEVAS FUNCIONES
+import { jwtRouter } from "./routes/jwtAuthRoutes.js";
+import sequelize from "./config/connection.js";
+
 
 config();
 const app = express();
@@ -64,6 +77,12 @@ class Server {
     this.app.use(express.json());
     this.app.use(helmet());
     this.app.use(express.urlencoded({ extended: true }));
+    /////// NNUEVAS FUNCIONES
+    
+    // NUEVO: Soporte para sesiones
+    this.app.use(passport.initialize());
+
+
   }
 
   /**
@@ -73,9 +92,25 @@ class Server {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
-    this.app.use("/email", emailRoutes);
-  }
 
+    // swagger documentation
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+    /////////NUEVA FUNCIONES 
+    // Rutas de autenticación con JWT:
+    this.app.use(jwtRouter);
+    
+    this.app.get("/protected", passport.authenticate("jwt", { session: false }), (req, res) => {
+      res.json({ message: "Acceso autorizado", user: req.user });
+    });
+
+      this.app.get("/auth/github",
+        passport.authenticate("auth-github", {
+        scope: ["user:email"],
+        session: false,
+      })
+    );
+  }
+  
   /**
    * Starts the server and listens on the specified port.
    */

@@ -2,12 +2,7 @@ import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
 
-
-
-
 dotenv.config();
-
-
 
 const verificationCodes = new Map();
 const blockedEmails = new Map();
@@ -19,9 +14,12 @@ const blockedEmails = new Map();
  */
 const transporter = nodemailer.createTransport({
   service: "Gmail",
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: "moisesviera30@gmail.com",
-    pass: "yajm pgix fuyq omsi",
+    user:  `${process.env.SENDEMAIL}`,
+    pass: `${process.env.PASSWORD}`,
   },
 });
 
@@ -36,7 +34,7 @@ const transporter = nodemailer.createTransport({
  */
 async function sendVerificationEmail(email, code) {
   const mailOptions = {
-    from: process.env.SENDEMAIL,
+    from: `${process.env.SENDEMAIL}`,
     to: email,
     subject: "Verifica tu correo electrónico",
     text: `Tu código de verificación es: ${code}\n\n¡Advertencia! Este código expirará en 10 minutos.`,
@@ -49,16 +47,14 @@ async function sendVerificationEmail(email, code) {
  * Controller for requesting email verification.
  *
  * @async
- * @function emailVerification
+ * @function emailVerificationService
  * @param {import("express").Request} req - Express request object.
  * @param {import("express").Response} res - Express response object.
  * @returns {Promise<import("express").Response>} JSON response with verification status.
  */
-export const emailVerification = async (req, res) => {
-  const { email } = req.body;
-
+export const emailVerificationService = async (email) => {
   if (!email) {
-    return res.status(400).json({ error: "El correo es requerido." });
+    return { error: "El correo es requerido.", status: 400 };
   }
 
   const verificationCode = uuidv4().substring(0, 6);
@@ -71,39 +67,35 @@ export const emailVerification = async (req, res) => {
 
   try {
     await sendVerificationEmail(email, verificationCode);
-    return res.status(200).json({ message: "Correo de verificación enviado." });
+    return { message: "Correo de verificación enviado.", status: 200 };
   } catch (error) {
     console.error("Error al enviar el correo:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al enviar el correo de verificación." });
+    return { error: "Error al enviar el correo de verificación.", status: 500 };
   }
 };
+
 
 /**
  * Controller for confirming email verification.
  *
  * @async
- * @function confirmEmail
+ * @function confirmEmailService
  * @param {import("express").Request} req - Express request object.
  * @param {import("express").Response} res - Express response object.
  * @returns {Promise<import("express").Response>} JSON response with confirmation status.
  */
-export const confirmEmail = async (req, res) => {
-  const { email, code } = req.body;
-
+export const confirmEmailService = async (email, code) => {
   if (!email || !code) {
-    return res
-      .status(400)
-      .json({ error: "El correo y el código son requeridos." });
+    return { error: "El correo y el código son requeridos.", status: 400 };
   }
 
   const blockExpiry = blockedEmails.get(email);
   if (blockExpiry && Date.now() < blockExpiry) {
     const minutesLeft = Math.ceil((blockExpiry - Date.now()) / 60000);
-    return res.status(429).json({
+    return {
       error: `Demasiados intentos fallidos. La verificación está bloqueada temporalmente. Por favor, intente de nuevo en ${minutesLeft} minuto(s).`,
-    });
+      status: 429,
+    };
   } else if (blockExpiry) {
     blockedEmails.delete(email);
   }
@@ -111,18 +103,19 @@ export const confirmEmail = async (req, res) => {
   const verificationData = verificationCodes.get(email);
 
   if (!verificationData) {
-    return res.status(400).json({
+    return {
       error:
         "No se encontró un código de verificación para ese correo. Por favor, solicite uno nuevo.",
-    });
+      status: 400,
+    };
   }
 
   if (Date.now() > verificationData.expiresAt) {
     verificationCodes.delete(email);
-    return res.status(400).json({
-      error:
-        "El código de verificación ha expirado. Por favor, solicite uno nuevo.",
-    });
+    return {
+      error: "El código de verificación ha expirado. Por favor, solicite uno nuevo.",
+      status: 400,
+    };
   }
 
   if (verificationData.code !== code) {
@@ -132,19 +125,22 @@ export const confirmEmail = async (req, res) => {
     if (verificationData.attempts >= 5) {
       blockedEmails.set(email, Date.now() + 15 * 60 * 1000);
       verificationCodes.delete(email);
-      return res.status(429).json({
+      return {
         error:
           "Has excedido el número máximo de intentos. La verificación ha sido bloqueada temporalmente por 15 minutos.",
-      });
+        status: 429,
+      };
     } else {
-      return res.status(400).json({
+      return {
         error: `Código de verificación incorrecto. Intentos fallidos: ${verificationData.attempts}.`,
-      });
+        status: 400,
+      };
     }
   }
+
   verificationCodes.delete(email);
   const mailOptions = {
-    from: process.env.SENDEMAIL,
+    from: `${process.env.SENDEMAIL}`,
     to: email,
     subject: "Cuenta verificada exitosamente",
     text: "¡Felicidades! Tu cuenta ha sido verificada exitosamente.",
@@ -152,14 +148,16 @@ export const confirmEmail = async (req, res) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    return res.status(200).json({
+    return {
       message:
         "Correo verificado correctamente. Se ha enviado un correo de confirmación.",
-    });
+      status: 200,
+    };
   } catch (error) {
     console.error("Error enviando el correo de confirmación:", error);
-    return res
-      .status(500)
-      .json({ error: "Hubo un error al enviar el correo de confirmación." });
+    return {
+      error: "Hubo un error al enviar el correo de confirmación.",
+      status: 500,
+    };
   }
 };

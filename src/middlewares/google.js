@@ -106,16 +106,13 @@ passport.use(
             status: 1, 
             last_login: new Date()
           });
-          
-          console.log(`Nuevo usuario creado con ID: ${user.id} y correo: ${email}`);
-          
+                    
           await ExternalAccount.create({
             user_id: user.id,
             provider_id: profile.id,
             provider: 'google'
           });
           
-          console.log(`Cuenta externa de Google registrada para el usuario ID: ${user.id}`);
         } else {
           await UsersModel.update(
             {
@@ -139,10 +136,8 @@ passport.use(
               provider_id: profile.id,
               provider: 'google'
             });
-            console.log(`Nueva cuenta externa de Google registrada para usuario existente ID: ${user.id}`);
           }
           
-          console.log(`Usuario existente actualizado, ID: ${user.id}, último login: ${new Date()}`);
         }
         
         const token = jwt.sign(

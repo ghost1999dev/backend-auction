@@ -237,10 +237,8 @@ export const updateUserFieldsGoogle = async (req, res) => {
     const { id } = req.params;
     const { password, address, phone } = req.body;
 
-    // Buscar usuario por ID
     const user = await UsersModel.findByPk(id);
     if (user) {
-      // Actualizar los campos
       if (password) user.password = hashPassword(password);
       if (address !== undefined) user.address = address;
       if (phone !== undefined) user.phone = phone;

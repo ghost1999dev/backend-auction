@@ -22,7 +22,12 @@ export const AddNewDeveloper = async (req, res) => {
             portfolio,
         })
 
-        res.status(201).json({ message: "Developer created successfully", developer })
+        res.status(201).json(
+            { 
+                message: "Developer created successfully", 
+                developer 
+            }
+        )
     } catch (error) {
         res.status(500).json({ message: "Error creating developer", error })
     }

@@ -70,6 +70,7 @@ export const createUser = async (req, res) => {
         return res
           .status(200)
           .json({ 
+            id: user.previous('id'), //agregarlo a los de backend
             message:
               "User created successfully. please check your email to verify your account",
             user,

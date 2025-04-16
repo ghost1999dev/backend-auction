@@ -238,10 +238,8 @@ export const updateUserFieldsGoogle = async (req, res) => {
     const { id } = req.params;
     const { password, address, phone } = req.body;
 
-    // Buscar usuario por ID
     const user = await UsersModel.findByPk(id);
     if (user) {
-      // Actualizar los campos
       if (password) user.password = hashPassword(password);
       if (address !== undefined) user.address = address;
       if (phone !== undefined) user.phone = phone;
@@ -273,17 +271,35 @@ export const AuthUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await UsersModel.findOne({ where: { email } });
-    if (user) {
-      const userPassword = await user.password;
-      if (userPassword === hashPassword(password)) {
-        const token = generateToken(user);
-        res.status(200).json({ message: "User authenticated successfully", token });
-      }
-      else {
-        res.status(400).json({ message: "Incorrect email or password" });
-      }
+
+    if (!user) {
+      return res.status(401).json({ message: "Correo o contraseña incorrectos" });
     }
+
+    if (user.status !== 1) {
+      return res.status(403).json({ message: "La cuenta está desactivada" });
+    }
+
+    const isPasswordValid = user.password === hashPassword(password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Correo o contraseña incorrectos" });
+    }
+
+    const token = generateToken(user);
+
+    user.last_login = new Date();
+    await user.save();
+
+    const { password: _, ...userData } = user.toJSON();
+
+    res.status(200).json({ 
+      message: "Usuario autenticado correctamente", 
+      token, 
+      user: userData 
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Error authenticating user", error });
+    res.status(500).json({ message: "Error al autenticar al usuario", error: error.message });
   }
-}
+};

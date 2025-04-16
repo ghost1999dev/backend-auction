@@ -22,6 +22,7 @@
   },
   "type": "module",
   "dependencies": {
+    "auctio_backend": "file:",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",

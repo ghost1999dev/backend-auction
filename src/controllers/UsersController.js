@@ -236,13 +236,14 @@ export const uploadImageUser = async (req, res) => {
 export const updateUserFieldsGoogle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { password, address, phone } = req.body;
+    const { role_id, password, address, phone } = req.body;
 
     const user = await UsersModel.findByPk(id);
     if (user) {
       if (password) user.password = hashPassword(password);
       if (address !== undefined) user.address = address;
       if (phone !== undefined) user.phone = phone;
+      if (role_id !== undefined) user.role_id = role_id;
 
       await user.save();
 

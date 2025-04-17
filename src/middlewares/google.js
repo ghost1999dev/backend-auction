@@ -102,7 +102,7 @@ passport.use(
             name: name,
             email: email,
             image: profilePhoto,
-            account_type: 2, 
+            account_type: 3, 
             status: 1, 
             last_login: new Date()
           });

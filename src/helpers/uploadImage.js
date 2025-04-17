@@ -1,24 +1,17 @@
-import multer from "multer"; // package to upload image
-import path from "path"; // package to get path
+import multer from 'multer';
+import path from 'path';
 
-/**
- * upload image
- *
- * function to upload image
- * @param {function} cb - callback function
- * @returns {string} path of image
- */
+/** @type {multer.StorageEngine} */
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "src/images");
+  destination: (req, file, cb) => {
+    cb(null, 'src/images');
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+  }
 });
 
-// set multer storage
-const upload = multer({ storage: storage });
+/** @type {multer.Multer} */
+const upload = multer({ storage });
 
 export default upload;
-

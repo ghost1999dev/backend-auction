@@ -24,6 +24,7 @@
   "dependencies": {
     "auctio_backend": "file:",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",

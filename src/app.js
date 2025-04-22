@@ -25,6 +25,7 @@ import DeveloperRoutes from "./routes/developerRoutes.js"
 //////NUEVAS FUNCIONES
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
+import ProjectRoutes from "./routes/projectsRoutes.js";
 
 
 config();
@@ -94,6 +95,7 @@ class Server {
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
     this.app.use("/developers", DeveloperRoutes);
+    this.app.use("/projects", ProjectRoutes);
 
 
     // swagger documentation

@@ -28,10 +28,13 @@ const Notification = sequelize.define(
         allowNull: false
       },
       context: {
-        type: DataTypes.STRING
+        type: DataTypes.JSON,  
+        allowNull: false,
+        defaultValue: {}
       },
       sent_at: {
-        type: DataTypes.DATE
+        type: DataTypes.DATE,
+        allowNull: true,
       },
       status: {
         type: DataTypes.STRING,
@@ -41,8 +44,7 @@ const Notification = sequelize.define(
         type: DataTypes.TEXT
       }
   }, {
-    tableName: 'notifications',
-    timestamps: false
+    timestamps: true
   }
 );
   

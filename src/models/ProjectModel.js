@@ -18,19 +18,17 @@ const Project = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    name: {
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    project_name: {
       type: DataTypes.STRING,
       allowNull: false
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
-    },
-    requirements: {
-      type: DataTypes.STRING
-    },
-    payment_type: {
-      type: DataTypes.STRING
     },
     budget: {
       type: DataTypes.FLOAT
@@ -41,13 +39,6 @@ const Project = sequelize.define(
     status: {
       type: DataTypes.STRING,
       defaultValue: 'active'
-    },
-    category_id: {
-      type: DataTypes.INTEGER
-    },
-    created_at: {
-      type: DataTypes.STRING,
-      defaultValue: () => new Date().toISOString()
     }
   },
    {

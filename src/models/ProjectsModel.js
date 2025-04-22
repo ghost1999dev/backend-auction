@@ -24,8 +24,8 @@ const Project = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'categories', // Tabla a la que hace referencia
-        key: 'id'            // Columna de la tabla de referencia
+        model: 'categories',
+        key: 'id'            
       }
     },
     project_name: {

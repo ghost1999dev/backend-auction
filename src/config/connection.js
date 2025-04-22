@@ -22,6 +22,12 @@ const sequelize = new Sequelize({
       rejectUnauthorized: true,
       ca: readFileSync(resolve(__dirname, 'ca.crt')).toString()
     }
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
 });
 

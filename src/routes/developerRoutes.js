@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
     AddNewDeveloper,
     DetailsDeveloperId,
+    getDevelopersByIdUser,
     ListAllDevelopers,
     UpdateDeveloperId,
 } from "../controllers/DevelopersController.js"
@@ -82,6 +83,34 @@ router.get("/show/all", ListAllDevelopers)
  */
 
 router.get("/show/:id", DetailsDeveloperId)
+
+/**
+ * @swagger
+ * /developers/show/user_id/{user_id}:
+ *  get:
+ *    tags: [Developers]
+ *    summary: Get a developer by user_id
+ *    parameters:
+ *      - in: path
+ *        name: user_id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Developer user_id
+ *    responses:
+ *      200:
+ *        description: Returns a developer
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Developer'
+ *      404:
+ *        description: Developer not found
+ *      500:
+ *        description: Server error
+ */
+
+router.get("/show/user_id/:user_id", getDevelopersByIdUser)
 
 /**
  * @swagger

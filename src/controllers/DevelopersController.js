@@ -86,6 +86,58 @@ export const DetailsDeveloperId = async (req, res) => {
 }
 
 /**
+ * get developer by id user
+ *
+ * function to get developer by id
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} developer retrieved
+ */
+export const getDevelopersByIdUser = async (req, res) => {
+    try {
+        const { user_id } = req.params
+
+        if (!user_id) throw new Error("Developer id is required")
+
+        const developer = await DevelopersModel.findOne({
+            include: [{
+                model: UsersModel,
+                attributes: [
+                    "role_id",
+                    "name",
+                    "email",
+                    "address",
+                    "phone",
+                    "image",
+                ],
+                where: {
+                    status: 1,
+                },
+                required: true,
+                include: [{
+                    model: RolesModel,
+                    attributes: ["role_name"],
+                    as: "role",
+                    required: true,
+                }]
+            }],
+            where: {
+                user_id: user_id
+            }
+        })
+
+        if (developer) {
+            res.status(200).json({ message: "Developer retrieved successfully", developer })
+        }
+        else {
+            res.status(404).json({ message: "Developer not found" })
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving developer", error })
+    }
+}
+
+/**
  * get all developers
  *
  * function to get all developers

@@ -87,6 +87,50 @@ export const DetailsCompanyId = async (req, res) => {
 };
 
 /**
+ * Obtener empresa por user_id
+ *
+ * Función que recupera una empresa según su user_id.
+ * @param {Object} req - Objeto de la petición HTTP.
+ * @param {Object} res - Objeto de la respuesta HTTP.
+ * @returns {Object} Empresa encontrada.
+ */
+export const DetailsCompanyIdUser = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    if (!user_id) throw new Error("Se requiere el id del usuario");
+
+    const company = await CompaniesModel.findOne({
+      include: [
+        {
+          model: UsersModel,
+          attributes: [
+            "role_id",
+            "name",
+            "email",
+            "address",
+            "phone",
+            "image",
+          ],
+          where: { status: 1 },
+          required: true,
+        },
+      ],
+      where: { user_id: user_id },
+    });
+
+    if (company) {
+      res
+        .status(200)
+        .json({ message: "Empresa obtenida con éxito", company });
+    } else {
+      res.status(404).json({ message: "Empresa no encontrada" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener la empresa", error });
+  }
+};
+
+/**
  * Listar todas las empresas
  *
  * Función que recupera todas las empresas.

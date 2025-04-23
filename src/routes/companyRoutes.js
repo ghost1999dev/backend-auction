@@ -5,6 +5,7 @@ import {
   DetailsCompanyId,
   AddNewCompany,
   UpdateCompanyProfile,
+  DetailsCompanyIdUser,
 } from "../controllers/CompaniesController.js";
 /**
  * 
@@ -88,6 +89,33 @@ router.get("/show/all", ListAllCompany);
  *        description: Server error
  */
 router.get("/show/:id", DetailsCompanyId);
+
+/**
+ * @swagger
+ * /companies/show/user_id/{id}:
+ *  get:
+ *    tags: [Companies]
+ *    summary: Get a company by user_id
+ *    parameters:
+ *      - in: path
+ *        name: user_id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Company user_id
+ *    responses:
+ *      200:
+ *        description: Returns a company
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Company'
+ *      404:
+ *        description: Company not found
+ *      500:
+ *        description: Server error
+ */
+router.get("/show/user_id/:user_id", DetailsCompanyIdUser);
 
 /**
  * @swagger

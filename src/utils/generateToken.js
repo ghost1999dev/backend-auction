@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_segura';
+
 export const generateToken = (user) => {
   return jwt.sign(
     {
@@ -26,4 +28,18 @@ export const handleJWTLogin = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: "Error al generar token", error: err.message });
     }
+  };
+
+  export const generateAdminToken = (admin) => {
+    const payload = {
+      id: admin.id,
+      username: admin.username,  
+    };
+  
+    const options = {
+      expiresIn: '1h',  
+    };
+  
+    const token = jwt.sign(payload, JWT_SECRET, options);
+    return token;
   };

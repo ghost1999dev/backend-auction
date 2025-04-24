@@ -21,11 +21,15 @@ import indexRoutes from "./routes/indexRoutes.js";
 import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
 import DeveloperRoutes from "./routes/developerRoutes.js"
+import categoryRoutes from "./routes/categoryRoutes.js";
+import {loginRouter} from "./routes/authRoutes.js";
+
 
 //////NUEVAS FUNCIONES
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
 import ProjectRoutes from "./routes/projectsRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 
 config();
@@ -96,6 +100,10 @@ class Server {
     this.app.use("/companies", CompanyRoutes);
     this.app.use("/developers", DeveloperRoutes);
     this.app.use("/projects", ProjectRoutes);
+    this.app.use("/categories", categoryRoutes);
+    this.app.use("/auth", loginRouter);
+    this.app.use("/admins", adminRoutes);
+
 
 
     // swagger documentation

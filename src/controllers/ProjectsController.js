@@ -25,7 +25,7 @@ export const createProject = async (req, res) => {
   
       // Si no se pasa 'status', lo configuramos por defecto como 1 (activo)
       if (status === undefined) {
-        projectStatus = 1;  // 'active' por defecto
+        projectStatus = 1;  // 'active' 
       }
   
       // Crear el proyecto en la base de datos
@@ -45,7 +45,7 @@ export const createProject = async (req, res) => {
         user_id: company_id,
         title: 'Nuevo Proyecto Creado',
         body: `Se ha creado un nuevo proyecto: ${project_name}`,
-        context: JSON.stringify({ action: 'project_creation' }),  // Esto convierte el objeto a JSON válido
+        context: JSON.stringify({ action: 'project_creation' }),  
         sent_at: new Date(),
         status: 'Active',
         error_message: null
@@ -60,7 +60,7 @@ export const createProject = async (req, res) => {
             context: { action: 'notification_error' },
             sent_at: new Date(),
             status: 'Desactive',
-            error_message: notificationError.message  // ← aquí sí se llena
+            error_message: notificationError.message
           });
       }
 
@@ -109,7 +109,7 @@ export const updateProjectId = async (req, res) => {
     // Preparar los datos para actualizar
     const updateData = {};
     
-    // Solo incluimos campos que se proporcionan en el cuerpo de la solicitud
+    
     if (company_id !== undefined) updateData.company_id = company_id;
     if (category_id !== undefined) updateData.category_id = category_id;
     if (project_name !== undefined) updateData.project_name = project_name;
@@ -157,14 +157,6 @@ export const updateProjectId = async (req, res) => {
   }
 };
 
-/**
- * Delete project
- *
- * function to delete a project (soft delete by changing status)
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} confirmation message
- */
 /**
  * Delete project
  *
@@ -291,8 +283,7 @@ export const DesactivateProjectId = async (req, res) => {
       console.error('Error retrieving project:', error);
       res.status(500).json({ message: "Error retrieving project", error: error.message });
     }
-  };
-  
+  };  
 
   /**
  * Hard delete project
@@ -423,7 +414,7 @@ export const getProjectsByCategory = async (req, res) => {
     }
     
     // Configurar condiciones de búsqueda
-    const whereCondition = { category_id: id }; // Cambiado de categoryId a id
+    const whereCondition = { category_id: id }; 
     
     // Si se proporciona un estado, filtramos por él
     if (status !== undefined) {

@@ -193,16 +193,23 @@ export const UpdateCompanyId = async (req, res) => {
       id: { [Op.ne]: id },
     });
 
-    if (existingNrcNumber || existingNitNumber) {
-      return res
-        .status(400)
-        .json({ message: "El NRC o NIT ya existen" });
+    var NrcNumber;
+    var NitNumber;
+
+    if (existingNrcNumber) {
+      NrcNumber = existingNrcNumber.nrc_number
+    }if(existingNitNumber){
+      NitNumber = existingNitNumber.nit_number
+    }if(!existingNrcNumber){
+      NrcNumber = nrc_number
+    }if(!existingNitNumber){
+      NitNumber = nit_number
     }
 
-    company.nrc_number = nrc_number;
+    company.nrc_number = NrcNumber;
     company.business_type = business_type;
     company.web_site = web_site;
-    company.nit_number = nit_number;
+    company.nit_number = NitNumber;
     await company.save();
 
     res

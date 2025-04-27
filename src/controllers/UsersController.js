@@ -76,6 +76,11 @@ export const createUser = async (req, res) => {
             user,
           });
       }
+      else if (response.status === 400) {
+        return res
+          .status(400)
+          .json({ message: "Incorrect verification code"});
+      }
   } catch (error) {
     res
       .status(500)

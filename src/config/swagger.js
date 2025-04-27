@@ -24,6 +24,10 @@ const options = {
                 description: "Localhost"
             },
             {
+                url: "https://backend-m1g2.onrender.com/",
+                description: "Development server"
+            },
+            {
                 url: "https://backend-auction-1.onrender.com/",
                 description: "Production server"
             },

@@ -29,10 +29,6 @@ import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
 import ProjectRoutes from "./routes/projectsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import DeveloperRoutes from "./routes/developerRoutes.js";
-
-//////NUEVAS FUNCIONES
-import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 
 config();
 const app = express();

@@ -19,7 +19,7 @@ jwtRouter.get(
       email: req.user.email,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.redirect(`http://localhost:4200/#/main/dashboard?token=${token}`);
+    res.redirect(`http://localhost:4200/#/auth/passport?token=${token}`);
   }
 );
 
@@ -38,7 +38,7 @@ jwtRouter.get(
       email: req.user.email,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.json({ token });
+    res.redirect(`http://localhost:4200/#/auth/passport?token=${token}`);
   }
 );
 

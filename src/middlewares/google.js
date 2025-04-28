@@ -14,7 +14,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "https://backend-auction-5zdm.onrender.com/auth/github/callback",
+      callbackURL: "http://localhost:4000/auth/github/callback",
       scope: ["user:email"],
     },
     async function (accessToken, refreshToken, profile, done) {
@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://backend-auction-5zdm.onrender.com/auth/google/callback",
+      callbackURL: "http://localhost:4000/auth/google/callback",
       scope: ['profile', 'email']
     },
     async function (accessToken, refreshToken, profile, done) {
@@ -102,20 +102,17 @@ passport.use(
             name: name,
             email: email,
             image: profilePhoto,
-            account_type: 2, 
+            account_type: 3, 
             status: 1, 
             last_login: new Date()
           });
-          
-          console.log(`Nuevo usuario creado con ID: ${user.id} y correo: ${email}`);
-          
+                    
           await ExternalAccount.create({
             user_id: user.id,
             provider_id: profile.id,
             provider: 'google'
           });
           
-          console.log(`Cuenta externa de Google registrada para el usuario ID: ${user.id}`);
         } else {
           await UsersModel.update(
             {
@@ -139,10 +136,8 @@ passport.use(
               provider_id: profile.id,
               provider: 'google'
             });
-            console.log(`Nueva cuenta externa de Google registrada para usuario existente ID: ${user.id}`);
           }
           
-          console.log(`Usuario existente actualizado, ID: ${user.id}, último login: ${new Date()}`);
         }
         
         const token = jwt.sign(

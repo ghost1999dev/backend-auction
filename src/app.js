@@ -20,11 +20,18 @@ import "./middlewares/jwt.js";
 import indexRoutes from "./routes/indexRoutes.js";
 import UserRoutes from "./routes/userRoutes.js";
 import CompanyRoutes from "./routes/companyRoutes.js";
+import DeveloperRoutes from "./routes/developerRoutes.js"
+import categoryRoutes from "./routes/categoryRoutes.js";
+import {loginRouter} from "./routes/authRoutes.js";
+import AuctionRoutes from "./routes/AuctionRoutes.js";
+import ApplicationRouter from "./routes/ApplicationRoutes.js";
+import BidRoutes from "./routes/bidRoutes.js";
 
 //////NUEVAS FUNCIONES
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
-
+import ProjectRoutes from "./routes/projectsRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 config();
 const app = express();
@@ -92,6 +99,22 @@ class Server {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
+    this.app.use("/developers", DeveloperRoutes);
+    this.app.use("/projects", ProjectRoutes);
+    this.app.use("/categories", categoryRoutes);
+    this.app.use("/auth", loginRouter);
+    this.app.use("/admins", adminRoutes);
+    this.app.use("/auctions", AuctionRoutes);
+    this.app.use("/applications", ApplicationRouter);
+    this.app.use("/bids", BidRoutes);
+
+
+app.use((req, res)=>res.status(404).json({ error:"Ruta no encontrada" }));
+app.use((err, _req, res, _n)=>{
+  console.error(err);
+  res.status(err.status||500).json({ error: err.message || "Error interno" });
+});
+
 
     // swagger documentation
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

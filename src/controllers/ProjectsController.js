@@ -14,6 +14,10 @@ import UsersModel from "../models/UsersModel.js";
 export const createProject = async (req, res) => {
     try {
       const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
+
+      if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
+        return res.status(400).json({ message: "All fields must be filled." });
+      }
   
       const validStatuses = [1, 0];  
       let projectStatus = status;
@@ -90,6 +94,10 @@ export const updateProjectId = async (req, res) => {
     const projectExists = await ProjectsModel.findByPk(id);
     if (!projectExists) {
       return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
+      return res.status(400).json({ message: "All fields must be filled." });
     }
     
     if (status !== undefined) {

@@ -17,7 +17,6 @@ export const createAdmin = async (req, res) => {
   try {
     const { full_name, phone, email, username, password, image } = req.body;
 
-      // Validar campos requeridos
       const requiredFields = { full_name, phone, email, username, password };
       const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field]);
       
@@ -29,7 +28,6 @@ export const createAdmin = async (req, res) => {
         });
       }
 
-    // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = await AdminModel.create({
@@ -50,7 +48,6 @@ export const createAdmin = async (req, res) => {
   } catch (error) {
     console.error('Error al crear admin:', error);
     
-    // Manejo de errores de validación de Sequelize
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
       const errors = error.errors.map(err => ({
         field: err.path,
@@ -147,7 +144,6 @@ export const getAdminById = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
 
-    // Validar que el ID sea proporcionado
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
@@ -157,7 +153,6 @@ export const updateAdmin = async (req, res) => {
 
     const { full_name, phone, email, username, password, image, status } = req.body;
 
-     // Validar que haya al menos un campo para actualizar
      if (!full_name && !phone && !email && !username && !password && !image && !status) {
       return res.status(400).json({
         error: true,
@@ -165,7 +160,6 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    // Buscar el administrador por ID
     const admin = await AdminModel.findByPk(req.params.id);
 
     if (!admin) {
@@ -175,13 +169,11 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    // Encriptar la nueva contraseña si se proporciona
     let hashedPassword = admin.password;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    // Actualizar los campos del administrador
     admin.full_name = full_name || admin.full_name;
     admin.phone = phone || admin.phone;
     admin.email = email || admin.email;
@@ -200,7 +192,6 @@ export const updateAdmin = async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar admin:', error);
     
-    // Manejo de errores de validación de Sequelize
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
       const errors = error.errors.map(err => ({
         field: err.path,
@@ -304,7 +295,6 @@ export const searchProjects = async (req, res) => {
   try {
     const { company_name, project_name, category_id } = req.query;
 
-     // Validar que al menos haya un criterio de búsqueda
      if (!company_name && !project_name && !category_id) {
       return res.status(400).json({
         error: true,
@@ -388,7 +378,6 @@ export const searchProjects = async (req, res) => {
  */
 export const getProjectById = async (req, res) => {
   try {
-    // Validar que el ID sea proporcionado
     if (!req.params.id) {
       return res.status(400).json({
         error: true,

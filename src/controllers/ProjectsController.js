@@ -15,20 +15,17 @@ export const createProject = async (req, res) => {
     try {
       const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
   
-      // Validación de estado (usamos 1 para 'activo' y 0 para 'inactivo')
-      const validStatuses = [1, 0];  // 1 = 'activo', 0 = 'inactivo'
+      const validStatuses = [1, 0];  
       let projectStatus = status;
   
       if (status !== undefined && !validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).' });
       }
   
-      // Si no se pasa 'status', lo configuramos por defecto como 1 (activo)
       if (status === undefined) {
-        projectStatus = 1;  // 'active' 
+        projectStatus = 1;  
       }
   
-      // Crear el proyecto en la base de datos
       const project = await ProjectsModel.create({
         company_id,
         category_id,
@@ -40,7 +37,6 @@ export const createProject = async (req, res) => {
       });
   
       try {
-       // Crear una notificación de proyecto creado
         await NotificationModel.create({
         user_id: company_id,
         title: 'Nuevo Proyecto Creado',
@@ -87,18 +83,15 @@ export const updateProjectId = async (req, res) => {
     const { id } = req.params;
     const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
     
-    // Validar que el ID sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID" });
     }
     
-    // Verificar que el proyecto existe
     const projectExists = await ProjectsModel.findByPk(id);
     if (!projectExists) {
       return res.status(404).json({ message: "Project not found" });
     }
     
-    // Validación de estado si se proporciona
     if (status !== undefined) {
       const validStatuses = [1, 0];
       if (!validStatuses.includes(status)) {
@@ -106,7 +99,6 @@ export const updateProjectId = async (req, res) => {
       }
     }
     
-    // Preparar los datos para actualizar
     const updateData = {};
     
     
@@ -118,12 +110,10 @@ export const updateProjectId = async (req, res) => {
     if (days_available !== undefined) updateData.days_available = days_available;
     if (status !== undefined) updateData.status = status;
     
-    // Actualizar el proyecto
     await ProjectsModel.update(updateData, {
       where: { id }
     });
     
-    // Obtener el proyecto actualizado para devolver en la respuesta
     const updatedProject = await ProjectsModel.findByPk(id, {
       include: [
         { model: CategoriesModel, as: 'category' },
@@ -131,7 +121,6 @@ export const updateProjectId = async (req, res) => {
       ]
     });
     
-    // Crear notificación sobre la actualización
     try {
       await NotificationModel.create({
         user_id: updatedProject.company_id,
@@ -169,23 +158,19 @@ export const DesactivateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Validar que el ID sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID" });
     }
     
-    // Verificar que el proyecto existe
     const project = await ProjectsModel.findByPk(id);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
     
-    // En vez de eliminar físicamente, cambiamos el estado a 0 (inactivo)
     await ProjectsModel.update({ status: 0 }, {
       where: { id }
     });
     
-    // Crear notificación sobre la desactivación
     try {
       await NotificationModel.create({
         user_id: project.company_id,
@@ -222,12 +207,10 @@ export const DesactivateProjectId = async (req, res) => {
       const { status } = req.query;
       let whereCondition = {};
       
-      // Si se proporciona un estado, filtramos por él
       if (status !== undefined) {
         whereCondition.status = parseInt(status);
       }
-      
-      // Obtener proyectos con sus relaciones
+
       const projects = await ProjectsModel.findAll({
         where: whereCondition,
         include: [
@@ -259,7 +242,6 @@ export const DesactivateProjectId = async (req, res) => {
     try {
       const { id } = req.params;
       
-      // Validar que el ID sea un número
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid project ID" });
       }
@@ -297,26 +279,21 @@ export const DesactivateProjectId = async (req, res) => {
     try {
       const { id } = req.params;
       
-      // Validar que el ID sea un número
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid project ID" });
       }
       
-      // Verificar que el proyecto existe
       const project = await ProjectsModel.findByPk(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
       
-      // Guardar los datos necesarios para la notificación antes de eliminar
       const { company_id, project_name } = project;
       
-      // Eliminar físicamente el registro
       await ProjectsModel.destroy({
         where: { id }
       });
       
-      // Crear notificación sobre la eliminación
       try {
         await NotificationModel.create({
           user_id: company_id,
@@ -357,22 +334,18 @@ export const getProjectsByCompany = async (req, res) => {
     console.log('Params:', req.params);
     console.log('Query:', req.query);
     
-    // Validar que el ID de la compañía sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid company ID" });
     }
     
-    // Configurar condiciones de búsqueda
     const whereCondition = { company_id: id };
     
-    // Si se proporciona un estado, filtramos por él
     if (status !== undefined) {
       whereCondition.status = parseInt(status);
     }
     
     console.log('Where condition:', whereCondition);
     
-    // Obtener proyectos de la compañía
     const projects = await ProjectsModel.findAll({
       where: whereCondition,
       include: [
@@ -402,28 +375,24 @@ export const getProjectsByCompany = async (req, res) => {
 
 export const getProjectsByCategory = async (req, res) => {
   try {
-    const { id } = req.params; // Cambiado de categoryId a id para coincidir con la ruta
+    const { id } = req.params; 
     const { status } = req.query;
     
     console.log('Params:', req.params);
     console.log('Query:', req.query);
     
-    // Validar que el ID de la categoría sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
-    // Configurar condiciones de búsqueda
     const whereCondition = { category_id: id }; 
     
-    // Si se proporciona un estado, filtramos por él
     if (status !== undefined) {
       whereCondition.status = parseInt(status);
     }
     
     console.log('Where condition:', whereCondition);
     
-    // Obtener proyectos de la categoría
     const projects = await ProjectsModel.findAll({
       where: whereCondition,
       include: [

@@ -37,7 +37,6 @@ export const createApplication = async (req, res, next) => {
   try {
     const { project_id, developer_id } = req.body;
 
-    // Validar campos requeridos
     if (!project_id || !developer_id) {
       return res.status(400).json({
         success: false,

@@ -236,7 +236,6 @@ const deleteFileSafe = async (file) => {
   try {
     await fs.unlink(path.join("src/images", file));
   } catch {
-    /* archivo inexistente, sin acción */
   }
 };
 
@@ -258,14 +257,12 @@ export const UpdateCompanyProfile = async (req, res) => {
     const nrc = clean(nrc_number);
     const nit = clean(nit_number);
 
-    /*  Obtener empresa y usuario */
     const company = await CompaniesModel.findByPk(id, { transaction: t });
     if (!company) throw new Error("Empresa no encontrada");
 
     const user = await UsersModel.findByPk(company.user_id, { transaction: t });
     if (!user) throw new Error("Usuario asociado no encontrado");
 
-    /* Verificar unicidad de NRC y NIT (excluyendo la empresa actual) */
     if (
       (nrc && nrc !== clean(company.nrc_number)) ||
       (nit && nit !== clean(company.nit_number))
@@ -280,7 +277,6 @@ export const UpdateCompanyProfile = async (req, res) => {
       if (dup) throw new Error("NRC o NIT ya existen");
     }
 
-    /* Asignar cambios */
     Object.assign(company, {
       ...(nrc && { nrc_number: nrc }),
       ...(nit && { nit_number: nit }),
@@ -293,21 +289,17 @@ export const UpdateCompanyProfile = async (req, res) => {
       ...(contact_email && { email: contact_email }),
     });
 
-    /* Procesar logo */
     if (req.file) {
       oldImage = user.image;
       user.image = req.file.filename;
     }
 
-    /* Guardar transacción */
     await company.save({ transaction: t });
     await user.save({ transaction: t });
     await t.commit();
 
-    /* Eliminar logo antiguo */
     if (oldImage) deleteFileSafe(oldImage);
 
-    /* 7. Responder con perfil actualizado */
     const updated = await CompaniesModel.findByPk(id, {
       include: [
         {

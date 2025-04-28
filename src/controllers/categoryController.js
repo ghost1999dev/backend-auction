@@ -12,12 +12,10 @@ export const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
 
-    // Validación del nombre de categoría
     if (!name || name.trim() === '') {
       return res.status(400).json({ message: 'Category name is required' });
     }
 
-    // Crear la categoría en la base de datos
     const category = await CategoriesModel.create({
       name
     });
@@ -45,23 +43,19 @@ export const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
     
-    // Validar que el ID sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
-    // Verificar que la categoría existe
     const categoryExists = await CategoriesModel.findByPk(id);
     if (!categoryExists) {
       return res.status(404).json({ message: "Category not found" });
     }
     
-    // Validación del nombre
     if (!name || name.trim() === '') {
       return res.status(400).json({ message: 'Category name is required' });
     }
     
-    // Actualizar la categoría
     await CategoriesModel.update(
       { 
         name
@@ -71,7 +65,6 @@ export const updateCategory = async (req, res) => {
       }
     );
     
-    // Obtener la categoría actualizada para devolver en la respuesta
     const updatedCategory = await CategoriesModel.findByPk(id);
     
     res.status(200).json({
@@ -96,18 +89,15 @@ export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Validar que el ID sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
-    // Verificar que la categoría existe
     const category = await CategoriesModel.findByPk(id);
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
     
-    // Eliminar físicamente la categoría
     await CategoriesModel.destroy({
       where: { id }
     });
@@ -131,7 +121,6 @@ export const deleteCategory = async (req, res) => {
  */
 export const getAllCategories = async (req, res) => {
   try {
-    // Obtener todas las categorías
     const categories = await CategoriesModel.findAll({
       order: [['createdAt', 'DESC']]
     });
@@ -158,7 +147,6 @@ export const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Validar que el ID sea un número
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid category ID" });
     }

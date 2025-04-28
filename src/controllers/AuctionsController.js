@@ -2,7 +2,6 @@ import AuctionModel from "../models/AuctionModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import { Op } from "sequelize";
 
-// Constantes para estados
 const AUCTION_STATUS = {
   PENDING: 0,
   ACTIVE: 1, 
@@ -10,7 +9,6 @@ const AUCTION_STATUS = {
   CANCELLED: 3
 };
 
-// Transiciones válidas de estado
 const VALID_TRANSITIONS = {
   [AUCTION_STATUS.PENDING]: [AUCTION_STATUS.ACTIVE, AUCTION_STATUS.CANCELLED],
   [AUCTION_STATUS.ACTIVE]: [AUCTION_STATUS.COMPLETED, AUCTION_STATUS.CANCELLED],
@@ -110,7 +108,7 @@ export const listAuctions = async (req, res, next) => {
             include: [{
                 model: ProjectsModel,
                 as: 'project',
-                attributes: ['project_name', 'description', 'budget'] // Cambiado 'name' por 'project_name'
+                attributes: ['project_name', 'description', 'budget'] 
             }]
         });
         return res.json({
@@ -199,7 +197,7 @@ export const updateAuction = async (req, res, next) => {
         const updatedAuction = await auction.update({
             ...req.body,
             status: Number(status),
-            updatedAt: new Date()  // Cambiado de updated_at a updatedAt
+            updatedAt: new Date() 
         });
 
         return res.json({
@@ -224,7 +222,6 @@ export const deleteAuction = async (req, res, next) => {
             });
         }
 
-        // Solo permitir eliminar en estados pendiente o cancelada
         if (![STATUS.PENDING, STATUS.CANCELLED].includes(Number(auction.status))) {
             return res.status(422).json({
                 success: false,

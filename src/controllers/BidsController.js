@@ -28,7 +28,6 @@ async function ensureLiveAuction(req, res, auctionId) {
     return null;
   }
 
-  // Validación del estado de la subasta
   if (auction.status !== AUCTION_STATUS.ACTIVE) {
     res.status(400).json({ 
       success: false, 
@@ -42,7 +41,6 @@ async function ensureLiveAuction(req, res, auctionId) {
   const start = auction.bidding_started_at ? new Date(auction.bidding_started_at) : null;
   const end = auction.bidding_deadline ? new Date(auction.bidding_deadline) : null;
 
-  // Solo validar fechas si están definidas
   if (start && now < start) {
     res.status(422).json({ 
       success: false, 
@@ -77,7 +75,6 @@ export const createBid = async (req, res, next) => {
   try {
     const { auction_id, developer_id, amount } = req.body;
 
-    // Validar campos requeridos
     if (!auction_id || !developer_id || amount == null) {
       return res.status(400).json({
         success: false,
@@ -86,7 +83,6 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    // Validar monto
     if (typeof amount !== "number" || amount <= 0) {
       return res.status(400).json({
         success: false,
@@ -98,7 +94,6 @@ export const createBid = async (req, res, next) => {
     const auction = await ensureLiveAuction(req, res, auction_id);
     if (!auction) return;
 
-    // Verificar desarrollador
     const developer = await UsersModel.findByPk(developer_id);
     if (!developer) {
       return res.status(404).json({ 
@@ -108,7 +103,6 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    // Verificar duplicado
     const exists = await BidModel.findOne({ where:{ auction_id, developer_id } });
     if (exists) {
       return res.status(409).json({ 
@@ -206,7 +200,6 @@ export const updateBid = async (req, res, next) => {
       });
     }
 
-    // Validar permisos si hay usuario autenticado
     if (req.user && bid.developer_id !== req.user.id) {
       return res.status(403).json({ 
         success: false, 
@@ -224,7 +217,6 @@ export const updateBid = async (req, res, next) => {
       });
     }
 
-    // Verificar estado de la subasta
     const auction = await AuctionModel.findByPk(bid.auction_id, {
       attributes: ['id', 'project_id', 'bidding_started_at', 'bidding_deadline', 'status']
     });
@@ -237,7 +229,6 @@ export const updateBid = async (req, res, next) => {
       });
     }
 
-    // Actualizar monto
     await bid.update({ amount });
 
     return res.status(200).json({ 

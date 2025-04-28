@@ -108,6 +108,9 @@ class Server {
     this.app.use("/applications", ApplicationRouter);
     this.app.use("/bids", BidRoutes);
 
+    // swagger documentation
+    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
 
 app.use((req, res)=>res.status(404).json({ error:"Ruta no encontrada" }));
 app.use((err, _req, res, _n)=>{
@@ -115,9 +118,6 @@ app.use((err, _req, res, _n)=>{
   res.status(err.status||500).json({ error: err.message || "Error interno" });
 });
 
-
-    // swagger documentation
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
     /////////NUEVA FUNCIONES 
     // Rutas de autenticación con JWT:
     this.app.use(jwtRouter);

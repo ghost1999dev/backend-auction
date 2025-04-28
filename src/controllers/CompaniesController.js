@@ -23,7 +23,10 @@ export const AddNewCompany = async (req, res) => {
     if (existingNrcNumber || existingNitNumber) {
       return res
         .status(400)
-        .json({ message: "El NRC o NIT ya existen" });
+        .json({ 
+          status: 400,
+          message: "El NRC o NIT ya existen" 
+        });
     }
 
     const company = await CompaniesModel.create({
@@ -36,9 +39,17 @@ export const AddNewCompany = async (req, res) => {
 
     res
       .status(201)
-      .json({ message: "Empresa creada con éxito", company });
+      .json({
+        status: 201,
+        message: "Empresa creada con éxito", company 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al crear la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al crear la empresa", error 
+      });
   }
 };
 
@@ -77,12 +88,25 @@ export const DetailsCompanyId = async (req, res) => {
     if (company) {
       res
         .status(200)
-        .json({ message: "Empresa obtenida con éxito", company });
+        .json({ 
+          status: 200,
+          message: "Empresa obtenida con éxito", company 
+        });
     } else {
-      res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener la empresa", error 
+      });
   }
 };
 
@@ -121,12 +145,25 @@ export const DetailsCompanyIdUser = async (req, res) => {
     if (company) {
       res
         .status(200)
-        .json({ message: "Empresa obtenida con éxito", company });
+        .json({ 
+          status: 200,
+          message: "Empresa obtenida con éxito", company 
+        });
     } else {
-      res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener la empresa", error 
+      });
   }
 };
 
@@ -159,9 +196,17 @@ export const ListAllCompany = async (req, res) => {
     });
     res
       .status(200)
-      .json({ message: "Empresas obtenidas con éxito", companies });
+      .json({ 
+        status: 200,
+        message: "Empresas obtenidas con éxito", companies 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener las empresas", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener las empresas", error 
+      });
   }
 };
 
@@ -180,7 +225,12 @@ export const UpdateCompanyId = async (req, res) => {
 
     const company = await CompaniesModel.findByPk(id);
     if (!company) {
-      return res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
 
     const existingNrcNumber = await CompaniesModel.findOne({
@@ -193,30 +243,26 @@ export const UpdateCompanyId = async (req, res) => {
       id: { [Op.ne]: id },
     });
 
-    var NrcNumber;
-    var NitNumber;
+    if (!existingNrcNumber) company.nrc_number = nrc_number;
+    if (!existingNitNumber) company.nit_number = nit_number;
 
-    if (existingNrcNumber) {
-      NrcNumber = existingNrcNumber.nrc_number
-    }if(existingNitNumber){
-      NitNumber = existingNitNumber.nit_number
-    }if(!existingNrcNumber){
-      NrcNumber = nrc_number
-    }if(!existingNitNumber){
-      NitNumber = nit_number
-    }
-
-    company.nrc_number = NrcNumber;
     company.business_type = business_type;
     company.web_site = web_site;
-    company.nit_number = NitNumber;
     await company.save();
 
     res
       .status(200)
-      .json({ message: "Empresa actualizada con éxito", company });
+      .json({ 
+        status: 200,
+        message: "Empresa actualizada con éxito", company 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al actualizar la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al actualizar la empresa", error 
+      });
   }
 };
 

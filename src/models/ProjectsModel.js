@@ -1,6 +1,7 @@
 import sequelize from "../config/connection.js";
 import CategoriesModel from "./CategorieModel.js";
 import UsersModel from "./UsersModel.js";
+import CompaniesModel from "./CompaniesModel.js";
 import { DataTypes } from "sequelize";
 /**
  * Projects model.
@@ -58,6 +59,8 @@ Project.belongsTo(UsersModel, { foreignKey: 'company_id', as: 'company' });
 
 // Relación con Category 
 Project.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' });
+
+Project.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
 
 // Relación con Status 
 /*Project.belongsTo(Status, { foreignKey: 'status', as: 'status' }); 

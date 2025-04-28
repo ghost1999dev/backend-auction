@@ -90,9 +90,8 @@ export const createUser = async (req, res) => {
           .status(200)
           .json({ 
             id: user.previous('id'),
-            status: 200,
-            message:
-              "User created successfully. please check your email to verify your account",
+            status: response.status,
+            message: response.message,
             user,
           });
       }

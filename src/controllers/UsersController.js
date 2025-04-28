@@ -4,6 +4,7 @@ import hashPassword from "../helpers/hashPassword.js";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
+import { json } from "sequelize";
 
 
 export const verficationEmail = async (req, res) => {
@@ -11,22 +12,40 @@ export const verficationEmail = async (req, res) => {
     let { email } = req.body;
 
      const existingEmail = await UsersModel.findOne({ where: { email } })
-     if (existingEmail) {
-         return res.status(400).json({ message: "Email already exists" })
-    }else{
+      if (existingEmail) {
+        res
+          .status(400)
+          .json({ 
+            status: 400,
+            message: "Email already exists" 
+          });
+      }else{
       const response = await emailVerificationService(email);
       
       if(response.status===200){
-        return res.status(200).json(response);
+        res
+          .status(200)
+          .json({ 
+            status: 200,
+            message: response.message 
+          });
       }else{
-        return res.status(response.status).json({ message: response.message });
+        res
+          .status(response.status)
+          .json({ 
+            status: response.status,
+            message: response.message 
+          });
       }
     }
 
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error creating user", error: error.message });
+      .json({ 
+        status: 500,
+        message: "Error creating user", error: error.message 
+      });
   }
 };
 
@@ -67,24 +86,30 @@ export const createUser = async (req, res) => {
           last_login: new Date(),
         });
       
-        return res
+        res
           .status(200)
           .json({ 
             id: user.previous('id'),
+            status: 200,
             message:
               "User created successfully. please check your email to verify your account",
             user,
           });
       }
-      else if (response.status === 400) {
-        return res
-          .status(400)
-          .json({ message: "Verification code is expired or incorrect" });
+      else {
+        res
+          json({
+            status: response.status,
+            message: response.message
+          })
       }
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error creating user", error: error.message });
+      .json({ 
+        status: 500,
+        message: "Error creating user", error: error.message 
+      });
   }
 };
 
@@ -111,9 +136,17 @@ export const getUsers = async (req, res) => {
     });
     res
       .status(200)
-      .json({ message: "Users retrieved successfully", usersWithImage });
+      .json({ 
+        status: 200,
+        message: "Users retrieved successfully", usersWithImage 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving users", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error retrieving users", error 
+      });
   }
 };
 
@@ -134,12 +167,27 @@ export const getUserById = async (req, res) => {
       }
     });
     if (user.status === 1) {
-      res.status(200).json({ message: "User retrieved successfully", user });
+      res
+        .status(200)
+        .json({ 
+          status: 200,
+          message: "User retrieved successfully", user 
+        });
     } else {
-      res.status(404).json({ message: "User not found" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          essage: "User not found" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving user", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error retrieving user", error 
+      });
   }
 };
 
@@ -162,12 +210,27 @@ export const updateUser = async (req, res) => {
       user.address = address;
       user.phone = phone;
       await user.save();
-      res.status(200).json({ message: "User updated successfully", user });
+      res
+        .status(200)
+        .json({ 
+          status: 200,
+          message: "User updated successfully", user 
+        });
     } else {
-      res.status(404).json("User not found");
+      res
+        .status(404)
+        .json({
+          status: 404,
+          message: "User not found"
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating user", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error updating user", error 
+      });
   }
 };
 
@@ -188,16 +251,36 @@ export const updatePassword = async (req, res) => {
       if (user.password === hashPassword(currentPassword)) {
         user.password = hashPassword(Newpassword);
         await user.save();
-        res.status(200).json({ message: "Password updated successfully", user });
+        res
+          .status(200)
+          .json({
+            status: 200,
+            message: "Password updated successfully", user 
+          });
       }
       else {
-        res.status(400).json({ message: "Current password is incorrect" });
+        res
+          .status(400)
+          .json({ 
+            status: 400,
+            message: "Current password is incorrect" 
+          });
       }
     } else {
-      res.status(404).json({ message: "User not found" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "User not found" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating password", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error updating password", error 
+      });
   }
 };
 
@@ -217,12 +300,27 @@ export const deleteUser = async (req, res) => {
     if (user) {
       user.status = 0;
       await user.save();
-      res.status(200).json({ message: "User deleted successfully", user });
+      res
+        .status(200)
+        .json({ 
+          status: 200,
+          message: "User deleted successfully", user 
+        });
     } else {
-      res.status(404).json({ message: "User not found" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "User not found" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting user", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error deleting user", error 
+      });
   }
 };
 
@@ -252,16 +350,29 @@ export const updateUserFieldsGoogle = async (req, res) => {
 
       await user.save();
 
-      res.status(200).json({
-        message: "Campos actualizados correctamente",
-        user
-      });
+      res
+        .status(200)
+        .json({
+          status: 200,
+          message: "Campos actualizados correctamente",
+          user
+        });
     } else {
-      res.status(404).json({ message: "Usuario no encontrado" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Usuario no encontrado" 
+        });
     }
   } catch (error) {
     console.error("Error al actualizar los campos:", error);
-    res.status(500).json({ message: "Error al actualizar los campos", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al actualizar los campos", error 
+      });
   }
 };
 /**
@@ -279,17 +390,32 @@ export const AuthUser = async (req, res) => {
     const user = await UsersModel.findOne({ where: { email } });
 
     if (!user) {
-      return res.status(401).json({ message: "Correo o contraseña incorrectos" });
+      return res
+        .status(401)
+        .json({ 
+          status: 401,
+          message: "Correo o contraseña incorrectos" 
+        });
     }
 
     if (user.status !== 1) {
-      return res.status(403).json({ message: "La cuenta está desactivada" });
+      return res
+        .status(403)
+        .json({ 
+          status: 403,
+          message: "La cuenta está desactivada" 
+        });
     }
 
     const isPasswordValid = user.password === hashPassword(password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Correo o contraseña incorrectos" });
+      return res
+        .status(401)
+        .json({ 
+          status: 401,
+          message: "Correo o contraseña incorrectos" 
+        });
     }
 
     const token = generateToken(user);
@@ -299,13 +425,21 @@ export const AuthUser = async (req, res) => {
 
     const { password: _, ...userData } = user.toJSON();
 
-    res.status(200).json({ 
-      message: "Usuario autenticado correctamente", 
-      token, 
-      user: userData 
-    });
+    res
+      .status(200)
+      .json({ 
+        status: 200,
+        message: "Usuario autenticado correctamente", 
+        token, 
+        user: userData 
+      });
 
   } catch (error) {
-    res.status(500).json({ message: "Error al autenticar al usuario", error: error.message });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al autenticar al usuario", error: error.message 
+      });
   }
 };

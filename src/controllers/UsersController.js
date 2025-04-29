@@ -5,11 +5,23 @@ import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
 import { json } from "sequelize";
+import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/usersSchema.js';
 
 
 export const verficationEmail = async (req, res) => {
   try {
     let { email } = req.body;
+
+    const { error, value } = validateEmailSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
 
      const existingEmail = await UsersModel.findOne({ where: { email } })
       if (existingEmail) {
@@ -34,7 +46,7 @@ export const verficationEmail = async (req, res) => {
           .status(response.status)
           .json({ 
             status: response.status,
-            message: response.message 
+            message: "Correo no encontrado" 
           });
       }
     }
@@ -59,6 +71,17 @@ export const verficationEmail = async (req, res) => {
  */
 export const createUser = async (req, res) => {
   try {
+    const { error, value } = createUserSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
+
     let { 
       role_id, 
       name, 
@@ -96,11 +119,10 @@ export const createUser = async (req, res) => {
           });
       }
       else {
-        res
-          json({
-            status: response.status,
-            message: response.message
-          })
+        return res.status(response.status).json({
+          status: response.status,
+          message: response.error
+        });
       }
   } catch (error) {
     res
@@ -185,7 +207,7 @@ export const getUserById = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error retrieving user", error 
+        message: "Error retrieving user"
       });
   }
 };
@@ -202,7 +224,17 @@ export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, address, phone } = req.body;
+    const { error, value } = updateUserSchema.validate(req.body, { abortEarly: false });
 
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
+        
     const user = await UsersModel.findByPk(id);
     if (user) {
       user.name = name;
@@ -245,6 +277,18 @@ export const updatePassword = async (req, res) => {
   try {
     const { id } = req.params;
     const { currentPassword, Newpassword } = req.body;
+    
+    const { error } = passwordUserchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
+
     const user = await UsersModel.findByPk(id);
     if (user) {
       if (user.password === hashPassword(currentPassword)) {

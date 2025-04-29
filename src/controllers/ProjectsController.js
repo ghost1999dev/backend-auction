@@ -16,14 +16,14 @@ export const createProject = async (req, res) => {
       const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
 
       if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
-        return res.status(400).json({ message: "All fields must be filled." });
+        return res.status(400).json({ message: "All fields must be filled.", status: 400 });
       }
   
-      const validStatuses = [1, 0];  
+      const validStatuses = [1, 0];  //0 pendiente, 1, active, 2, inactive, 3, rechazado, 4, finalizado
       let projectStatus = status;
   
       if (status !== undefined && !validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).' });
+        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
       }
   
       if (status === undefined) {
@@ -65,12 +65,13 @@ export const createProject = async (req, res) => {
       }
 
       res.status(201).json({
-        message: "Project created successfully",
+        message: "Project created successfully", 
+        status: 201,
         project
       });
     } catch (error) {
       console.error('Error creating project:', error);
-      res.status(500).json({ message: "Error creating project", error: error.message });
+      res.status(500).json({ message: "Error creating project", error: error.message, status: 500 });
     }
   };
 
@@ -88,22 +89,22 @@ export const updateProjectId = async (req, res) => {
     const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
     
     if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid project ID" });
+      return res.status(400).json({ message: "Invalid project ID", status: 400 });
     }
     
     const projectExists = await ProjectsModel.findByPk(id);
     if (!projectExists) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: "Project not found", status: 404 });
     }
 
     if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
-      return res.status(400).json({ message: "All fields must be filled." });
+      return res.status(400).json({ message: "All fields must be filled.", status: 400 });
     }
     
     if (status !== undefined) {
       const validStatuses = [1, 0];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).' });
+        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
       }
     }
     
@@ -150,7 +151,7 @@ export const updateProjectId = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating project:', error);
-    res.status(500).json({ message: "Error updating project", error: error.message });
+    res.status(500).json({ message: "Error updating project", error: error.message, status: 500 });
   }
 };
 
@@ -167,12 +168,12 @@ export const DesactivateProjectId = async (req, res) => {
     const { id } = req.params;
     
     if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid project ID" });
+      return res.status(400).json({ message: "Invalid project ID", status: 400 });
     }
     
     const project = await ProjectsModel.findByPk(id);
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: "Project not found", status: 404 });
     }
     
     await ProjectsModel.update({ status: 0 }, {
@@ -195,11 +196,11 @@ export const DesactivateProjectId = async (req, res) => {
     }
     
     res.status(200).json({
-      message: "Project deactivated successfully"
+      message: "Project deactivated successfully", status: 200
     });
   } catch (error) {
     console.error('Error deactivating project:', error);
-    res.status(500).json({ message: "Error deactivating project", error: error.message });
+    res.status(500).json({ message: "Error deactivating project", error: error.message, status: 500 });
   }
 };
   /**
@@ -229,12 +230,12 @@ export const DesactivateProjectId = async (req, res) => {
       });
       
       res.status(200).json({
-        message: "Projects retrieved successfully",
+        message: "Projects retrieved successfully", status: 200,
         projects
       });
     } catch (error) {
       console.error('Error retrieving projects:', error);
-      res.status(500).json({ message: "Error retrieving projects", error: error.message });
+      res.status(500).json({ message: "Error retrieving projects", error: error.message, status: 500 });
     }
   };
 
@@ -251,7 +252,7 @@ export const DesactivateProjectId = async (req, res) => {
       const { id } = req.params;
       
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID" });
+        return res.status(400).json({ message: "Invalid project ID", status: 400 });
       }
       
       const project = await ProjectsModel.findByPk(id, {
@@ -262,7 +263,7 @@ export const DesactivateProjectId = async (req, res) => {
       });
       
       if (!project) {
-        return res.status(404).json({ message: "Project not found" });
+        return res.status(404).json({ message: "Project not found", status: 404 });
       }
       
       res.status(200).json({
@@ -271,7 +272,7 @@ export const DesactivateProjectId = async (req, res) => {
       });
     } catch (error) {
       console.error('Error retrieving project:', error);
-      res.status(500).json({ message: "Error retrieving project", error: error.message });
+      res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
     }
   };  
 
@@ -288,12 +289,12 @@ export const DesactivateProjectId = async (req, res) => {
       const { id } = req.params;
       
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID" });
+        return res.status(400).json({ message: "Invalid project ID", status: 400 });
       }
       
       const project = await ProjectsModel.findByPk(id);
       if (!project) {
-        return res.status(404).json({ message: "Project not found" });
+        return res.status(404).json({ message: "Project not found", status: 404 });
       }
       
       const { company_id, project_name } = project;
@@ -318,11 +319,11 @@ export const DesactivateProjectId = async (req, res) => {
       }
       
       res.status(200).json({
-        message: "Project permanently deleted successfully"
+        message: "Project permanently deleted successfully", status: 200
       });
     } catch (error) {
       console.error('Error deleting project:', error);
-      res.status(500).json({ message: "Error deleting project", error: error.message });
+      res.status(500).json({ message: "Error deleting project", error: error.message, status: 500 });
     }
   };
   
@@ -343,7 +344,7 @@ export const getProjectsByCompany = async (req, res) => {
     console.log('Query:', req.query);
     
     if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid company ID" });
+      return res.status(400).json({ message: "Invalid company ID", status: 400 });
     }
     
     const whereCondition = { company_id: id };
@@ -364,11 +365,12 @@ export const getProjectsByCompany = async (req, res) => {
     
     res.status(200).json({
       message: "Company projects retrieved successfully",
+      status: 200,
       projects
     });
   } catch (error) {
     console.error('Error retrieving company projects:', error);
-    res.status(500).json({ message: "Error retrieving company projects", error: error.message });
+    res.status(500).json({ message: "Error retrieving company projects", error: error.message, status: 500 });
   }
 };
 
@@ -390,7 +392,7 @@ export const getProjectsByCategory = async (req, res) => {
     console.log('Query:', req.query);
     
     if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid category ID" });
+      return res.status(400).json({ message: "Invalid category ID", status: 400 });
     }
     
     const whereCondition = { category_id: id }; 
@@ -411,10 +413,11 @@ export const getProjectsByCategory = async (req, res) => {
     
     res.status(200).json({
       message: "Category projects retrieved successfully",
+      status: 200,
       projects
     });
   } catch (error) {
     console.error('Error retrieving category projects:', error);
-    res.status(500).json({ message: "Error retrieving category projects", error: error.message });
+    res.status(500).json({ message: "Error retrieving category projects", error: error.message, status: 500 });
   }
 };

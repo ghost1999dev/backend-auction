@@ -3,8 +3,10 @@ import ProjectsModel from '../models/ProjectsModel.js';
 import CompaniesModel from '../models/CompaniesModel.js';
 import CategorieModel from '../models/CategorieModel.js';
 import UsersModel from '../models/UsersModel.js';
+import NotificationModel from "../models/NotificationModel.js";
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
+import Joi from 'joi';
 /**
  * create admin
  *
@@ -17,7 +19,6 @@ export const createAdmin = async (req, res) => {
   try {
     const { full_name, phone, email, username, password, image } = req.body;
 
-      // Validar campos requeridos
       const requiredFields = { full_name, phone, email, username, password };
       const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field]);
       
@@ -29,7 +30,6 @@ export const createAdmin = async (req, res) => {
         });
       }
 
-    // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = await AdminModel.create({
@@ -50,7 +50,6 @@ export const createAdmin = async (req, res) => {
   } catch (error) {
     console.error('Error al crear admin:', error);
     
-    // Manejo de errores de validación de Sequelize
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
       const errors = error.errors.map(err => ({
         field: err.path,
@@ -147,7 +146,6 @@ export const getAdminById = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
 
-    // Validar que el ID sea proporcionado
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
@@ -157,7 +155,6 @@ export const updateAdmin = async (req, res) => {
 
     const { full_name, phone, email, username, password, image, status } = req.body;
 
-     // Validar que haya al menos un campo para actualizar
      if (!full_name && !phone && !email && !username && !password && !image && !status) {
       return res.status(400).json({
         error: true,
@@ -165,7 +162,6 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    // Buscar el administrador por ID
     const admin = await AdminModel.findByPk(req.params.id);
 
     if (!admin) {
@@ -175,13 +171,11 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    // Encriptar la nueva contraseña si se proporciona
     let hashedPassword = admin.password;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
-    // Actualizar los campos del administrador
     admin.full_name = full_name || admin.full_name;
     admin.phone = phone || admin.phone;
     admin.email = email || admin.email;
@@ -200,7 +194,6 @@ export const updateAdmin = async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar admin:', error);
     
-    // Manejo de errores de validación de Sequelize
     if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstraintError') {
       const errors = error.errors.map(err => ({
         field: err.path,
@@ -304,7 +297,6 @@ export const searchProjects = async (req, res) => {
   try {
     const { company_name, project_name, category_id } = req.query;
 
-     // Validar que al menos haya un criterio de búsqueda
      if (!company_name && !project_name && !category_id) {
       return res.status(400).json({
         error: true,
@@ -388,7 +380,6 @@ export const searchProjects = async (req, res) => {
  */
 export const getProjectById = async (req, res) => {
   try {
-    // Validar que el ID sea proporcionado
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
@@ -429,6 +420,107 @@ export const getProjectById = async (req, res) => {
     return res.status(500).json({
       error: true,
       message: 'Error interno del servidor'
+    });
+  }
+};
+
+export const updateProjectStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newStatus } = req.body;
+
+    const schemaParams = Joi.object({
+      id: Joi.number().positive().required().messages({
+        'any.required': 'ID de proyecto requerido',
+        'number.base': 'El ID debe ser un número',
+        'number.positive': 'El ID debe ser un número positivo'
+      })
+    });
+
+    const schemaBody = Joi.object({
+      newStatus: Joi.number().valid(0, 1, 3, 4).required().messages({
+        'any.required': 'El nuevo estado es obligatorio',
+        'number.base': 'El estado debe ser un número',
+        'any.only': 'El estado debe ser uno de los siguientes valores: 0, 1, 3, 4'
+      })
+    });
+
+    const validateParams = schemaParams.validate(req.params);
+    const validateBody = schemaBody.validate(req.body);
+
+    if (validateParams.error || validateBody.error) {
+      return res.status(400).json({
+        message: "Error de validación",
+        details: [
+          ...(validateParams.error ? validateParams.error.details.map(d => d.message) : []),
+          ...(validateBody.error ? validateBody.error.details.map(d => d.message) : [])
+        ],
+        status: 400
+      });
+    }
+
+    const project = await ProjectsModel.findByPk(id, {
+      include: {
+        model: CompaniesModel,
+        as: 'company_profile',
+        include: {
+          model: UsersModel,
+          attributes: ['id', 'name', 'email']
+        }
+      }
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        message: 'Proyecto no encontrado',
+        status: 404
+      });
+    }
+
+    project.status = newStatus;
+    await project.save();
+
+    const estados = {
+      0: 'Pendiente',
+      1: 'Activo',
+      3: 'Rechazado',
+      4: 'Finalizado'
+    };
+
+    const user = project.company_profile?.user;
+
+    if (user) {
+      console.log('Enviando notificación con:', {
+        user_id: user.id,
+        title: 'Actualización del estado de tu proyecto',
+        body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`
+      });
+
+      await NotificationModel.create({
+        user_id: user.id,
+        title: 'Actualización del estado de tu proyecto',
+        body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`,
+        context: {
+          projectId: project.id,
+          status: newStatus
+        },
+        sent_at: new Date(),
+        status: 'sent'
+      });
+    } else {
+      console.warn('No se encontró el usuario para enviar la notificación');
+    }
+
+    return res.status(200).json({
+      message: `Estado del proyecto actualizado a ${newStatus}`,
+      status: 200,
+      project
+    });
+  } catch (error) {
+    console.error('Error al actualizar estado del proyecto:', error);
+    return res.status(500).json({
+      message: 'Error interno del servidor',
+      error: error.message
     });
   }
 };

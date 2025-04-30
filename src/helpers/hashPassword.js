@@ -1,4 +1,3 @@
-// import package to hash password
 import crypto from "crypto";
 
 /**

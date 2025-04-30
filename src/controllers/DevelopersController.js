@@ -1,6 +1,7 @@
 import DevelopersModel from "../models/DevelopersModel.js"
 import UsersModel from "../models/UsersModel.js"
 import RolesModel from "../models/RolesModel.js"
+import { stat } from "fs"
 
 /**
  * create developer
@@ -24,12 +25,18 @@ export const AddNewDeveloper = async (req, res) => {
 
         res.status(201).json(
             { 
+                status: 201,
                 message: "Developer created successfully", 
                 developer 
             }
         )
     } catch (error) {
-        res.status(500).json({ message: "Error creating developer", error })
+        res.status(500).json(
+            { 
+                status: 500,
+                message: "Error creating developer", error 
+            }
+        )
     }
 }
 
@@ -75,13 +82,28 @@ export const DetailsDeveloperId = async (req, res) => {
         })
 
         if (developer) {
-            res.status(200).json({ message: "Developer retrieved successfully", developer })
+            res
+                .status(200)
+                .json({
+                    status: 200,
+                    message: "Developer retrieved successfully", developer 
+                })
         }
         else {
-            res.status(404).json({ message: "Developer not found" })
+            res
+                .status(404)
+                .json({ 
+                    status: 404,
+                    message: "Developer not found" 
+                })
         }
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving developer", error })
+        res
+            .status(500)
+            .json({ 
+                status: 500,
+                message: "Error retrieving developer", error 
+            })
     }
 }
 
@@ -127,13 +149,28 @@ export const getDevelopersByIdUser = async (req, res) => {
         })
 
         if (developer) {
-            res.status(200).json({ message: "Developer retrieved successfully", developer })
+            res
+                .status(200)
+                .json({ 
+                    status: 200,
+                    message: "Developer retrieved successfully", developer 
+                })
         }
         else {
-            res.status(404).json({ message: "Developer not found" })
+            res
+                .status(404)
+                .json({ 
+                    status: 404,
+                    message: "Developer not found" 
+                })
         }
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving developer", error })
+        res
+            .status(500)
+            .json({ 
+                status: 500,
+                message: "Error retrieving developer", error 
+            })
     }
 }
 
@@ -171,9 +208,29 @@ export const ListAllDevelopers = async (req, res) => {
             }],
         })
 
-        res.status(200).json({ message: "Developers retrieved successfully", developers })
+        if (developers) {
+            res
+                .status(200)
+                .json({ 
+                    status: 200,
+                    message: "Developers retrieved successfully", developers 
+                })
+        }
+        else {
+            res
+                .status(404)
+                .json({ 
+                    status: 404,
+                    message: "There are no developers"
+                })
+        }
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving developers", error })
+        res
+            .status(500)
+            .json({ 
+                status: 500,
+                message: "Error retrieving developers", error 
+            })
     }
 }
 
@@ -199,12 +256,25 @@ export const UpdateDeveloperId = async (req, res ) => {
             developer.portfolio = portfolio
             await developer.save()
 
-            res.status(200).json({ message: "Developer updated successfully", developer })
+            res
+                .status(200)
+                .json({ 
+                    status: 200,
+                    message: "Developer updated successfully", developer 
+                })
         }
         else {
-            res.status(404).json({ message: "Developer not found" })
+            res
+                .status(404)
+                .json({ 
+                    message: "Developer not found" 
+                })
         }
     } catch (error) {
-        res.status(500).json({ message: "Error updating developer", error })
+        res
+            .status(500)
+            .json({ 
+                message: "Error updating developer", error 
+            })
     }
 }

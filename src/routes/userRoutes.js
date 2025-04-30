@@ -4,6 +4,7 @@
  * 
  */
 import { Router } from "express";
+import upload from "../middlewares/upload.js";
 import {
   createUser,
   getUsers,
@@ -214,9 +215,16 @@ router.delete("/delete/:id", deleteUser);
 /**
  * @swagger
  * /users/upload-image:
- *  post:
+ *  put:
  *    tags: [Users]
  *    summary: Upload a user image
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: User id
  *    requestBody:
  *      required: true
  *      content:
@@ -233,13 +241,15 @@ router.delete("/delete/:id", deleteUser);
  *              - image
  *    responses:
  *      200:
- *        description: Returns updated user
+ *        description: Image updated successfully
+ *      400:
+ *        description: Invalid file provided or file type not allowed
  *      404:
  *        description: User not found
  *      500:
  *        description: Server error
  */
-router.post("/upload-image", uploadImageUser);
+router.put("/upload-image/:id", upload.single('file'), uploadImageUser);
 
 router.patch("/update-fields/:id", updateUserFieldsGoogle);
 /**

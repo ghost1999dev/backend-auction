@@ -42,10 +42,10 @@ const uploadImage = async ({
     }
 
     const s3Client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: process.env.BUCKET_REGION,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.BUCKET_ACCESS_KEY,
+        secretAccessKey: process.env.BUCKET_ACCESS_SECRET_KEY,
       }
     })
 
@@ -60,7 +60,7 @@ const uploadImage = async ({
     const contentType = getContentType(fileExtension)
 
     const params = {
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: process.env.BUCKET_NAME,
       Key: s3Key,
       Body: fileContent,
       ContentType: contentType,
@@ -69,7 +69,7 @@ const uploadImage = async ({
     const command = new PutObjectCommand(params)
     const data = await s3Client.send(command)
 
-    const fileURL = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`
+    const fileURL = `https://${process.env.BUCKET_NAME}.s3.${process.env.BUCKET_REGION}.amazonaws.com/${s3Key}`
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)

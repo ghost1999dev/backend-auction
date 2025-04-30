@@ -1,39 +1,4 @@
-import multer from "multer"
-import path from "path"
-import { fileURLToPath } from "url"
 import uploadImage from "../helpers/uploadImage.js"
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../images/temp"))
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`)
-  }
-})
-
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|webp/;
-  const extmane = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
-
-  if (mimetype && extmane) {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid file type"));
-  }
-}
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 1024 * 1024 * 10
-  }
-})
 
 /**
  * update image
@@ -57,7 +22,7 @@ const updateImage = async (req, res, model) => {
         });
     }
 
-    if (!req.files || !req.files.length === 0) {
+    if (!req.file || !req.file.length === 0) {
       return res
         .status(400)
         .json({
@@ -66,13 +31,15 @@ const updateImage = async (req, res, model) => {
         });
     }
 
-    const uploadPromises = uploadImage({
-      filePath: req.files[0].path,
-      originalName: req.files[0].originalname,
+    const user = await UsersModel.findByPk(id)
+
+    if (!user) return res.status(404).json({ status: 404, message: "User not found" });
+
+    const result = await uploadImage({
+      filePath: req.file.path,
+      originalName: req.file.originalname,
       folderName: "images/"
     }) 
-
-    const result = await Promise.all(uploadPromises)
 
     //imagePath = imagePath.replace(/\\/g, "/");
 
@@ -83,7 +50,7 @@ const updateImage = async (req, res, model) => {
       .json({ 
         status: 200,
         message: "Image updated successfully",
-        image: result.url
+        imageUrl: result.url
       });
   } catch (error) {
     res

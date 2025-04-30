@@ -6,7 +6,8 @@ import { createAdmin,
     deleteAdmin,
     getAllProjects,
     searchProjects,
-    getProjectById
+    getProjectById,
+    updateProjectStatus
 
 } from '../controllers/AdminController.js';
 
@@ -220,6 +221,35 @@ router.get('/search-projects', searchProjects);
      *        description: Server error         
      */
 router.get('/get-project-by-id/:id', getProjectById);
+    /**
+     * @swagger
+     * /admins/update-project-status/{id}:
+     *  put:
+     *    tags: [Admins]
+     *    summary: Update project status
+     *    parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *          type: string
+     *        required: true
+     *        description: Project id
+     *    requestBody:
+     *      required: true
+     *      content:
+     *        application/json:
+     *          schema:
+     *            $ref: '#/components/schemas/projectUpdateStatus'
+     *    responses:
+     *      200:
+     *        description: Returns updated project
+     *      404:
+     *        description: Project not found
+     *      500:
+     *        description: Server error         
+     */
+
+router.put('/update-project-status/:id',updateProjectStatus);
 
 export default router;
     /**

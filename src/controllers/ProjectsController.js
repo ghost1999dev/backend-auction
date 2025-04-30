@@ -19,16 +19,18 @@ export const createProject = async (req, res) => {
         return res.status(400).json({ message: "All fields must be filled.", status: 400 });
       }
   
-      const validStatuses = [1, 0];  //0 pendiente, 1, active, 2, inactive, 3, rechazado, 4, finalizado
-      let projectStatus = status;
-  
-      if (status !== undefined && !validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
-      }
-  
-      if (status === undefined) {
-        projectStatus = 1;  
-      }
+      
+      let projectStatus = 0;
+
+      if (status !== undefined) {
+        const validStatuses = [0,1,3,4];  
+        if (!validStatuses.includes(status)) {
+          return res.status(400).json({ 
+            message: 'Valor de estado inválido. El valor predeterminado es 0 (pendiente).',
+            status: 400 });
+        }
+        projectStatus = status;  
+      }    
   
       const project = await ProjectsModel.create({
         company_id,
@@ -44,10 +46,13 @@ export const createProject = async (req, res) => {
         await NotificationModel.create({
         user_id: company_id,
         title: 'Nuevo Proyecto Creado',
-        body: `Se ha creado un nuevo proyecto: ${project_name}`,
-        context: JSON.stringify({ action: 'project_creation' }),  
+        body: `Se ha creado un nuevo proyecto: ${project_name}. Estado: pendiente de verificación.`,
+        context: JSON.stringify({
+        action: 'project_creation',
+        status: 'pendiente de verificación'          
+        }),  
         sent_at: new Date(),
-        status: 'Active',
+        status: 'Pendiente',
         error_message: null
 
         });
@@ -57,7 +62,9 @@ export const createProject = async (req, res) => {
             user_id: company_id,
             title: 'Error al crear notificación',
             body: 'No se pudo crear correctamente la notificación del proyecto.',
-            context: { action: 'notification_error' },
+            context: { 
+              action: 'notification_error'
+             },
             sent_at: new Date(),
             status: 'Desactive',
             error_message: notificationError.message
@@ -102,23 +109,21 @@ export const updateProjectId = async (req, res) => {
     }
     
     if (status !== undefined) {
-      const validStatuses = [1, 0];
+      const validStatuses = [0,1,3,4];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
       }
     }
     
-    const updateData = {};
-    
-    
-    if (company_id !== undefined) updateData.company_id = company_id;
-    if (category_id !== undefined) updateData.category_id = category_id;
-    if (project_name !== undefined) updateData.project_name = project_name;
-    if (description !== undefined) updateData.description = description;
-    if (budget !== undefined) updateData.budget = budget;
-    if (days_available !== undefined) updateData.days_available = days_available;
-    if (status !== undefined) updateData.status = status;
-    
+    const updateData = {
+      company_id,
+      category_id,
+      project_name,
+      description,
+      budget,
+      days_available,
+      status: 0
+    };
     await ProjectsModel.update(updateData, {
       where: { id }
     });
@@ -129,15 +134,21 @@ export const updateProjectId = async (req, res) => {
         { model: UsersModel, as: 'company' }
       ]
     });
+
+    const statusText = "pendiente";
     
     try {
       await NotificationModel.create({
         user_id: updatedProject.company_id,
         title: 'Proyecto Actualizado',
-        body: `El proyecto "${updatedProject.project_name}" ha sido actualizado`,
-        context: JSON.stringify({ action: 'project_update', project_id: id }),
+        body: `El proyecto "${updatedProject.project_name}" ha sido actualizado. Estado: Pendiente de verificación.`,
+        context: JSON.stringify({ 
+          action: 'project_update', 
+          project_id: id,
+          status: 'pendiente de verificación'          
+        }),
         sent_at: new Date(),
-        status: 'Active',
+        status: 0,
         error_message: null
       });
     } catch (notificationError) {
@@ -184,8 +195,12 @@ export const DesactivateProjectId = async (req, res) => {
       await NotificationModel.create({
         user_id: project.company_id,
         title: 'Proyecto Desactivado',
-        body: `El proyecto "${project.project_name}" ha sido desactivado`,
-        context: JSON.stringify({ action: 'project_deactivation', project_id: id }),
+        body: `El proyecto "${project.project_name}" ha sido desactivado. Estado: pendiente de verificación.`,
+        context: JSON.stringify({ 
+          action: 'project_deactivation', 
+          project_id: id,
+          status: 'pendiente de verificación'
+         }),
         sent_at: new Date(),
         status: 'Active',
         error_message: null

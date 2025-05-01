@@ -12,12 +12,32 @@ export const createUserSchema = Joi.object({
   password: Joi.string().optional().allow('', null),
   address: Joi.string().required(),
   phone: Joi.string()
-    .pattern(/^\d{4}-\d{4}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Phone numbers format is wrong',
-      'string.empty': 'Number is empty'
-    }),
+  .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
+  .required()
+  .error((errors) => {
+    return errors.map((error) => {
+      switch (error.code) {
+        case 'string.pattern.base':
+          return new Error(JSON.stringify({
+            success: false,
+            message: "El formato del teléfono debe ser +(XXX) XXXX-XXXX",
+            status: 400
+          }));
+        case 'string.empty':
+          return new Error(JSON.stringify({
+            success: false,
+            message: "El número de teléfono no puede estar vacío",
+            status: 400
+          }));
+        default:
+          return new Error(JSON.stringify({
+            success: false,
+            message: "Error de validación del teléfono",
+            status: 400
+          }));
+      }
+    });
+  }),
   image: Joi.string().optional().allow(null, ''),
   account_type: Joi.number().required()
 });

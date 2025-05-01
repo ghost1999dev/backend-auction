@@ -12,14 +12,14 @@ export const verficationEmail = async (req, res) => {
 
      const existingEmail = await UsersModel.findOne({ where: { email } })
      if (existingEmail) {
-         return res.status(400).json({ message: "Email already exists" })
+         return res.status(400).json({ status: 500, message: "Email already exists" })
     }else{
       const response = await emailVerificationService(email);
       
       if(response.status===200){
         return res.status(200).json(response);
       }else{
-        return res.status(response.status).json({ message: response.message });
+        return res.status(response.status).json({ status: false, message: response.message });
       }
     }
 
@@ -52,8 +52,11 @@ export const createUser = async (req, res) => {
       account_type } = req.body;
 
       const response = await confirmEmailService(email, code);
+
       if(response.status===200){
+
           password = hashPassword(password);
+          
           const user = await UsersModel.create({
           role_id,
           name,
@@ -65,8 +68,7 @@ export const createUser = async (req, res) => {
           account_type,
           status: 1,
           last_login: new Date(),
-        });
-      
+        });      
         return res
           .status(200)
           .json({ 
@@ -74,7 +76,7 @@ export const createUser = async (req, res) => {
             message:
               "User created successfully. please check your email to verify your account",
             user,
-          });
+          })        
       }
   } catch (error) {
     res

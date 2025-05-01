@@ -1,11 +1,15 @@
 import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
+import dotenv from "dotenv";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
-import { json } from "sequelize";
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
 import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/usersSchema.js';
+
 
 export const verficationEmail = async (req, res) => {
   try {
@@ -151,26 +155,46 @@ export const getUsers = async (req, res) => {
     const users = await UsersModel.findAll({
       attributes: { exclude: ['password', 'createdAt'] },
     })
-    const usersWithImage = users.map((user) => {
-      return {
-        ...user.dataValues,
-        image: user.image
-          ? `${req.protocol}://${req.get("host")}/${user.image}`
-          : null,
-      };
-    });
+    const usersWithImage = await Promise.all(
+      users.map(async (user) => {
+        if (!user.image) {
+          return {
+            ...user.dataValues,
+            image: null,
+          }
+        }
+
+        const s3key = user.image.includes("amazonaws.com/") 
+          ? user.image.split("amazonaws.com/")[1]
+          : user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+
+        return {
+          ...user.dataValues,
+          image: imageUrl
+        }
+      })
+    )
     res
       .status(200)
       .json({ 
         status: 200,
-        message: "Users retrieved successfully", usersWithImage 
+        message: "Users retrieved successfully", 
+        users: usersWithImage 
       });
   } catch (error) {
     res
       .status(500)
       .json({ 
         status: 500,
-        message: "Error retrieving users", error 
+        message: "Error retrieving users", 
+        error: error.message 
       });
   }
 };
@@ -192,18 +216,39 @@ export const getUserById = async (req, res) => {
       }
     });
     if (user.status === 1) {
+
+      let imageUrl = ''
+      if (user.image) {
+        const s3key = user.image.includes("amazonaws.com/") 
+          ? user.image.split("amazonaws.com/")[1]
+          : user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+      }
+
+      const userWithImage = {
+        ...user.dataValues,
+        image: imageUrl
+      }
+
       res
         .status(200)
         .json({ 
           status: 200,
-          message: "User retrieved successfully", user 
+          message: "User retrieved successfully", 
+          user: userWithImage 
         });
     } else {
       res
         .status(404)
         .json({ 
           status: 404,
-          essage: "User not found" 
+          message: "User not found" 
         });
     }
   } catch (error) {
@@ -211,7 +256,8 @@ export const getUserById = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error retrieving user"
+        message: "Error retrieving user",
+        error: error.message
       });
   }
 };

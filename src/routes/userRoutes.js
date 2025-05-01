@@ -232,7 +232,7 @@ router.delete("/delete/:id", deleteUser);
  *          schema:
  *            type: object
  *            properties:
- *              image:
+ *              file:
  *                type: string
  *                format: url
  *                description: Image url

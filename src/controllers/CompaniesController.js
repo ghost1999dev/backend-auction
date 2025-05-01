@@ -93,6 +93,12 @@ export const DetailsCompanyId = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
       where: { id },
@@ -178,6 +184,12 @@ export const DetailsCompanyIdUser = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
       where: { user_id: user_id },

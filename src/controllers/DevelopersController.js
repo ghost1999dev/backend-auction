@@ -2,6 +2,9 @@ import DevelopersModel from "../models/DevelopersModel.js"
 import UsersModel from "../models/UsersModel.js"
 import RolesModel from "../models/RolesModel.js"
 import { stat } from "fs"
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
 
 /**
  * create developer
@@ -58,6 +61,7 @@ export const DetailsDeveloperId = async (req, res) => {
             include: [{
                 model: UsersModel,
                 attributes: [
+                    "id",
                     "role_id",
                     "name",
                     "email",
@@ -82,11 +86,35 @@ export const DetailsDeveloperId = async (req, res) => {
         })
 
         if (developer) {
+
+            let imageUrl = ''
+            if (developer.user.image){
+                const s3key = developer.user.image.includes("amazonaws.com/") 
+                ? developer.user.image.split("amazonaws.com/")[1]
+                : developer.user.image
+
+                const command = new GetObjectCommand({
+                    Bucket: process.env.BUCKET_NAME,
+                    Key: s3key,
+                })
+
+                imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+            }
+
+            const developerWithImage = {
+                ...developer.dataValues,
+                user: {
+                    ...developer.user.dataValues,
+                    image: imageUrl
+                }
+            }
+
             res
                 .status(200)
                 .json({
                     status: 200,
-                    message: "Developer retrieved successfully", developer 
+                    message: "Developer retrieved successfully", 
+                    developer: developerWithImage 
                 })
         }
         else {
@@ -102,7 +130,8 @@ export const DetailsDeveloperId = async (req, res) => {
             .status(500)
             .json({ 
                 status: 500,
-                message: "Error retrieving developer", error 
+                message: "Error retrieving developer", 
+                error: error.message 
             })
     }
 }

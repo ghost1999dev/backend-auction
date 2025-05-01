@@ -3,7 +3,11 @@ import { createAdmin,
     getAllAdmins, 
     getAdminById, 
     updateAdmin, 
-    deleteAdmin 
+    deleteAdmin,
+    getAllProjects,
+    searchProjects,
+    getProjectById,
+    updateProjectStatus
 
 } from '../controllers/AdminController.js';
 
@@ -134,6 +138,118 @@ router.put('/update/:id', updateAdmin);
      *        description: Server error         
      */     
 router.delete('/delete/:id', deleteAdmin);
+    /**
+     * @swagger
+     * /admins/get-all-projects:
+     *  get:
+     *    tags: [Admins]
+     *    summary: Get all projects
+     *    responses:
+     *      200:
+     *        description: Returns all projects
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: array
+     *              items:
+     *                $ref: '#/components/schemas/Project'
+     *      500:
+     *        description: Server error         
+     */
+router.get('/get-all-projects', getAllProjects);
+    /**
+     * @swagger
+     * /admins/search-projects:
+     *  get:
+     *    tags: [Admins]
+     *    summary: Search projects
+     *    parameters:
+     *      - in: query
+     *        name: company_name
+     *        schema:
+     *          type: string
+     *        required: false
+     *        description: Company name
+     *      - in: query
+     *        name: project_name
+     *        schema:
+     *          type: string
+     *        required: false
+     *        description: Project name
+     *      - in: query         
+     *        name: category_name
+     *        schema:
+     *          type: string
+     *        required: false
+     *        description: Category name
+     *    responses:
+     *      200:
+     *        description: Returns all projects
+     *        content:
+     *          application/json:
+     *            schema:
+     *              type: array
+     *              items:
+     *                $ref: '#/components/schemas/Project'
+     *      500:
+     *        description: Server error         
+     */
+router.get('/search-projects', searchProjects);
+    /**
+     * @swagger
+     * /admins/get-project-by-id/{id}:
+     *  get:
+     *    tags: [Admins]
+     *    summary: Get a project by id
+     *    parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *          type: string
+     *        required: true
+     *        description: Project id
+     *    responses:
+     *      200:
+     *        description: Returns a project
+     *        content:
+     *          application/json:
+     *            schema:
+     *              $ref: '#/components/schemas/Project'
+     *      404:
+     *        description: Project not found
+     *      500:
+     *        description: Server error         
+     */
+router.get('/get-project-by-id/:id', getProjectById);
+    /**
+     * @swagger
+     * /admins/update-project-status/{id}:
+     *  put:
+     *    tags: [Admins]
+     *    summary: Update project status
+     *    parameters:
+     *      - in: path
+     *        name: id
+     *        schema:
+     *          type: string
+     *        required: true
+     *        description: Project id
+     *    requestBody:
+     *      required: true
+     *      content:
+     *        application/json:
+     *          schema:
+     *            $ref: '#/components/schemas/projectUpdateStatus'
+     *    responses:
+     *      200:
+     *        description: Returns updated project
+     *      404:
+     *        description: Project not found
+     *      500:
+     *        description: Server error         
+     */
+
+router.put('/update-project-status/:id',updateProjectStatus);
 
 export default router;
     /**

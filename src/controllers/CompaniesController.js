@@ -23,7 +23,10 @@ export const AddNewCompany = async (req, res) => {
     if (existingNrcNumber || existingNitNumber) {
       return res
         .status(400)
-        .json({ message: "El NRC o NIT ya existen" });
+        .json({ 
+          status: 400,
+          message: "El NRC o NIT ya existen" 
+        });
     }
 
     const company = await CompaniesModel.create({
@@ -36,9 +39,17 @@ export const AddNewCompany = async (req, res) => {
 
     res
       .status(201)
-      .json({ message: "Empresa creada con éxito", company });
+      .json({
+        status: 201,
+        message: "Empresa creada con éxito", company 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al crear la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al crear la empresa", error 
+      });
   }
 };
 
@@ -77,12 +88,25 @@ export const DetailsCompanyId = async (req, res) => {
     if (company) {
       res
         .status(200)
-        .json({ message: "Empresa obtenida con éxito", company });
+        .json({ 
+          status: 200,
+          message: "Empresa obtenida con éxito", company 
+        });
     } else {
-      res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener la empresa", error 
+      });
   }
 };
 
@@ -121,12 +145,25 @@ export const DetailsCompanyIdUser = async (req, res) => {
     if (company) {
       res
         .status(200)
-        .json({ message: "Empresa obtenida con éxito", company });
+        .json({ 
+          status: 200,
+          message: "Empresa obtenida con éxito", company 
+        });
     } else {
-      res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener la empresa", error 
+      });
   }
 };
 
@@ -159,9 +196,17 @@ export const ListAllCompany = async (req, res) => {
     });
     res
       .status(200)
-      .json({ message: "Empresas obtenidas con éxito", companies });
+      .json({ 
+        status: 200,
+        message: "Empresas obtenidas con éxito", companies 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener las empresas", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al obtener las empresas", error 
+      });
   }
 };
 
@@ -180,7 +225,12 @@ export const UpdateCompanyId = async (req, res) => {
 
     const company = await CompaniesModel.findByPk(id);
     if (!company) {
-      return res.status(404).json({ message: "Empresa no encontrada" });
+      res
+        .status(404)
+        .json({ 
+          status: 404,
+          message: "Empresa no encontrada" 
+        });
     }
 
     const existingNrcNumber = await CompaniesModel.findOne({
@@ -193,30 +243,26 @@ export const UpdateCompanyId = async (req, res) => {
       id: { [Op.ne]: id },
     });
 
-    var NrcNumber;
-    var NitNumber;
+    if (!existingNrcNumber) company.nrc_number = nrc_number;
+    if (!existingNitNumber) company.nit_number = nit_number;
 
-    if (existingNrcNumber) {
-      NrcNumber = existingNrcNumber.nrc_number
-    }if(existingNitNumber){
-      NitNumber = existingNitNumber.nit_number
-    }if(!existingNrcNumber){
-      NrcNumber = nrc_number
-    }if(!existingNitNumber){
-      NitNumber = nit_number
-    }
-
-    company.nrc_number = NrcNumber;
     company.business_type = business_type;
     company.web_site = web_site;
-    company.nit_number = NitNumber;
     await company.save();
 
     res
       .status(200)
-      .json({ message: "Empresa actualizada con éxito", company });
+      .json({ 
+        status: 200,
+        message: "Empresa actualizada con éxito", company 
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error al actualizar la empresa", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al actualizar la empresa", error 
+      });
   }
 };
 
@@ -236,7 +282,6 @@ const deleteFileSafe = async (file) => {
   try {
     await fs.unlink(path.join("src/images", file));
   } catch {
-    /* archivo inexistente, sin acción */
   }
 };
 
@@ -258,14 +303,12 @@ export const UpdateCompanyProfile = async (req, res) => {
     const nrc = clean(nrc_number);
     const nit = clean(nit_number);
 
-    /*  Obtener empresa y usuario */
     const company = await CompaniesModel.findByPk(id, { transaction: t });
     if (!company) throw new Error("Empresa no encontrada");
 
     const user = await UsersModel.findByPk(company.user_id, { transaction: t });
     if (!user) throw new Error("Usuario asociado no encontrado");
 
-    /* Verificar unicidad de NRC y NIT (excluyendo la empresa actual) */
     if (
       (nrc && nrc !== clean(company.nrc_number)) ||
       (nit && nit !== clean(company.nit_number))
@@ -280,7 +323,6 @@ export const UpdateCompanyProfile = async (req, res) => {
       if (dup) throw new Error("NRC o NIT ya existen");
     }
 
-    /* Asignar cambios */
     Object.assign(company, {
       ...(nrc && { nrc_number: nrc }),
       ...(nit && { nit_number: nit }),
@@ -293,21 +335,17 @@ export const UpdateCompanyProfile = async (req, res) => {
       ...(contact_email && { email: contact_email }),
     });
 
-    /* Procesar logo */
     if (req.file) {
       oldImage = user.image;
       user.image = req.file.filename;
     }
 
-    /* Guardar transacción */
     await company.save({ transaction: t });
     await user.save({ transaction: t });
     await t.commit();
 
-    /* Eliminar logo antiguo */
     if (oldImage) deleteFileSafe(oldImage);
 
-    /* 7. Responder con perfil actualizado */
     const updated = await CompaniesModel.findByPk(id, {
       include: [
         {

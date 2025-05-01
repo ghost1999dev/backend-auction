@@ -1,6 +1,7 @@
 import sequelize from "../config/connection.js";
 import CategoriesModel from "./CategorieModel.js";
 import UsersModel from "./UsersModel.js";
+import CompaniesModel from "./CompaniesModel.js";
 import { DataTypes } from "sequelize";
 /**
  * Projects model.
@@ -45,7 +46,7 @@ const Project = sequelize.define(
     status: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 1  // 1 para 'activo', 0 para 'inactivo'
+      defaultValue: 1  
     }
   },
    {
@@ -53,16 +54,17 @@ const Project = sequelize.define(
   }
 );
 
-// Relación con User
+
 Project.belongsTo(UsersModel, { foreignKey: 'company_id', as: 'company' });
 
-// Relación con Category 
+
 Project.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' });
 
-// Relación con Status 
-/*Project.belongsTo(Status, { foreignKey: 'status', as: 'status' }); 
+Project.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
+ 
+//Project.belongsTo(Status, { foreignKey: 'status', as: 'status' }); 
 
-// Relación con ProjectApplications (un proyecto tiene muchas aplicaciones)
+/*// Relación con ProjectApplications (un proyecto tiene muchas aplicaciones)
 Project.hasMany(ProjectApplication, { foreignKey: 'project_id' });
 
 // Relación con Auctions (un proyecto tiene muchos subastas)

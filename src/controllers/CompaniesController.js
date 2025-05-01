@@ -4,6 +4,17 @@ import { Op } from "sequelize";
 import path from "path";
 import fs from "fs/promises";
 import sequelize from "../config/connection.js";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url"
+
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config()
 
 /**
  * Crear empresa
@@ -71,6 +82,7 @@ export const DetailsCompanyId = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",
@@ -86,11 +98,37 @@ export const DetailsCompanyId = async (req, res) => {
     });
 
     if (company) {
+      let imageUrl = ''
+      if (company.user.image){
+        const s3key = company.user.image.includes("amazonaws.com/") 
+        ? company.user.image.split("amazonaws.com/")[1]
+        : company.user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+      }
+      else {
+        imageUrl = path.join(__dirname, "../images/default-image.png")
+      }
+
+      const companyWithImage = {
+        ...company.dataValues,
+        user: {
+          ...company.user.dataValues,
+          image: imageUrl
+        }
+      }
+
       res
         .status(200)
         .json({ 
           status: 200,
-          message: "Empresa obtenida con éxito", company 
+          message: "Empresa obtenida con éxito", 
+          company: companyWithImage 
         });
     } else {
       res
@@ -105,7 +143,8 @@ export const DetailsCompanyId = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error al obtener la empresa", error 
+        message: "Error al obtener la empresa", 
+        error: error.message 
       });
   }
 };
@@ -128,6 +167,7 @@ export const DetailsCompanyIdUser = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",
@@ -143,11 +183,37 @@ export const DetailsCompanyIdUser = async (req, res) => {
     });
 
     if (company) {
+      let imageUrl = ''
+      if (company.user.image){
+        const s3key = company.user.image.includes("amazonaws.com/") 
+        ? company.user.image.split("amazonaws.com/")[1]
+        : company.user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+      }
+      else {
+        imageUrl = path.join(__dirname, "../images/default-image.png")
+      }
+
+      const companyWithImage = {
+        ...company.dataValues,
+        user: {
+          ...company.user.dataValues,
+          image: imageUrl
+        }
+      }
+
       res
         .status(200)
         .json({ 
           status: 200,
-          message: "Empresa obtenida con éxito", company 
+          message: "Empresa obtenida con éxito", 
+          company: companyWithImage 
         });
     } else {
       res
@@ -182,6 +248,7 @@ export const ListAllCompany = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",

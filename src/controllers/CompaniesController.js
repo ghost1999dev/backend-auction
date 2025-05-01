@@ -10,6 +10,7 @@ import { fileURLToPath } from "url"
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"
+import RolesModel from "../models/RolesModel.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -258,21 +259,72 @@ export const ListAllCompany = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
     });
-    res
-      .status(200)
-      .json({ 
-        status: 200,
-        message: "Empresas obtenidas con éxito", companies 
+
+    if (companies) {
+      const companiesWithImage = await Promise.all(
+        companies.map(async (company) => {
+          if (!company.user.image) {
+            return {
+              ...company.dataValues,
+              user: {
+                ...company.user.dataValues,
+                image: path.join(__dirname, "../images/default-image.png")
+              }
+            }
+          }
+
+          const s3key = company.user.image.includes("amazonaws.com/") 
+          ? company.user.image.split("amazonaws.com/")[1]
+          : company.user.image
+
+          const command = new GetObjectCommand({
+            Bucket: process.env.BUCKET_NAME,
+            Key: s3key,
+          })
+
+          const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+
+          return {
+            ...company.dataValues,
+            user: {
+              ...company.user.dataValues,
+              image: imageUrl
+            }
+          }
+        })
+      )
+        res
+        .status(200)
+        .json({ 
+          status: 200,
+          message: "Empresas obtenidas con éxito", 
+          companies: companiesWithImage 
       });
+    }
+    else { 
+      res.
+        status(404).
+        json({ 
+          status: 404,
+          message: "No se encontraron empresas" 
+        });
+    }
   } catch (error) {
     res
       .status(500)
       .json({ 
         status: 500,
-        message: "Error al obtener las empresas", error 
+        message: "Error al obtener las empresas", 
+        error: error.message 
       });
   }
 };

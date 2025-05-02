@@ -4,6 +4,18 @@ import { Op } from "sequelize";
 import path from "path";
 import fs from "fs/promises";
 import sequelize from "../config/connection.js";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url"
+
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
+import RolesModel from "../models/RolesModel.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config()
 
 /**
  * Crear empresa
@@ -71,6 +83,7 @@ export const DetailsCompanyId = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",
@@ -80,17 +93,49 @@ export const DetailsCompanyId = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
       where: { id },
     });
 
     if (company) {
+      let imageUrl = ''
+      if (company.user.image){
+        const s3key = company.user.image.includes("amazonaws.com/") 
+        ? company.user.image.split("amazonaws.com/")[1]
+        : company.user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+      }
+      else {
+        imageUrl = path.join(__dirname, "../images/default-image.png")
+      }
+
+      const companyWithImage = {
+        ...company.dataValues,
+        user: {
+          ...company.user.dataValues,
+          image: imageUrl
+        }
+      }
+
       res
         .status(200)
         .json({ 
           status: 200,
-          message: "Empresa obtenida con éxito", company 
+          message: "Empresa obtenida con éxito", 
+          company: companyWithImage 
         });
     } else {
       res
@@ -105,7 +150,8 @@ export const DetailsCompanyId = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error al obtener la empresa", error 
+        message: "Error al obtener la empresa", 
+        error: error.message 
       });
   }
 };
@@ -128,6 +174,7 @@ export const DetailsCompanyIdUser = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",
@@ -137,17 +184,49 @@ export const DetailsCompanyIdUser = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
       where: { user_id: user_id },
     });
 
     if (company) {
+      let imageUrl = ''
+      if (company.user.image){
+        const s3key = company.user.image.includes("amazonaws.com/") 
+        ? company.user.image.split("amazonaws.com/")[1]
+        : company.user.image
+
+        const command = new GetObjectCommand({
+          Bucket: process.env.BUCKET_NAME,
+          Key: s3key,
+        })
+
+        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+      }
+      else {
+        imageUrl = path.join(__dirname, "../images/default-image.png")
+      }
+
+      const companyWithImage = {
+        ...company.dataValues,
+        user: {
+          ...company.user.dataValues,
+          image: imageUrl
+        }
+      }
+
       res
         .status(200)
         .json({ 
           status: 200,
-          message: "Empresa obtenida con éxito", company 
+          message: "Empresa obtenida con éxito", 
+          company: companyWithImage 
         });
     } else {
       res
@@ -182,6 +261,7 @@ export const ListAllCompany = async (req, res) => {
         {
           model: UsersModel,
           attributes: [
+            "id",
             "role_id",
             "name",
             "email",
@@ -191,21 +271,72 @@ export const ListAllCompany = async (req, res) => {
           ],
           where: { status: 1 },
           required: true,
+          include: [{
+            model: RolesModel,
+              attributes: ["role_name"],
+              as: "role",
+              required: true,
+          }]
         },
       ],
     });
-    res
-      .status(200)
-      .json({ 
-        status: 200,
-        message: "Empresas obtenidas con éxito", companies 
+
+    if (companies) {
+      const companiesWithImage = await Promise.all(
+        companies.map(async (company) => {
+          if (!company.user.image) {
+            return {
+              ...company.dataValues,
+              user: {
+                ...company.user.dataValues,
+                image: path.join(__dirname, "../images/default-image.png")
+              }
+            }
+          }
+
+          const s3key = company.user.image.includes("amazonaws.com/") 
+          ? company.user.image.split("amazonaws.com/")[1]
+          : company.user.image
+
+          const command = new GetObjectCommand({
+            Bucket: process.env.BUCKET_NAME,
+            Key: s3key,
+          })
+
+          const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+
+          return {
+            ...company.dataValues,
+            user: {
+              ...company.user.dataValues,
+              image: imageUrl
+            }
+          }
+        })
+      )
+        res
+        .status(200)
+        .json({ 
+          status: 200,
+          message: "Empresas obtenidas con éxito", 
+          companies: companiesWithImage 
       });
+    }
+    else { 
+      res.
+        status(404).
+        json({ 
+          status: 404,
+          message: "No se encontraron empresas" 
+        });
+    }
   } catch (error) {
     res
       .status(500)
       .json({ 
         status: 500,
-        message: "Error al obtener las empresas", error 
+        message: "Error al obtener las empresas", 
+        error: error.message 
       });
   }
 };

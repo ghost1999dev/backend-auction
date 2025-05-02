@@ -1,7 +1,7 @@
 // src/controllers/BidController.js
 
-import BidModel      from "../models/BidsModel.js";
-import AuctionModel  from "../models/AuctionModel.js";
+import BidsModel      from "../models/BidsModel.js";
+import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
 
 const AUCTION_STATUS = {
@@ -18,7 +18,7 @@ const AUCTION_STATUS = {
  * @returns {Promise<Object|null>} Objeto subasta si es válida, null si no
  */
 async function ensureLiveAuction(req, res, auctionId) {
-  const auction = await AuctionModel.findByPk(auctionId);
+  const auction = await AuctionsModel.findByPk(auctionId);
   if (!auction) {
     res.status(404).json({ 
       success: false, 
@@ -103,7 +103,7 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    const exists = await BidModel.findOne({ where:{ auction_id, developer_id } });
+    const exists = await BidsModel.findOne({ where:{ auction_id, developer_id } });
     if (exists) {
       return res.status(409).json({ 
         success: false, 
@@ -112,7 +112,7 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    const bid = await BidModel.create({ auction_id, developer_id, amount });
+    const bid = await BidsModel.create({ auction_id, developer_id, amount });
     return res.status(201).json({
       success: true,
       message: "Puja creada exitosamente",
@@ -147,7 +147,7 @@ export const listBids = async (req, res, next) => {
       where,
       order: [["createdAt", "DESC"]],
       include: [
-        { model: AuctionModel, as: "auction",   attributes: ["id","status"] },
+        { model: AuctionsModel, as: "auction",   attributes: ["id","status"] },
         { model: UsersModel,   as: "developer", attributes: ["id","name","email"] }
       ]
     });
@@ -163,9 +163,9 @@ export const listBids = async (req, res, next) => {
  */
 export const getBid = async (req, res, next) => {
   try {
-    const bid = await BidModel.findByPk(req.params.id, {
+    const bid = await BidsModel.findByPk(req.params.id, {
       include: [
-        { model: AuctionModel, as: "auction",   attributes: ["id","status"] },
+        { model: AuctionsModel, as: "auction",   attributes: ["id","status"] },
         { model: UsersModel,   as: "developer", attributes: ["id","name","email"] }
       ]
     });
@@ -188,7 +188,7 @@ export const getBid = async (req, res, next) => {
  */
 export const updateBid = async (req, res, next) => {
   try {
-    const bid = await BidModel.findByPk(req.params.id, {
+    const bid = await BidsModel.findByPk(req.params.id, {
       attributes: ['id', 'auction_id', 'amount', 'createdAt', 'updatedAt']
     });
 
@@ -217,7 +217,7 @@ export const updateBid = async (req, res, next) => {
       });
     }
 
-    const auction = await AuctionModel.findByPk(bid.auction_id, {
+    const auction = await AuctionsModel.findByPk(bid.auction_id, {
       attributes: ['id', 'project_id', 'bidding_started_at', 'bidding_deadline', 'status']
     });
 
@@ -251,7 +251,7 @@ export const updateBid = async (req, res, next) => {
  */
 export const deleteBid = async (req, res, next) => {
   try {
-    const bid = await BidModel.findByPk(req.params.id);
+    const bid = await BidsModel.findByPk(req.params.id);
     if (!bid) {
       return res.status(404).json({ success: false, message: "Puja no encontrada", error: "bid_not_found" });
     }

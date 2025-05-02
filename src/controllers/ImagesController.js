@@ -1,3 +1,5 @@
+import uploadImage from "../helpers/uploadImage.js"
+
 /**
  * update image
  *
@@ -10,14 +12,54 @@
 const updateImage = async (req, res, model) => {
   try {
     const { id } = req.params;
-    let imagePath = req.file.path;
 
-    imagePath = imagePath.replace(/\\/g, "/");
+    if (!id) {
+      return res
+        .status(400)
+        .json({
+          status: 400,
+          message: "No id provided" 
+        });
+    }
 
-    await model.update({ image: imagePath }, { where: { id: id } });
-    res.status(200).json({ message: "Image updated successfully" });
+    if (!req.file || !req.file.length === 0) {
+      return res
+        .status(400)
+        .json({
+          status: 400,
+          message: "No file uploaded" 
+        });
+    }
+
+    const user = await model.findByPk(id)
+
+    if (!user) return res.status(404).json({ status: 404, message: "User not found" });
+
+    const result = await uploadImage({
+      filePath: req.file.path,
+      originalName: req.file.originalname,
+      folderName: "images/"
+    }) 
+
+    //imagePath = imagePath.replace(/\\/g, "/");
+
+    await model.update({ image: result.url }, { where: { id: id } });
+    
+    res
+      .status(200)
+      .json({ 
+        status: 200,
+        message: "Image updated successfully",
+        imageUrl: result.url
+      });
   } catch (error) {
-    res.status(500).json({ message: "Error updating image", error });
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error updloading image", 
+        error: error.message 
+      });
   }
 };
 

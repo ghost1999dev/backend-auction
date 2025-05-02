@@ -1,4 +1,4 @@
-import AuctionModel from "../models/AuctionModel.js";
+import AuctionsModel from "../models/AuctionsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import { Op } from "sequelize";
 
@@ -49,7 +49,7 @@ export const createAuction = async (req, res, next) => {
             });
         }
 
-        const existingAuction = await AuctionModel.findOne({
+        const existingAuction = await AuctionsModel.findOne({
             where: { project_id }
         });
 
@@ -61,7 +61,7 @@ export const createAuction = async (req, res, next) => {
             });
         }
 
-        const auction = await AuctionModel.create({
+        const auction = await AuctionsModel.create({
             ...req.body,
             status: AUCTION_STATUS.PENDING
         });
@@ -101,7 +101,7 @@ export const listAuctions = async (req, res, next) => {
                 ...(end_date   && { [Op.lte]: end_date   })
             };
         }
-        const auctions = await AuctionModel.findAll({ 
+        const auctions = await AuctionsModel.findAll({ 
             attributes: ['id', 'project_id', 'status', 'createdAt', 'updatedAt'],
             where, 
             order: [["createdAt", "DESC"]],
@@ -127,7 +127,7 @@ export const listAuctions = async (req, res, next) => {
  */
 export const getAuction = async (req, res, next) => {
     try {
-        const auction = await AuctionModel.findByPk(req.params.id, {
+        const auction = await AuctionsModel.findByPk(req.params.id, {
             include: [{
                 model: ProjectsModel,
                 as: 'project',
@@ -168,7 +168,7 @@ export const updateAuction = async (req, res, next) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        const auction = await AuctionModel.findByPk(id);
+        const auction = await AuctionsModel.findByPk(id);
         if (!auction) {
             return res.status(404).json({
                 success: false,
@@ -214,7 +214,7 @@ export const deleteAuction = async (req, res, next) => {
     try {
         const { id } = req.params;
         
-        const auction = await AuctionModel.findByPk(id);
+        const auction = await AuctionsModel.findByPk(id);
         if (!auction) {
             return res.status(404).json({ 
                 success: false,

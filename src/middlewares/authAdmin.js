@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import AdminModel from '../models/AdminModel.js';
+import AdminsModel from '../models/AdminsModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_segura';
 
@@ -23,7 +23,7 @@ export const validateAdmin = async (req, res, next) => {
     
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    const admin = await AdminModel.findOne({ 
+    const admin = await AdminsModel.findOne({ 
       where: { 
         id: decoded.id,
         status: 'active'

@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { config } from "dotenv";
 import UsersModel from "../models/UsersModel.js";
-import ExternalAccount from "../models/ExternalAccount.js";
+import ExternalAccountsModel from "../models/ExternalAccountsModel.js";
 import jwt from 'jsonwebtoken';
 
 config();
@@ -53,7 +53,7 @@ passport.use(
             { where: { id: user.id } }
           );
 
-          const external = await ExternalAccount.findOne({
+          const external = await ExternalAccountsModel.findOne({
             where: { user_id: user.id, provider: "github" },
           });
 
@@ -107,7 +107,7 @@ passport.use(
             last_login: new Date()
           });
                     
-          await ExternalAccount.create({
+          await ExternalAccountsModel.create({
             user_id: user.id,
             provider_id: profile.id,
             provider: 'google'
@@ -123,7 +123,7 @@ passport.use(
             { where: { id: user.id } }
           );
           
-          let externalAccount = await ExternalAccount.findOne({
+          let externalAccount = await ExternalAccountsModel.findOne({
             where: {
               user_id: user.id,
               provider: 'google'
@@ -131,7 +131,7 @@ passport.use(
           });
           
           if (!externalAccount) {
-            await ExternalAccount.create({
+            await ExternalAccountsModel.create({
               user_id: user.id,
               provider_id: profile.id,
               provider: 'google'
@@ -162,7 +162,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await UsersModel.findByPk(id, {
-      include: [{ model: ExternalAccount }]
+      include: [{ model: ExternalAccountsModel }]
     });
     
     if (!user) {

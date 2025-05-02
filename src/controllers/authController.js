@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import AdminModel from '../models/AdminModel.js';  
+import AdminsModel from '../models/AdminsModel.js';  
 import { generateAdminToken } from '../utils/generateToken.js';  
 
 
@@ -10,7 +10,7 @@ export const loginAdmin = async (req, res) => {
 
     console.log('Buscando administrador con el nombre de usuario:', username);
 
-    const admin = await AdminModel.findOne({ where: { username } });
+    const admin = await AdminsModel.findOne({ where: { username } });
     
     if (!admin) {
       console.log('Admin no encontrado');

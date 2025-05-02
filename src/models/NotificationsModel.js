@@ -3,11 +3,11 @@ import { DataTypes } from "sequelize";
 
 /**
  * Notification model.
- * @module NotificationModel
+ * @module NotificationsModel
  */
 
 
-const Notification = sequelize.define(
+const NotificationsModel = sequelize.define(
     "notifications", 
     {
       id: {
@@ -48,4 +48,4 @@ const Notification = sequelize.define(
   }
 );
   
-  export default Notification;
+  export default NotificationsModel;

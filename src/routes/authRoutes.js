@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import { handleJWTLogin } from "../utils/generateToken.js";
 import { loginAdmin } from "../controllers/authController.js";
-import { validateAdmin } from "../middlewares/AuthAdmin.js";
+import { validateAdmin } from "../middlewares/authAdmin.js";
 
 
 export const loginRouter = express.Router();

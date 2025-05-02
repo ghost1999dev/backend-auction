@@ -6,7 +6,6 @@ import fs from "fs/promises";
 import sequelize from "../config/connection.js";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url"
-
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"

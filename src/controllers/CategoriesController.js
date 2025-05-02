@@ -1,4 +1,4 @@
-import CategoriesModel from "../models/CategorieModel.js";
+import CategoriesModel from "../models/CategoriesModel.js";
 
 /**
  * Create category

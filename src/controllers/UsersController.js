@@ -1,7 +1,6 @@
 import UsersModel from "../models/UsersModel.js";
 import updateImage from "./ImagesController.js";
 import hashPassword from "../helpers/hashPassword.js";
-import dotenv from "dotenv";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";

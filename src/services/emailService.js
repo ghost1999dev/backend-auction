@@ -1,10 +1,9 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
-// Cargar variables de entorno
 dotenv.config();
 
-// Configuración del email desde variables de entorno
+
 const emailConfig = {
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -14,7 +13,7 @@ const emailConfig = {
 
 };
 
-// Configurar el transporter de nodemailer
+
 const transporter = nodemailer.createTransport({
   host: emailConfig.host,
   port: emailConfig.port,
@@ -27,16 +26,16 @@ const transporter = nodemailer.createTransport({
 
 /**
  * Envía un correo electrónico notificando el cambio de estado de un proyecto
- * @param {Object} params - Parámetros para el correo
- * @param {string} params.email - Correo electrónico del destinatario
- * @param {string} params.name - Nombre del destinatario
- * @param {string} params.projectName - Nombre del proyecto
- * @param {string} params.statusName - Nombre del estado (Pendiente, Activo, etc.)
- * @param {number} params.status - Número de estado (0, 1, 3, 4)
- * @returns {Promise} - Promesa con el resultado del envío
+ * @param {Object} params 
+ * @param {string} params.email 
+ * @param {string} params.name 
+ * @param {string} params.projectName
+ * @param {string} params.statusName 
+ * @param {number} params.status 
+ * @returns {Promise} 
  */
 export const sendProjectStatusEmail = async ({ email, name, projectName, statusName, status }) => {
-  // Preparar el asunto y cuerpo del correo según el estado
+
   let subject = `Actualización de estado de tu proyecto: ${projectName}`;
   let bodyContent = '';
   
@@ -67,7 +66,7 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
                      <p>Ingresa a la plataforma para más detalles.</p>`;
   }
 
-  // Plantilla HTML completa
+
   const htmlTemplate = `
     <!DOCTYPE html>
     <html>
@@ -99,7 +98,6 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
     </html>
   `;
 
-  // Configuración del correo
   const mailOptions = {
     from: `"Sistema de Proyectos" <${emailConfig.user}>`,
     to: email,
@@ -107,7 +105,7 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
     html: htmlTemplate,
   };
 
-  // Enviar el correo
+
   console.log(`Intentando enviar correo a ${email} con la configuración:`, {
     host: emailConfig.host,
     port: emailConfig.port,

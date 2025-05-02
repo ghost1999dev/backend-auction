@@ -90,7 +90,7 @@ class Server {
   /**
    * Registers application routes.
    */
-  routes() {
+ routes() {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
     this.app.use("/companies", CompanyRoutes);
@@ -102,28 +102,18 @@ class Server {
     this.app.use("/auctions", AuctionRoutes);
     this.app.use("/applications", ApplicationRouter);
     this.app.use("/bids", BidRoutes);
-
+    this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+ 
+    app.use((req, res)=>res.status(404).json({ error:"Ruta no encontrada" }));
+    app.use((err, _req, res, _n)=>{
+      console.error(err);
+      res.status(err.status||500).json({ error: err.message || "Error interno" });
+    });
 
-
-app.use((req, res)=>res.status(404).json({ error:"Ruta no encontrada" }));
-app.use((err, _req, res, _n)=>{
-  console.error(err);
-  res.status(err.status||500).json({ error: err.message || "Error interno" });
-});
-
-    this.app.use(jwtRouter);
-    
     this.app.get("/protected", passport.authenticate("jwt", { session: false }), (req, res) => {
       res.json({ message: "Acceso autorizado", user: req.user });
     });
-
-      this.app.get("/auth/github",
-        passport.authenticate("auth-github", {
-        scope: ["user:email"],
-        session: false,
-      })
-    );
   }
   
   /**

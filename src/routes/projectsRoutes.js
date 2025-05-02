@@ -5,7 +5,6 @@ import {
     DetailsProjectId,
     updateProjectId,
     DesactivateProjectId,
-    hardDeleteProject,
     getProjectsByCompany,
     getProjectsByCategory
 
@@ -147,29 +146,6 @@ router.put("/update/:id", updateProjectId);
  */
 
 router.delete("/desactivate/:id", DesactivateProjectId);
-
-/**
- * @swagger
- * /projects/delete/{id}:
- *  delete:
- *    tags: [projects]
- *    summary: Delete a project permanently
- *    parameters:
- *      - in: path
- *        name: id
- *        schema:
- *          type: string
- *        required: true
- *        description: Project id
- *    responses:
- *      200:
- *        description: Returns deleted project
- *      404:
- *        description: Project not found
- *      500:
- *        description: Server error                         
- */
-router.delete("/delete/:id", hardDeleteProject);
 /**
  * @swagger
  * /projects/show/companyProject/{id}:

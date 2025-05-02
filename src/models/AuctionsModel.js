@@ -47,7 +47,7 @@ const AuctionsModel = sequelize.define(
   }
 );
 
-AuctionModel.belongsTo(ProjectsModel, { 
+AuctionsModel.belongsTo(ProjectsModel, { 
   foreignKey: "project_id", 
   as: "project" 
 });

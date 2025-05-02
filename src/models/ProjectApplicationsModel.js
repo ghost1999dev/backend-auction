@@ -52,12 +52,12 @@ const ProjectApplicationsModel = sequelize.define(
 );
 
 // Definir relaciones
-ProjectApplicationModel.belongsTo(ProjectsModel, { 
+ProjectApplicationsModel.belongsTo(ProjectsModel, { 
   foreignKey: "project_id",   
   as: "project" 
 });
 
-ProjectApplicationModel.belongsTo(UsersModel, { 
+ProjectApplicationsModel.belongsTo(UsersModel, { 
   foreignKey: "developer_id", 
   as: "developer" 
 });

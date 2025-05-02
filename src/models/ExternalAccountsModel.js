@@ -31,7 +31,7 @@ export const ExternalAccountsModel = sequelize.define(
 // Importación dinámica de UsersModel para evitar el ciclo
 (async () => {
   const { default: UsersModel } = await import("./UsersModel.js");
-  ExternalAccount.belongsTo(UsersModel, { foreignKey: "user_id" });
+  ExternalAccountsModel.belongsTo(UsersModel, { foreignKey: "user_id" });
 })();
 
 export default ExternalAccountsModel;

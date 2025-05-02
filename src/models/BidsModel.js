@@ -46,12 +46,12 @@ const BidsModel = sequelize.define(
 );
 
 // Relaciones
-Bid.belongsTo(AuctionsModel, { 
+BidsModel.belongsTo(AuctionsModel, { 
   foreignKey: "auction_id", 
   as: "auction" 
 });
 
-Bid.belongsTo(UsersModel, { 
+BidsModel.belongsTo(UsersModel, { 
   foreignKey: "developer_id", 
   as: "developer" 
 });

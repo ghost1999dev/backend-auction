@@ -55,12 +55,12 @@ const ProjectsModel = sequelize.define(
 );
 
 
-Project.belongsTo(UsersModel, { foreignKey: 'company_id', as: 'company' });
+ProjectsModel.belongsTo(UsersModel, { foreignKey: 'company_id', as: 'company' });
 
 
-Project.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' });
+ProjectsModel.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' });
 
-Project.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
+ProjectsModel.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
   
 export default ProjectsModel;
   

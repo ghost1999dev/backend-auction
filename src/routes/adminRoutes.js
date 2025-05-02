@@ -9,7 +9,7 @@ import { createAdmin,
     getProjectById,
     updateProjectStatus
 
-} from '../controllers/AdminController.js';
+} from '../controllers/AdminsController.js';
 
 const router = express.Router();
     /**

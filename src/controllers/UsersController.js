@@ -7,7 +7,7 @@ import { generateToken } from "../utils/generateToken.js";
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"
-import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/usersSchema.js';
+import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/userSchema.js';
 
 
 export const verficationEmail = async (req, res) => {

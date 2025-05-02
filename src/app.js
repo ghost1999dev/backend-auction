@@ -23,7 +23,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import {loginRouter} from "./routes/authRoutes.js";
 import AuctionRoutes from "./routes/AuctionRoutes.js";
 import ApplicationRouter from "./routes/ApplicationRoutes.js";
-import BidRoutes from "./routes/bidRoutes.js";
+//import BidRoutes from "./routes/bidRoutes.js";
 
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
@@ -101,7 +101,7 @@ class Server {
     this.app.use("/admins", adminRoutes);
     this.app.use("/auctions", AuctionRoutes);
     this.app.use("/applications", ApplicationRouter);
-    this.app.use("/bids", BidRoutes);
+    //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
  

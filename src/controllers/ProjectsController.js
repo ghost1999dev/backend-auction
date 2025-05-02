@@ -13,25 +13,14 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const createProject = async (req, res) => {
     try {
-      const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
+      const { company_id, category_id, project_name, description, budget, days_available } = req.body;
 
       if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
         return res.status(400).json({ message: "All fields must be filled.", status: 400 });
-      }
-  
+      }  
       
       let projectStatus = 0;
 
-      if (status !== undefined) {
-        const validStatuses = [0,1,3,4];  
-        if (!validStatuses.includes(status)) {
-          return res.status(400).json({ 
-            message: 'Valor de estado inválido. El valor predeterminado es 0 (pendiente).',
-            status: 400 });
-        }
-        projectStatus = status;  
-      }    
-  
       const project = await ProjectsModel.create({
         company_id,
         category_id,
@@ -93,7 +82,7 @@ export const createProject = async (req, res) => {
 export const updateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
+    const { company_id, category_id, project_name, description, budget, days_available } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -113,14 +102,9 @@ export const updateProjectId = async (req, res) => {
       !days_available) {
       return res.status(400).json({ message: "All fields must be filled.", status: 400 });
     }
-    
-    if (status !== undefined) {
-      const validStatuses = [0,1,3,4];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
-      }
-    }
-    
+
+    const currentStatus = projectExists.status;
+
     const updateData = {
       company_id,
       category_id,
@@ -128,8 +112,9 @@ export const updateProjectId = async (req, res) => {
       description,
       budget,
       days_available,
-      status: 0
+      status: currentStatus
     };
+
     await ProjectsModel.update(updateData, {
       where: { id }
     });
@@ -141,7 +126,23 @@ export const updateProjectId = async (req, res) => {
       ]
     });
 
-    const statusText = "pendiente";
+    let statusText;
+    switch (currentStatus) {
+      case 0:
+        statusText = "Pendiente";
+        break;
+      case 1:
+        statusText = "Activo";
+        break;
+      case 3:
+        statusText = "Rechazado";
+        break;
+      case 4:
+        statusText = "Finalizado";
+        break;
+      default:
+        statusText = "Desconocido";
+    }
     
     try {
       await NotificationsModel.create({
@@ -151,7 +152,7 @@ export const updateProjectId = async (req, res) => {
         context: JSON.stringify({ 
           action: 'project_update', 
           project_id: id,
-          status: 'pendiente de verificación'          
+          status: statusText          
         }),
         sent_at: new Date(),
         status: 0,
@@ -192,10 +193,30 @@ export const DesactivateProjectId = async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: "Project not found", status: 404 });
     }
+
+    const currentStatus = project.status;
     
     await ProjectsModel.update({ status: 0 }, {
       where: { id }
     });
+
+    let statusText;
+    switch (currentStatus) {
+      case 0:
+        statusText = "Pendiente";
+        break;
+      case 1:
+        statusText = "Activo";
+        break;
+      case 3:
+        statusText = "Rechazado";
+        break;
+      case 4:
+        statusText = "Finalizado";
+        break;
+      default:
+        statusText = "Desconocido";
+    }
     
     try {
       await NotificationsModel.create({
@@ -205,7 +226,7 @@ export const DesactivateProjectId = async (req, res) => {
         context: JSON.stringify({ 
           action: 'project_deactivation', 
           project_id: id,
-          status: 'pendiente de verificación'
+          status: statusText
          }),
         sent_at: new Date(),
         status: 'Active',
@@ -296,57 +317,6 @@ export const DesactivateProjectId = async (req, res) => {
       res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
     }
   };  
-
-  /**
- * Hard delete project
- *
- * function to permanently delete a project from database
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} confirmation message
- */
-  export const hardDeleteProject = async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID", status: 400 });
-      }
-      
-      const project = await ProjectsModel.findByPk(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found", status: 404 });
-      }
-      
-      const { company_id, project_name } = project;
-      
-      await ProjectsModel.destroy({
-        where: { id }
-      });
-      
-      try {
-        await NotificationsModel.create({
-          user_id: company_id,
-          title: 'Proyecto Eliminado Permanentemente',
-          body: `El proyecto "${project_name}" ha sido eliminado permanentemente`,
-          context: JSON.stringify({ action: 'project_deletion', project_id: id }),
-          sent_at: new Date(),
-          status: 'Deleted',
-          error_message: null
-        });
-      } catch (notificationError) {
-        console.error('Error creating notification:', notificationError);
-       
-      }
-      
-      res.status(200).json({
-        message: "Project permanently deleted successfully", status: 200
-      });
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      res.status(500).json({ message: "Error deleting project", error: error.message, status: 500 });
-    }
-  };
   
 /**
  * Get projects by company

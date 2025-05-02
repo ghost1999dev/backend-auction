@@ -1,14 +1,14 @@
 // src/models/BidModel.js
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
-import AuctionModel from "./AuctionModel.js";
+import AuctionsModel from "./AuctionsModel.js";
 import UsersModel   from "./UsersModel.js";
 
 /**
  * Bid model.
- * @module BidModel
+ * @module BidsModel
  */
-const Bid = sequelize.define(
+const BidsModel = sequelize.define(
   "bids",
   {
     id: {
@@ -46,7 +46,7 @@ const Bid = sequelize.define(
 );
 
 // Relaciones
-Bid.belongsTo(AuctionModel, { 
+Bid.belongsTo(AuctionsModel, { 
   foreignKey: "auction_id", 
   as: "auction" 
 });
@@ -56,4 +56,4 @@ Bid.belongsTo(UsersModel, {
   as: "developer" 
 });
 
-export default Bid;
+export default BidsModel;

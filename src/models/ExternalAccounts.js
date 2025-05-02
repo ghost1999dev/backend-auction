@@ -1,7 +1,12 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 
-export const ExternalAccount = sequelize.define(
+/**
+ * ExternalAccount model.
+ * @module ExternalAccountsModel
+ */
+
+export const ExternalAccountsModel = sequelize.define(
   "external_account",
   {
     id: {
@@ -29,4 +34,4 @@ export const ExternalAccount = sequelize.define(
   ExternalAccount.belongsTo(UsersModel, { foreignKey: "user_id" });
 })();
 
-export default ExternalAccount;
+export default ExternalAccountsModel;

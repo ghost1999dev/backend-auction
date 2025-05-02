@@ -1,5 +1,5 @@
 import sequelize from "../config/connection.js";
-import CategoriesModel from "./CategorieModel.js";
+import CategoriesModel from "./CategoriesModel.js";
 import UsersModel from "./UsersModel.js";
 import CompaniesModel from "./CompaniesModel.js";
 import { DataTypes } from "sequelize";
@@ -61,17 +61,6 @@ Project.belongsTo(UsersModel, { foreignKey: 'company_id', as: 'company' });
 Project.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' });
 
 Project.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
- 
-//Project.belongsTo(Status, { foreignKey: 'status', as: 'status' }); 
-
-/*// Relación con ProjectApplications (un proyecto tiene muchas aplicaciones)
-Project.hasMany(ProjectApplication, { foreignKey: 'project_id' });
-
-// Relación con Auctions (un proyecto tiene muchos subastas)
-Project.hasMany(Auction, { foreignKey: 'project_id' });
-
-// Relación con AuditLogs (un proyecto tiene muchos logs de auditoría)
-Project.hasMany(AuditLog, { foreignKey: 'project_id' });*/
   
-  export default Project;
+export default Project;
   

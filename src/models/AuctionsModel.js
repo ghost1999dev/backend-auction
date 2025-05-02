@@ -13,9 +13,9 @@ import ProjectsModel from "./ProjectsModel.js";
 
 /**
  * Modelo de Subastas
- * @module AuctionModel
+ * @module AuctionsModel
  */
-const AuctionModel = sequelize.define(
+const AuctionsModel = sequelize.define(
   "auctions",
   {
     id: { 
@@ -52,4 +52,4 @@ AuctionModel.belongsTo(ProjectsModel, {
   as: "project" 
 });
 
-export default AuctionModel;
+export default AuctionsModel;

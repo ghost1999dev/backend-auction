@@ -4,14 +4,14 @@ import ProjectsModel from "./ProjectsModel.js";
 import UsersModel from "./UsersModel.js";
 
 /**
- * @typedef {Object} ProjectApplication
+ * @typedef {Object} ProjectApplicationsModel
  * @property {number} id - ID único de la aplicación
  * @property {number} project_id - ID del proyecto al que se aplica
  * @property {number} developer_id - ID del desarrollador que aplica
  * @property {number} status - Estado de la aplicación (0=pending, 1=accepted, 2=rejected)
  */
 
-const ProjectApplicationModel = sequelize.define(
+const ProjectApplicationsModel = sequelize.define(
   "project_applications",
   {
     id: { 
@@ -62,4 +62,4 @@ ProjectApplicationModel.belongsTo(UsersModel, {
   as: "developer" 
 });
 
-export default ProjectApplicationModel;
+export default ProjectApplicationsModel;

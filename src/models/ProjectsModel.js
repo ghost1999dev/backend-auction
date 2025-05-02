@@ -9,7 +9,7 @@ import { DataTypes } from "sequelize";
  */
 
 
-const Project = sequelize.define(
+const ProjectsModel = sequelize.define(
     "projects", 
     {
     id: {
@@ -62,5 +62,5 @@ Project.belongsTo(CategoriesModel, { foreignKey: 'category_id', as: 'category' }
 
 Project.belongsTo(CompaniesModel, { foreignKey: 'company_id', as: 'company_profile' });
   
-export default Project;
+export default ProjectsModel;
   

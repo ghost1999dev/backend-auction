@@ -1,4 +1,4 @@
-import AppModel from "../models/ProjectApplicationModel.js";
+import ProjectApplicationModel from "../models/ProjectApplicationsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import UsersModel from "../models/UsersModel.js";
 
@@ -66,7 +66,7 @@ export const createApplication = async (req, res, next) => {
       });
     }
 
-    const alreadyExists = await AppModel.findOne({
+    const alreadyExists = await ProjectApplicationModel.findOne({
       where: { project_id, developer_id }
     });
 
@@ -78,7 +78,7 @@ export const createApplication = async (req, res, next) => {
       });
     }
 
-    const app = await AppModel.create({
+    const app = await ProjectApplicationModel.create({
       project_id,
       developer_id,
       status: APPLICATION_STATUS.PENDING
@@ -119,7 +119,7 @@ export const listApplications = async (req, res, next) => {
       filters.status = s;
     }
 
-    const applications = await AppModel.findAll({
+    const applications = await ProjectApplicationModel.findAll({
       where: filters,
       order: [["createdAt", "DESC"]],
       include: [
@@ -149,7 +149,7 @@ export const listApplications = async (req, res, next) => {
  */
 export const getApplication = async (req, res, next) => {
   try {
-    const application = await AppModel.findByPk(req.params.id, {
+    const application = await ProjectApplicationModel.findByPk(req.params.id, {
       include: [
         { 
           model: ProjectsModel,
@@ -193,7 +193,7 @@ export const updateApplication = async (req, res, next) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const app = await AppModel.findByPk(id);
+    const app = await ProjectApplicationModel.findByPk(id);
     if (!app) {
       return res.status(404).json({
         success: false,
@@ -231,7 +231,7 @@ export const updateApplication = async (req, res, next) => {
  */
 export const deleteApplication = async (req, res, next) => {
   try {
-    const app = await AppModel.findByPk(req.params.id);
+    const app = await ProjectApplicationModel.findByPk(req.params.id);
     if (!app) {
       return res.status(404).json({ 
         success: false,

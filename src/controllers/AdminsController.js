@@ -1,9 +1,9 @@
-import AdminModel from '../models/AdminModel.js';
+import AdminsModel from '../models/AdminsModel.js';
 import ProjectsModel from '../models/ProjectsModel.js';
 import CompaniesModel from '../models/CompaniesModel.js';
-import CategorieModel from '../models/CategorieModel.js';
+import CategoriesModel from '../models/CategoriesModel.js';
 import UsersModel from '../models/UsersModel.js';
-import NotificationModel from "../models/NotificationModel.js";
+import NotificationsModel from "../models/NotificationsModel.js";
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
@@ -32,7 +32,7 @@ export const createAdmin = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newAdmin = await AdminModel.create({
+    const newAdmin = await AdminsModel.create({
       full_name,
       phone,
       email,
@@ -80,7 +80,7 @@ export const createAdmin = async (req, res) => {
  */
 export const getAllAdmins = async (req, res) => {
   try {
-    const admins = await AdminModel.findAll();
+    const admins = await AdminsModel.findAll();
     return res.status(200).json({
       error: false,
       data: admins
@@ -113,7 +113,7 @@ export const getAdminById = async (req, res) => {
       });
     }
 
-    const admin = await AdminModel.findByPk(req.params.id);
+    const admin = await AdminsModel.findByPk(req.params.id);
 
     if (!admin) {
       return res.status(400).json({
@@ -162,7 +162,7 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    const admin = await AdminModel.findByPk(req.params.id);
+    const admin = await AdminsModel.findByPk(req.params.id);
 
     if (!admin) {
       return res.status(404).json({
@@ -318,7 +318,7 @@ export const searchProjects = async (req, res) => {
         ]
       },
       {
-        model: CategorieModel,
+        model: CategoriesModel,
         as: 'category',
         attributes: ['id', 'name']
       }
@@ -400,7 +400,7 @@ export const getProjectById = async (req, res) => {
           ]
         },
         {
-          model: CategorieModel,
+          model: CategoriesModel,
           as: 'category',
           attributes: ['id', 'name']
         }

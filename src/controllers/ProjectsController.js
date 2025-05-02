@@ -104,7 +104,13 @@ export const updateProjectId = async (req, res) => {
       return res.status(404).json({ message: "Project not found", status: 404 });
     }
 
-    if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
+    if (
+      !company_id || 
+      !category_id || 
+      !project_name || 
+      !description || 
+      !budget || 
+      !days_available) {
       return res.status(400).json({ message: "All fields must be filled.", status: 400 });
     }
     

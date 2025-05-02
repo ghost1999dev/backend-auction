@@ -1,7 +1,7 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import RolesModel from "./RolesModel.js";
-import ExternalAccountsModel from "./ExternalAccounts.js";
+import ExternalAccountsModel from "./ExternalAccountsModel.js";
 
 /**
  * Users model.

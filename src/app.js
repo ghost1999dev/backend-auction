@@ -21,7 +21,7 @@ import CompanyRoutes from "./routes/companyRoutes.js";
 import DeveloperRoutes from "./routes/developerRoutes.js"
 import categoryRoutes from "./routes/categoryRoutes.js";
 import {loginRouter} from "./routes/authRoutes.js";
-import AuctionRoutes from "./routes/auctionRoutes.js";
+import AuctionRoutes from "./routes/AuctionRoutes.js";
 import ApplicationRouter from "./routes/applicationRoutes.js";
 //import BidRoutes from "./routes/bidRoutes.js";
 

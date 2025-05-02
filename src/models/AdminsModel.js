@@ -1,13 +1,12 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
-import bcrypt from 'bcrypt';
 
 /**
  * Admin model.
- * @module AdminModel
+ * @module AdminsModel
  */
 
-const AdminModel = sequelize.define(
+const AdminsModel = sequelize.define(
   "admins",
   {
     id: {
@@ -48,4 +47,4 @@ const AdminModel = sequelize.define(
 });
 
 
-export default AdminModel;
+export default AdminsModel;

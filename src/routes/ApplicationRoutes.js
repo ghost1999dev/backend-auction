@@ -12,7 +12,7 @@ import {
   getApplication,
   updateApplication,
   deleteApplication
-} from "../controllers/ApplicationsController.js";
+} from "../controllers/ProjectApplicationsController.js";
 
 const router = Router();
 

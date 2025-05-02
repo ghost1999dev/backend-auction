@@ -1,6 +1,6 @@
 import ProjectsModel from "../models/ProjectsModel.js";
-import NotificationModel from "../models/NotificationModel.js";
-import CategoriesModel from "../models/CategorieModel.js";
+import NotificationsModel from "../models/NotificationsModel.js";
+import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
 
 /**
@@ -43,7 +43,7 @@ export const createProject = async (req, res) => {
       });
   
       try {
-        await NotificationModel.create({
+        await NotificationsModel.create({
         user_id: company_id,
         title: 'Nuevo Proyecto Creado',
         body: `Se ha creado un nuevo proyecto: ${project_name}. Estado: pendiente de verificación.`,
@@ -58,7 +58,7 @@ export const createProject = async (req, res) => {
         });
   
       } catch (notificationError) {
-        await NotificationModel.create({
+        await NotificationsModel.create({
             user_id: company_id,
             title: 'Error al crear notificación',
             body: 'No se pudo crear correctamente la notificación del proyecto.',
@@ -138,7 +138,7 @@ export const updateProjectId = async (req, res) => {
     const statusText = "pendiente";
     
     try {
-      await NotificationModel.create({
+      await NotificationsModel.create({
         user_id: updatedProject.company_id,
         title: 'Proyecto Actualizado',
         body: `El proyecto "${updatedProject.project_name}" ha sido actualizado. Estado: Pendiente de verificación.`,
@@ -192,7 +192,7 @@ export const DesactivateProjectId = async (req, res) => {
     });
     
     try {
-      await NotificationModel.create({
+      await NotificationsModel.create({
         user_id: project.company_id,
         title: 'Proyecto Desactivado',
         body: `El proyecto "${project.project_name}" ha sido desactivado. Estado: pendiente de verificación.`,
@@ -319,7 +319,7 @@ export const DesactivateProjectId = async (req, res) => {
       });
       
       try {
-        await NotificationModel.create({
+        await NotificationsModel.create({
           user_id: company_id,
           title: 'Proyecto Eliminado Permanentemente',
           body: `El proyecto "${project_name}" ha sido eliminado permanentemente`,

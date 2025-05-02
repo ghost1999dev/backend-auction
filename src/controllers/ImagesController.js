@@ -31,7 +31,7 @@ const updateImage = async (req, res, model) => {
         });
     }
 
-    const user = await UsersModel.findByPk(id)
+    const user = await model.findByPk(id)
 
     if (!user) return res.status(404).json({ status: 404, message: "User not found" });
 
@@ -57,7 +57,8 @@ const updateImage = async (req, res, model) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error updloading image", error 
+        message: "Error updloading image", 
+        error: error.message 
       });
   }
 };

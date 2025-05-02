@@ -5,7 +5,7 @@ import {
   deleteCategory, 
   getAllCategories, 
   getCategoryById 
-} from '../controllers/categoryController.js';
+} from '../controllers/CategoriesController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
 
 const router = express.Router();

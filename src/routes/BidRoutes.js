@@ -3,7 +3,7 @@ import validate from "../middlewares/validate.js";
 import {
   createBidSchema,
   updateBidSchema
-} from "../validations/bidSchemas.js";
+} from "../validations/bidSchema.js";
 import {
   createBid,
   listBids,

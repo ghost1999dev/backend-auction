@@ -1,7 +1,12 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 
-export const ExternalAccount = sequelize.define(
+/**
+ * ExternalAccount model.
+ * @module ExternalAccountsModel
+ */
+
+export const ExternalAccountsModel = sequelize.define(
   "external_account",
   {
     id: {
@@ -26,7 +31,7 @@ export const ExternalAccount = sequelize.define(
 // Importación dinámica de UsersModel para evitar el ciclo
 (async () => {
   const { default: UsersModel } = await import("./UsersModel.js");
-  ExternalAccount.belongsTo(UsersModel, { foreignKey: "user_id" });
+  ExternalAccountsModel.belongsTo(UsersModel, { foreignKey: "user_id" });
 })();
 
-export default ExternalAccount;
+export default ExternalAccountsModel;

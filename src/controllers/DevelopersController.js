@@ -1,7 +1,15 @@
 import DevelopersModel from "../models/DevelopersModel.js"
 import UsersModel from "../models/UsersModel.js"
 import RolesModel from "../models/RolesModel.js"
-import { stat } from "fs"
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
+
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * create developer
@@ -58,6 +66,7 @@ export const DetailsDeveloperId = async (req, res) => {
             include: [{
                 model: UsersModel,
                 attributes: [
+                    "id",
                     "role_id",
                     "name",
                     "email",
@@ -82,11 +91,38 @@ export const DetailsDeveloperId = async (req, res) => {
         })
 
         if (developer) {
+
+            let imageUrl = ''
+            if (developer.user.image){
+                const s3key = developer.user.image.includes("amazonaws.com/") 
+                ? developer.user.image.split("amazonaws.com/")[1]
+                : developer.user.image
+
+                const command = new GetObjectCommand({
+                    Bucket: process.env.BUCKET_NAME,
+                    Key: s3key,
+                })
+
+                imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+            }
+            else {
+                imageUrl = path.join(__dirname, "../images/default-image.png")
+            }
+
+            const developerWithImage = {
+                ...developer.dataValues,
+                user: {
+                    ...developer.user.dataValues,
+                    image: imageUrl
+                }
+            }
+
             res
                 .status(200)
                 .json({
                     status: 200,
-                    message: "Developer retrieved successfully", developer 
+                    message: "Developer retrieved successfully", 
+                    developer: developerWithImage 
                 })
         }
         else {
@@ -102,7 +138,8 @@ export const DetailsDeveloperId = async (req, res) => {
             .status(500)
             .json({ 
                 status: 500,
-                message: "Error retrieving developer", error 
+                message: "Error retrieving developer", 
+                error: error.message 
             })
     }
 }
@@ -149,11 +186,38 @@ export const getDevelopersByIdUser = async (req, res) => {
         })
 
         if (developer) {
+
+            let imageUrl = ''
+            if (developer.user.image){
+                const s3key = developer.user.image.includes("amazonaws.com/") 
+                ? developer.user.image.split("amazonaws.com/")[1]
+                : developer.user.image
+
+                const command = new GetObjectCommand({
+                    Bucket: process.env.BUCKET_NAME,
+                    Key: s3key,
+                })
+
+                imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+            }
+            else {
+                imageUrl = path.join(__dirname, "../images/default-image.png")
+            }
+
+            const developerWithImage = {
+                ...developer.dataValues,
+                user: {
+                    ...developer.user.dataValues,
+                    image: imageUrl
+                }
+            }
+
             res
                 .status(200)
                 .json({ 
                     status: 200,
-                    message: "Developer retrieved successfully", developer 
+                    message: "Developer retrieved successfully", 
+                    developer: developerWithImage
                 })
         }
         else {
@@ -188,6 +252,7 @@ export const ListAllDevelopers = async (req, res) => {
             include: [{
                 model: UsersModel,
                 attributes: [
+                    "id",
                     "role_id",
                     "name",
                     "email",
@@ -209,11 +274,46 @@ export const ListAllDevelopers = async (req, res) => {
         })
 
         if (developers) {
+
+            const developersWithImage = await Promise.all(
+                developers.map(async (developer) => {
+                    if (!developer.user.image) {
+                        return {
+                            ...developer.dataValues,
+                            user: {
+                                ...developer.user.dataValues,
+                                image: path.join(__dirname, "../images/default-image.png")
+                            }
+                        }
+                    }
+
+                    const s3key = developer.user.image.includes("amazonaws.com/") 
+                    ? developer.user.image.split("amazonaws.com/")[1]
+                    : developer.user.image
+
+                    const command = new GetObjectCommand({
+                    Bucket: process.env.BUCKET_NAME,
+                    Key: s3key,
+                    })
+
+                    const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+
+                    return {
+                        ...developer.dataValues,
+                        user: {
+                            ...developer.user.dataValues,
+                            image: imageUrl
+                        }
+                    }
+                })
+            )
+
             res
                 .status(200)
                 .json({ 
                     status: 200,
-                    message: "Developers retrieved successfully", developers 
+                    message: "Developers retrieved successfully", 
+                    developers: developersWithImage 
                 })
         }
         else {
@@ -229,7 +329,8 @@ export const ListAllDevelopers = async (req, res) => {
             .status(500)
             .json({ 
                 status: 500,
-                message: "Error retrieving developers", error 
+                message: "Error retrieving developers", 
+                error: error.message 
             })
     }
 }

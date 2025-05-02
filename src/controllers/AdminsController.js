@@ -4,6 +4,7 @@ import CompaniesModel from '../models/CompaniesModel.js';
 import CategoriesModel from '../models/CategoriesModel.js';
 import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from "../models/NotificationsModel.js";
+import { sendProjectStatusEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
@@ -496,7 +497,7 @@ export const updateProjectStatus = async (req, res) => {
         body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`
       });
 
-      await NotificationModel.create({
+      await NotificationsModel.create({
         user_id: user.id,
         title: 'Actualización del estado de tu proyecto',
         body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`,
@@ -505,8 +506,23 @@ export const updateProjectStatus = async (req, res) => {
           status: newStatus
         },
         sent_at: new Date(),
-        status: 'sent'
+        status: estados[newStatus]
       });
+      // Enviar correo electrónico al usuario
+      try {
+        await sendProjectStatusEmail({
+          email: user.email,
+          name: user.name,
+          projectName: project.project_name,
+          statusName: estados[newStatus],
+          status: newStatus
+        });
+        console.log(`Correo electrónico enviado a ${user.email}`);
+      }
+      catch (emailError) {
+        console.error('Error al enviar el correo electrónico:', emailError);
+       
+      }
     } else {
       console.warn('No se encontró el usuario para enviar la notificación');
     }
@@ -523,4 +539,7 @@ export const updateProjectStatus = async (req, res) => {
       error: error.message
     });
   }
+  
+
+  
 };

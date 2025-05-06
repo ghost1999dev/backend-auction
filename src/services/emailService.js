@@ -1,5 +1,10 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import cron from 'node-cron';
+import ProjectsModel from '../models/ProjectsModel.js';
+import UsersModel from '../models/UsersModel.js';
+import NotificationsModel from '../models/NotificationsModel.js';
+
 
 dotenv.config();
 
@@ -118,3 +123,138 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
   console.log(`Correo enviado con éxito: ${info.messageId}`);
   return info;
 };
+
+/**
+ * Envía un correo con plantilla HTML cuando un proyecto se finaliza automáticamente
+ */
+export const sendFinalizationEmail = async ({ email, company_name, project_name, days_available, project_link }) => {
+  const htmlTemplate = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Proyecto Finalizado</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f4f4f4;
+          margin: 0;
+          padding: 0;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: #ffffff;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        h2 {
+          color: #2c3e50;
+        }
+        p {
+          color: #34495e;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .button {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 12px 20px;
+          background-color: #3498db;
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 30px;
+          font-size: 13px;
+          color: #999;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <h2>Proyecto Finalizado</h2>
+        <p>Hola <strong>${company_name}</strong>,</p>
+        <p>Te informamos que tu proyecto <strong>"${project_name}"</strong> ha sido <strong>finalizado automáticamente</strong> tras completar los <strong>${days_available} días</strong> disponibles.</p>
+
+        <a class="button" href="${project_link}" target="_blank">Ver Proyecto</a>
+
+        <p>Gracias por confiar en nuestra plataforma.</p>
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Bluepixel" <${process.env.SENDEMAIL}>`,
+    to: email,
+    subject: `Tu proyecto "${project_name}" ha finalizado`,
+    html: htmlTemplate,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`Correo de finalización enviado a ${email}: ${info.messageId}`);
+  return info;
+};
+
+// Cron job: ejecuta todos los días a las 00:00
+cron.schedule('0 0 * * *', async () => {
+  console.log('Ejecutando verificación diaria de proyectos activos...');
+
+  try {
+    const activeProjects = await ProjectsModel.findAll({
+      where: { status: 1 },
+      include: [{ model: UsersModel, as: 'company' }]
+    });
+
+    const today = new Date();
+
+    for (const project of activeProjects) {
+      const createdAt = new Date(project.updatedAt);
+      const elapsedDays = Math.floor((today - createdAt) / (1000 * 60 * 60 * 24));
+      const daysRemaining = project.days_available - elapsedDays;
+
+      if (daysRemaining <= 0) {
+        
+        await ProjectsModel.update({ status: 4 }, { where: { id: project.id } });
+
+        
+        await NotificationsModel.create({
+          user_id: project.company_id,
+          title: 'Proyecto Finalizado',
+          body: `El proyecto "${project.project_name}" ha sido finalizado automáticamente tras agotar sus días disponibles.`,
+          context: JSON.stringify({
+            action: 'project_auto_finalize',
+            project_id: project.id,
+            status: 'finalizado'
+          }),
+          sent_at: new Date(),
+          status: 'Enviado',
+          error_message: null
+        });
+
+       
+        await sendFinalizationEmail({
+          email: project.company.email,
+          company_name: project.company.name,
+          project_name: project.project_name,
+          days_available: project.days_available,
+          project_link: `https://sitio/nombre-proyecto/${project.id}`
+        });
+
+        console.log(`Proyecto ${project.id} finalizado y notificado.`);
+      } else {
+        console.log(`Proyecto ${project.id}: ${daysRemaining} días restantes.`);
+      }
+    }
+  } catch (error) {
+    console.error("Error en la verificación diaria de proyectos:", error);
+  }
+});

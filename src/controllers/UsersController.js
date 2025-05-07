@@ -9,6 +9,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"
 import dotenv from "dotenv";
 import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/userSchema.js';
+import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 
 dotenv.config()
 
@@ -537,3 +538,120 @@ export const AuthUser = async (req, res) => {
       });
   }
 };
+
+/**
+ * forgot password
+ * 
+ * function to send code password reset
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} user recovered
+ */
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const { error, value } = validateEmailSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
+
+    const user = await UsersModel.findOne({ where: { email } })
+
+    if (!user) {
+      res
+        .status(400)
+        .json({ 
+          status: 400,
+          message: "Correo no encontrado" 
+        });
+    }
+
+    const response = await requestPasswordRecovery(email)
+
+    if (response.status === 200) {
+      res
+        .status(200)
+        .json({
+          status: 200,
+          message: "Codigo de recuperacion enviado."
+        })
+    }
+    else {
+      res
+        .status(response.status)
+        .json({
+          status: response.status,
+          message: "Correo no encontrado"
+        })
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al enviar el correo de recuperacion", error: error.message 
+      })
+  }
+}
+
+/**
+ * reset password
+ * 
+ * function to reset password
+ * @param {Object} req - request object
+ * @param {Object} res - response object  
+ * @returns {Object} user recovered
+ */
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, code, password } = req.body;
+
+    if (!email || !code || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Error de validación',
+        error: error.message,
+        status: 400
+      });
+    }
+    else {
+      const response = await confirmEmailService(email, code)
+
+      if (response.status === 200) {
+        const passwordHashed = hashPassword(password)
+
+        const user = await UsersModel.update({ password: passwordHashed }, { where: { email } })
+        
+        res
+          .status(200)
+          .json({
+            status: 200,
+            message: "Contraseña actualizada correctamente.",
+            user: user
+          })
+      }
+      else {
+        res
+          .status(response.status)
+          .json({
+            status: response.status,
+            message: response.message
+          })
+      }
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al actualizar la contraseña", error: error.message 
+      })
+  }
+}

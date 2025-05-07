@@ -15,7 +15,9 @@ import {
   uploadImageUser,
   verficationEmail,
   updateUserFieldsGoogle,
-  AuthUser
+  AuthUser,
+  forgotPassword,
+  resetPassword
 } from "../controllers/UsersController.js";
 
 const router = Router();
@@ -287,6 +289,77 @@ router.patch("/update-fields/:id", updateUserFieldsGoogle);
  *        description: Server error
  */
 router.post("/auth", AuthUser);
+
+/**
+ * @swagger
+ * /users/forgot-password:
+ *  post:
+ *    tags: [Users]
+ *    summary: Request a password reset
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                format: email
+ *                description: Email to reset password
+ *                example: example@example.com
+ *            required:
+ *              - email
+ *    responses:
+ *      200:
+ *        description: Returns a token
+ *      400: 
+ *        description: Email not found
+ *      500:
+ *        description: Server error
+ */
+router.post("/forgot-password", forgotPassword);
+
+/**
+ * @swagger
+ * /users/reset-password:
+ *  post:
+ *    tags: [Users]
+ *    summary: Reset a password
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                format: email
+ *                description: Email to reset password
+ *                example: example@example.com
+ *              code:
+ *                type: string
+ *                description: Code to reset password
+ *                example: 123456
+ *              password:
+ *                type: string
+ *                format: password
+ *                description: New password
+ *                example: example123
+ *            required:
+ *              - email
+ *              - code
+ *              - password
+ *    responses:
+ *      200:
+ *        description: Returns an updated user
+ *      400: 
+ *        description: Email, code or password incorrect
+ *      500:
+ *        description: Server error
+ */
+router.post("/reset-password", resetPassword);
 
 export default router;
 

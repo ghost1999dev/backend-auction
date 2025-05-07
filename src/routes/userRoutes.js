@@ -312,7 +312,7 @@ router.post("/auth", AuthUser);
  *              - email
  *    responses:
  *      200:
- *        description: Correo de verigacion enviado
+ *        description: Correo de verificacion enviado
  *      400: 
  *        description: Correo no encontrado
  *      500:

@@ -588,7 +588,8 @@ export const forgotPassword = async (req, res) => {
         .status(response.status)
         .json({
           status: response.status,
-          message: "Correo no encontrado"
+          message: response.message,
+          error: response.error
         })
     }
   } catch (error) {
@@ -596,7 +597,8 @@ export const forgotPassword = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error al enviar el correo de recuperacion", error: error.message 
+        message: "Error al enviar el correo de recuperacion", 
+        error: response.error
       })
   }
 }
@@ -625,17 +627,30 @@ export const resetPassword = async (req, res) => {
       const response = await confirmEmailService(email, code)
 
       if (response.status === 200) {
-        const passwordHashed = hashPassword(password)
+        const user = await UsersModel.findOne({ where: { email } })
 
-        const user = await UsersModel.update({ password: passwordHashed }, { where: { email } })
-        
-        res
+        if (!user) {
+          res 
+            .status(400)
+            .json({ 
+              status: 400,
+              message: "Correo no encontrado" 
+            });
+        }
+        else {
+          const passwordHashed = hashPassword(password)
+
+          user.password = passwordHashed
+
+          await user.save()
+          res
           .status(200)
           .json({
             status: 200,
             message: "Contraseña actualizada correctamente.",
             user: user
           })
+        }
       }
       else {
         res

@@ -312,9 +312,9 @@ router.post("/auth", AuthUser);
  *              - email
  *    responses:
  *      200:
- *        description: Returns a token
+ *        description: Correo de verigacion enviado
  *      400: 
- *        description: Email not found
+ *        description: Correo no encontrado
  *      500:
  *        description: Server error
  */
@@ -353,9 +353,9 @@ router.post("/forgot-password", forgotPassword);
  *              - password
  *    responses:
  *      200:
- *        description: Returns an updated user
+ *        description: Usuario actualizado correctamente
  *      400: 
- *        description: Email, code or password incorrect
+ *        description: Corre no encontrado, codigo incorrecto
  *      500:
  *        description: Server error
  */

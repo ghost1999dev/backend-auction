@@ -1,4 +1,4 @@
-import { emailVerificationService } from "./emailService"
+import { emailVerificationService } from "../helpers/emailVerification.js"
 
 export const requestPasswordRecovery = async (email) => {
     try {
@@ -6,27 +6,22 @@ export const requestPasswordRecovery = async (email) => {
       const response = await emailVerificationService(email);
   
       if (response.status === 200) {
-        res
-          .status(200)
-          .json({
-            status: 200,
-            message: "Codigo de recuperacion enviado."
-          })
+        return { 
+          status: 200, 
+          message: "Codigo de recuperacion enviado." 
+        }
       }
       else {
-        res
-          .status(response.status)
-          .json({
-            status: response.status,
-            message: "Correo no encontrado"
-          })
+        return {
+          status: response.status,
+          message: response.message
+        }
       }
     } catch (error) {
-      res
-        .status(500)
-        .json({ 
-          status: 500,
-          message: "Error al enviar el correo de recuperacion", error: error.message 
-        })
+      return {
+        status: 500,
+        message: "Error al enviar el correo de recuperacion", 
+        error: error.message
+      }
     }
 }

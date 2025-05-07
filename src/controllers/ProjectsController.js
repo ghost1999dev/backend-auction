@@ -108,7 +108,7 @@ export const updateProjectId = async (req, res) => {
       return res.status(404).json({ message: "Project not found", status: 404 });
     }
 
-    if (projectExists.status === 0) {
+    if (projectExists.status !== 0) {
       return res.status(403).json({
         message: "Solo los proyectos en estado Pendiente pueden ser actualizados.",
         status: 403

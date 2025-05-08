@@ -273,7 +273,7 @@ export const applicationsCounterByDeveloper = async (req, res) => {
       return res.status(404).json({
         status: 404,
         message: "Desarrollador no encontrado",
-        error: "developer_not_found"
+        error: error.message
       })
     }
     
@@ -286,7 +286,7 @@ export const applicationsCounterByDeveloper = async (req, res) => {
         model: ProjectsModel,
         as: 'project',
         where: {
-          status: [1, 4]
+          status: 1
         }
       }]
     })

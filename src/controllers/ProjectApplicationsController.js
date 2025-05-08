@@ -248,3 +248,42 @@ export const deleteApplication = async (req, res, next) => {
     next(e);
   }
 };
+
+/**
+ * @desc    Contar las aplicaciones de un desarrollador
+ * @route   GET /applications/counter/:developer_id
+ * @param   {string} req.params.developer_id - ID del desarrollador
+ * @returns {Object} Contador de aplicaciones
+ */
+export const applicationsCounterByDeveloper = async (req, res) => {
+  try {
+    const { developer_id } = req.params;
+    
+    const applications = await ProjectApplicationsModel.count({
+      where: { 
+        developer_id,
+        status: [1, 4] 
+      }
+    })
+
+    if (!applications) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontraron aplicaciones para este desarrollador",
+        applications
+      })
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: "Aplicaciones contadas exitosamente",
+      applications
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al contar las aplicaciones",
+      error: error.message
+    });
+  }
+}

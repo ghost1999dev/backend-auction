@@ -2,8 +2,6 @@ import bcrypt from 'bcrypt';
 import AdminsModel from '../models/AdminsModel.js';  
 import { generateAdminToken } from '../utils/generateToken.js';  
 
-
-
 export const loginAdmin = async (req, res) => {
   try {
     const { username, password } = req.body;

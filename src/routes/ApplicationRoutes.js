@@ -11,7 +11,8 @@ import {
   listApplications,
   getApplication,
   updateApplication,
-  deleteApplication
+  deleteApplication,
+  applicationsCounterByDeveloper
 } from "../controllers/ProjectApplicationsController.js";
 
 const router = Router();
@@ -19,15 +20,15 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: AplicacionesProyecto
+ *   name: aplication-projects
  *   description: Solicitudes de desarrolladores a proyectos
  */
 
 /**
  * @swagger
- * /aplicaciones-proyecto/create:
+ * /aplication-projects/create:
  *   post:
- *     tags: [AplicacionesProyecto]
+ *     tags: [aplication-projects]
  *     summary: Crear una nueva aplicación
  *     requestBody:
  *       required: true
@@ -53,9 +54,9 @@ router.post(
 
 /**
  * @swagger
- * /aplicaciones-proyecto/show/all:
+ * /aplication-projects/show/all:
  *   get:
- *     tags: [AplicacionesProyecto]
+ *     tags: [aplication-projects]
  *     summary: Listar aplicaciones (con filtros)
  *     parameters:
  *       - in: query
@@ -91,9 +92,9 @@ router.get("/show/all", listApplications);
 
 /**
  * @swagger
- * /aplicaciones-proyecto/{id}:
+ * /aplication-projects/{id}:
  *   get:
- *     tags: [AplicacionesProyecto]
+ *     tags: [aplication-projects]
  *     summary: Obtener una aplicación por ID
  *     parameters:
  *       - in: path
@@ -118,9 +119,9 @@ router.get("/:id", getApplication);
 
 /**
  * @swagger
- * /aplicaciones-proyecto/update/{id}:
+ * /aplication-projects/update/{id}:
  *   put:
- *     tags: [AplicacionesProyecto]
+ *     tags: [aplication-projects]
  *     summary: Actualizar estado de la aplicación
  *     parameters:
  *       - in: path
@@ -153,9 +154,9 @@ router.put(
 
 /**
  * @swagger
- * /aplicaciones-proyecto/delete/{id}:
+ * /aplication-projects/delete/{id}:
  *   delete:
- *     tags: [AplicacionesProyecto]
+ *     tags: [aplication-projects]
  *     summary: Eliminar una aplicación
  *     parameters:
  *       - in: path
@@ -173,6 +174,29 @@ router.put(
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteApplication);
+
+/**
+ * @swagger
+ * /aplication-projects/counter/{developer_id}:
+ *   get:
+ *     tags: [aplication-projects]
+ *     summary: Contar las aplicaciones de un desarrollador
+ *     parameters:
+ *       - in: path
+ *         name: developer_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del desarrollador
+ *     responses:
+ *       200:
+ *         description: Contador de aplicaciones
+ *       404:
+ *         description: Desarrollador no encontrado o no tiene aplicaciones
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/counter/:developer_id", applicationsCounterByDeveloper);
 
 export default router;
 

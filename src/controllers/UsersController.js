@@ -580,7 +580,8 @@ export const forgotPassword = async (req, res) => {
         .status(200)
         .json({
           status: 200,
-          message: "Codigo de recuperacion enviado."
+          message: "Codigo de recuperacion enviado.",
+          email: user.email
         })
     }
     else {

@@ -280,11 +280,18 @@ export const applicationsCounterByDeveloper = async (req, res) => {
     const applications = await ProjectApplicationsModel.count({
       where: { 
         developer_id,
-        status: [1, 4] 
-      }
+        status: 1 
+      },
+      include: [{
+        model: ProjectsModel,
+        as: 'project',
+        where: {
+          status: [1, 4]
+        }
+      }]
     })
 
-    if (!applications) {
+    if (applications <= 0) {
       return res.status(404).json({
         status: 404,
         message: "No se encontraron aplicaciones para este desarrollador",

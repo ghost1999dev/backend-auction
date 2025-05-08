@@ -258,6 +258,24 @@ export const deleteApplication = async (req, res, next) => {
 export const applicationsCounterByDeveloper = async (req, res) => {
   try {
     const { developer_id } = req.params;
+
+    if (!developer_id) {
+      return res.status(400).json({
+        status: 400,
+        message: "Falta el ID del desarrollador",
+        error: "missing_fields"
+      })
+    }
+
+    const developer = await UsersModel.findByPk(developer_id)
+
+    if (!developer) {
+      return res.status(404).json({
+        status: 404,
+        message: "Desarrollador no encontrado",
+        error: "developer_not_found"
+      })
+    }
     
     const applications = await ProjectApplicationsModel.count({
       where: { 

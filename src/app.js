@@ -9,6 +9,7 @@ import { swaggerSpec, swaggerUiOptions } from "./config/swagger.js";
 import cors from "cors";
 import helmet from "helmet";
 import session from "express-session";
+import "./services/emailService.js";
 
 import passport from "passport";
 import "./middlewares/google.js";

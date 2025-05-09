@@ -13,25 +13,29 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const createProject = async (req, res) => {
     try {
-      const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
+      const { company_id, category_id, project_name, description, budget, days_available } = req.body;
 
       if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
         return res.status(400).json({ message: "All fields must be filled.", status: 400 });
       }
-  
+      
+      
+      const activeProjectsCount = await ProjectsModel.count({
+       where: {
+         company_id,
+          status: [0, 1] 
+        }
+      });
+
+      if (activeProjectsCount >= 5) {
+        return res.status(403).json({
+          message: "No se pueden crear más de 5 proyectos activos. Finaliza o desactiva alguno antes de crear uno nuevo.",
+          status: 403
+        });
+      }
       
       let projectStatus = 0;
 
-      if (status !== undefined) {
-        const validStatuses = [0,1,3,4];  
-        if (!validStatuses.includes(status)) {
-          return res.status(400).json({ 
-            message: 'Valor de estado inválido. El valor predeterminado es 0 (pendiente).',
-            status: 400 });
-        }
-        projectStatus = status;  
-      }    
-  
       const project = await ProjectsModel.create({
         company_id,
         category_id,
@@ -93,7 +97,7 @@ export const createProject = async (req, res) => {
 export const updateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company_id, category_id, project_name, description, budget, days_available, status } = req.body;
+    const { company_id, category_id, project_name, description, budget, days_available } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -102,6 +106,13 @@ export const updateProjectId = async (req, res) => {
     const projectExists = await ProjectsModel.findByPk(id);
     if (!projectExists) {
       return res.status(404).json({ message: "Project not found", status: 404 });
+    }
+
+    if (projectExists.status !== 0) {
+      return res.status(403).json({
+        message: "Solo los proyectos en estado Pendiente pueden ser actualizados.",
+        status: 403
+      });
     }
 
     if (
@@ -113,14 +124,9 @@ export const updateProjectId = async (req, res) => {
       !days_available) {
       return res.status(400).json({ message: "All fields must be filled.", status: 400 });
     }
-    
-    if (status !== undefined) {
-      const validStatuses = [0,1,3,4];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status value. Valid values are 1 (active) or 0 (inactive).', status: 400 });
-      }
-    }
-    
+
+    const currentStatus = projectExists.status;
+
     const updateData = {
       company_id,
       category_id,
@@ -128,8 +134,9 @@ export const updateProjectId = async (req, res) => {
       description,
       budget,
       days_available,
-      status: 0
+      status: currentStatus
     };
+
     await ProjectsModel.update(updateData, {
       where: { id }
     });
@@ -141,7 +148,26 @@ export const updateProjectId = async (req, res) => {
       ]
     });
 
-    const statusText = "pendiente";
+    let statusText;
+    switch (currentStatus) {
+      case 0:
+        statusText = "Pendiente";
+        break;
+      case 1:
+        statusText = "Activo";
+        break;
+      case 2:
+        statusText = "Inactivo";
+        break;
+      case 3:
+        statusText = "Rechazado";
+        break;
+      case 4:
+        statusText = "Finalizado";
+        break;
+      default:
+        statusText = "Desconocido";
+    }
     
     try {
       await NotificationsModel.create({
@@ -151,10 +177,10 @@ export const updateProjectId = async (req, res) => {
         context: JSON.stringify({ 
           action: 'project_update', 
           project_id: id,
-          status: 'pendiente de verificación'          
+          status: statusText          
         }),
         sent_at: new Date(),
-        status: 0,
+        status: statusText,
         error_message: null
       });
     } catch (notificationError) {
@@ -192,23 +218,34 @@ export const DesactivateProjectId = async (req, res) => {
     if (!project) {
       return res.status(404).json({ message: "Project not found", status: 404 });
     }
+
+    const currentStatus = project.status;
     
-    await ProjectsModel.update({ status: 0 }, {
+    await ProjectsModel.update({ status: 2 }, {
       where: { id }
     });
+
+    let statusText;
+    switch (currentStatus) {
+      case 2:
+        statusText = "Inactivo";
+        break;
+      default:
+        statusText = "Desconocido";
+    }
     
     try {
       await NotificationsModel.create({
         user_id: project.company_id,
         title: 'Proyecto Desactivado',
-        body: `El proyecto "${project.project_name}" ha sido desactivado. Estado: pendiente de verificación.`,
+        body: `El proyecto "${project.project_name}" ha sido desactivado`,
         context: JSON.stringify({ 
           action: 'project_deactivation', 
           project_id: id,
-          status: 'pendiente de verificación'
+          status: statusText
          }),
         sent_at: new Date(),
-        status: 'Active',
+        status: statusText,
         error_message: null
       });
     } catch (notificationError) {
@@ -249,14 +286,37 @@ export const DesactivateProjectId = async (req, res) => {
         ],
         order: [['createdAt', 'DESC']]
       });
+
+      const projectsWithRemainingDays = projects.map(project => {
+        let daysRemaining = null;
+  
+        if (project.status === 1) { 
+          const  activatedAt = new Date(project.updatedAt);
+          const today = new Date();
+  
+          const msInDay = 24 * 60 * 60 * 1000;
+          const elapsedDays = Math.floor((today -  activatedAt) / msInDay);
+          daysRemaining = project.days_available - elapsedDays;
+  
+          if (daysRemaining < 0) daysRemaining = 0;
+        }
+  
+        return {
+          ...project.toJSON(),
+          days_remaining: daysRemaining
+        };
+      });
       
       res.status(200).json({
-        message: "Projects retrieved successfully", status: 200,
-        projects
+        message: "Projects retrieved successfully", 
+        status: 200,
+        projects: projectsWithRemainingDays
       });
     } catch (error) {
       console.error('Error retrieving projects:', error);
-      res.status(500).json({ message: "Error retrieving projects", error: error.message, status: 500 });
+      res.status(500).json({ message: "Error retrieving projects", 
+        error: error.message, 
+        status: 500 });
     }
   };
 
@@ -271,82 +331,43 @@ export const DesactivateProjectId = async (req, res) => {
   export const DetailsProjectId = async (req, res) => {
     try {
       const { id } = req.params;
-      
+  
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid project ID", status: 400 });
       }
-      
+  
       const project = await ProjectsModel.findByPk(id, {
         include: [
           { model: CategoriesModel, as: 'category' },
           { model: UsersModel, as: 'company' }
         ]
       });
-      
+  
       if (!project) {
         return res.status(404).json({ message: "Project not found", status: 404 });
       }
+  
       
+      let daysRemaining = null;
+      if (project.status === 1 && project.updatedAt) { 
+        const activatedAt = new Date(project.updatedAt);
+        const today = new Date();
+        const daysPassed = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+        daysRemaining = project.days_available - daysPassed;
+        if (daysRemaining < 0) daysRemaining = 0;
+      }
+  
       res.status(200).json({
         message: "Project retrieved successfully",
-        project
+        project,
+        days_remaining: daysRemaining
       });
     } catch (error) {
       console.error('Error retrieving project:', error);
       res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
     }
-  };  
-
-  /**
- * Hard delete project
- *
- * function to permanently delete a project from database
- * @param {Object} req - request object
- * @param {Object} res - response object
- * @returns {Object} confirmation message
- */
-  export const hardDeleteProject = async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID", status: 400 });
-      }
-      
-      const project = await ProjectsModel.findByPk(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found", status: 404 });
-      }
-      
-      const { company_id, project_name } = project;
-      
-      await ProjectsModel.destroy({
-        where: { id }
-      });
-      
-      try {
-        await NotificationsModel.create({
-          user_id: company_id,
-          title: 'Proyecto Eliminado Permanentemente',
-          body: `El proyecto "${project_name}" ha sido eliminado permanentemente`,
-          context: JSON.stringify({ action: 'project_deletion', project_id: id }),
-          sent_at: new Date(),
-          status: 'Deleted',
-          error_message: null
-        });
-      } catch (notificationError) {
-        console.error('Error creating notification:', notificationError);
-       
-      }
-      
-      res.status(200).json({
-        message: "Project permanently deleted successfully", status: 200
-      });
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      res.status(500).json({ message: "Error deleting project", error: error.message, status: 500 });
-    }
   };
+   
   
 /**
  * Get projects by company
@@ -383,11 +404,33 @@ export const getProjectsByCompany = async (req, res) => {
       ],
       order: [['createdAt', 'DESC']]
     });
+
+    const projectsWithRemainingDays = projects.map(project => {
+      let daysRemaining = null;
+
+      if (project.status === 1) { 
+        const  activatedAt = new Date(project.updatedAt);
+        const today = new Date();
+
+        const msInDay = 24 * 60 * 60 * 1000;
+        const elapsedDays = Math.floor((today -  activatedAt) / msInDay);
+        daysRemaining = project.days_available - elapsedDays;
+
+        if (daysRemaining < 0) daysRemaining = 0;
+      }
+
+      return {
+        ...project.toJSON(),
+        days_remaining: daysRemaining
+      };
+    });
+
+
     
     res.status(200).json({
       message: "Company projects retrieved successfully",
       status: 200,
-      projects
+      projects: projectsWithRemainingDays
     });
   } catch (error) {
     console.error('Error retrieving company projects:', error);
@@ -431,11 +474,32 @@ export const getProjectsByCategory = async (req, res) => {
       ],
       order: [['createdAt', 'DESC']]
     });
+
+    const projectsWithRemainingDays = projects.map(project => {
+      let daysRemaining = null;
+
+      if (project.status === 1) { 
+        const  activatedAt = new Date(project.updatedAt);
+        const today = new Date();
+
+        const msInDay = 24 * 60 * 60 * 1000;
+        const elapsedDays = Math.floor((today -  activatedAt) / msInDay);
+        daysRemaining = project.days_available - elapsedDays;
+
+        if (daysRemaining < 0) daysRemaining = 0;
+      }
+
+      return {
+        ...project.toJSON(),
+        days_remaining: daysRemaining
+      };
+    });
+
     
     res.status(200).json({
       message: "Category projects retrieved successfully",
       status: 200,
-      projects
+      projects: projectsWithRemainingDays
     });
   } catch (error) {
     console.error('Error retrieving category projects:', error);

@@ -248,3 +248,67 @@ export const deleteApplication = async (req, res, next) => {
     next(e);
   }
 };
+
+/**
+ * @desc    Contar las aplicaciones de un desarrollador
+ * @route   GET /applications/counter/:developer_id
+ * @param   {string} req.params.developer_id - ID del desarrollador
+ * @returns {Object} Contador de aplicaciones
+ */
+export const applicationsCounterByDeveloper = async (req, res) => {
+  try {
+    const { developer_id } = req.params;
+
+    if (!developer_id) {
+      return res.status(400).json({
+        status: 400,
+        message: "Falta el ID del desarrollador",
+        error: "missing_fields"
+      })
+    }
+
+    const developer = await UsersModel.findByPk(developer_id)
+
+    if (!developer) {
+      return res.status(404).json({
+        status: 404,
+        message: "Desarrollador no encontrado",
+        error: error.message
+      })
+    }
+    
+    const applications = await ProjectApplicationsModel.count({
+      where: { 
+        developer_id,
+        status: 1 
+      },
+      include: [{
+        model: ProjectsModel,
+        as: 'project',
+        where: {
+          status: 1
+        }
+      }]
+    })
+
+    if (applications <= 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontraron aplicaciones para este desarrollador",
+        applications
+      })
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: "Aplicaciones contadas exitosamente",
+      applications
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al contar las aplicaciones",
+      error: error.message
+    });
+  }
+}

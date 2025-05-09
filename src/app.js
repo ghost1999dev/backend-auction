@@ -23,7 +23,7 @@ import DeveloperRoutes from "./routes/developerRoutes.js"
 import categoryRoutes from "./routes/categoryRoutes.js";
 import {loginRouter} from "./routes/authRoutes.js";
 import AuctionRoutes from "./routes/AuctionRoutes.js";
-import ApplicationRouter from "./routes/ApplicationRoutes.js";
+import ApplicationRoutes from "./routes/ApplicationRoutes.js";
 //import BidRoutes from "./routes/bidRoutes.js";
 
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
@@ -101,7 +101,7 @@ class Server {
     this.app.use("/auth", loginRouter);
     this.app.use("/admins", adminRoutes);
     this.app.use("/auctions", AuctionRoutes);
-    this.app.use("/applications", ApplicationRouter);
+    this.app.use("/aplication-projects", ApplicationRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

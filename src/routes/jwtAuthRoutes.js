@@ -19,7 +19,7 @@ jwtRouter.get(
       email: req.user.email,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
-    res.redirect(`https://stirring-raindrop-a222c3.netlify.app/#/auth/passport?token=${token}`);
+    res.redirect(`http://localhost:4200/#/auth/passport?token=${token}`);
   }
 );
 

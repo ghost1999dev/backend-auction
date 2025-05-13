@@ -28,7 +28,7 @@ export const loginAdmin = async (req, res) => {
 
     return res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error.message);
     return res.status(500).json({ message: 'Internal server error.' });
   }
 };

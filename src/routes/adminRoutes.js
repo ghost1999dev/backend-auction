@@ -7,11 +7,43 @@ import { createAdmin,
     getAllProjects,
     searchProjects,
     getProjectById,
-    updateProjectStatus
+    updateProjectStatus,
+    generateUsername
 
 } from '../controllers/AdminsController.js';
+import { validateAdmin } from '../middlewares/authAdmin.js';
+
 
 const router = express.Router();
+    /**
+     * @swagger
+     * /admins/generate-username:
+     *  post:
+     *    tags: [Admins]
+     *    summary: Generate username
+     *    requestBody:
+     *      required: true
+     *      content:
+     *        application/json:
+     *          schema:
+     *            $ref: '#/components/schemas/generateUsername'
+     *    responses:
+     *      200:
+     *        description: Returns a username
+     *        content:
+     *          application/json:
+     *            schema:
+     *              $ref: '#/components/schemas/username'
+     *      400:
+     *        description: Invalid credentials
+     *      500:        
+     *        description: Server error         
+     */
+router.post('/generate-username', generateUsername);
+
+
+
+
     /**
      * @swagger
      * tags:
@@ -40,7 +72,7 @@ const router = express.Router();
      *        description: Server error 
      */      
 
-router.post('/create', createAdmin);
+router.post('/create', validateAdmin, createAdmin);
 
     /**
      * @swagger
@@ -137,7 +169,7 @@ router.put('/update/:id', updateAdmin);
      *      500:
      *        description: Server error         
      */     
-router.delete('/delete/:id', deleteAdmin);
+router.delete('/delete/:id', validateAdmin, deleteAdmin);
     /**
      * @swagger
      * /admins/get-all-projects:

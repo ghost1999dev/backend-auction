@@ -36,8 +36,23 @@ async function sendVerificationEmail(email, code) {
   const mailOptions = {
     from: `${process.env.SENDEMAIL}`,
     to: email,
-    subject: "Verifica tu correo electrónico",
-    text: `Tu código de verificación es: ${code}\n\n¡Advertencia! Este código expirará en 10 minutos.`,
+    subject: "Verificación de tu correo electrónico",
+    text: `
+          Hola,
+
+          Gracias por registrarte. Para continuar, por favor usa el siguiente código de verificación:
+
+          Código: ${code}
+
+          Este código es válido solo por 10 minutos.
+
+          Si no solicitaste este código, puedes ignorar este mensaje.
+
+          Saludos cordiales,  
+          El equipo de soporte.
+          ----------------------------------------
+          © ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.
+              `.trim(),
   };
 
   await transporter.sendMail(mailOptions);

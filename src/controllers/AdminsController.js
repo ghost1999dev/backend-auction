@@ -4,10 +4,58 @@ import CompaniesModel from '../models/CompaniesModel.js';
 import CategoriesModel from '../models/CategoriesModel.js';
 import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from "../models/NotificationsModel.js";
+import RolesModel from '../models/RolesModel.js';
 import { sendProjectStatusEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
+
+/**
+ * generate username
+ *
+ * function to suggest a username based on full_name
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} suggested username
+ */
+export const generateUsername = async (req, res) => {
+  try {
+    const { full_name } = req.body;
+    
+    if (!full_name) {
+      return res.status(400).json({
+        error: true,
+        message: 'El nombre completo es requerido para generar un nombre de usuario'
+      });
+    }  
+    let username = full_name
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .substring(0, 10); 
+    
+    
+    const existingUser = await AdminsModel.findOne({ where: { username } });
+    
+    if (existingUser) {      
+      const randomNum = Math.floor(Math.random() * 1000);      
+      username = `${username.substring(0, 7)}${randomNum}`.substring(0, 10);
+    }
+    
+    return res.status(200).json({
+      error: false,
+      data: {
+        suggested_username: username
+      }
+    });
+  } catch (error) {
+    console.error('Error al generar nombre de usuario:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Error interno del servidor'
+    });
+  }
+};
+
 /**
  * create admin
  *
@@ -18,9 +66,20 @@ import Joi from 'joi';
  */ 
 export const createAdmin = async (req, res) => {
   try {
-    const { full_name, phone, email, username, password, image } = req.body;
 
-      const requiredFields = { full_name, phone, email, username, password };
+    console.log("Usuario autenticado:", req.user);
+
+
+    if (!req.user || req.user.role !== 'SuperAdministrador') {
+      return res.status(403).json({
+        error: true,
+        message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.'
+      });
+    }
+
+    const { full_name, phone, email, password, image, role, username: customUsername } = req.body;
+
+      const requiredFields = { full_name, phone, email, password };
       const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field]);
       
       if (missingFields.length > 0) {
@@ -31,6 +90,56 @@ export const createAdmin = async (req, res) => {
         });
       }
 
+      const validRoles = ['Administrador', 'SuperAdministrador'];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).json({
+        error: true,
+        message: 'Rol inválido. Los roles permitidos son: Administrador, SuperAdministrador',
+      });
+    }  
+
+    let roleId;
+    if (role) {
+      const roleRecord = await RolesModel.findOne({ where: { role_name: role } });
+      if (!roleRecord) {
+        return res.status(400).json({
+          error: true,
+          message: 'El rol especificado no existe en la base de datos.',
+        });
+      }
+      roleId = roleRecord.id; // Asignar role_id según el nombre del rol
+    } else {
+      // Si no se pasa rol, asignamos 'Administrador' por defecto
+      roleId = 3; // ID para 'Administrador'
+    }
+
+    let username = customUsername;
+    
+    if (!username) {
+      
+      username = full_name
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]/g, '') 
+        .substring(0, 10); 
+    
+   
+      const existingUser = await AdminsModel.findOne({ where: { username } });
+      
+      if (existingUser) {      
+        const randomNum = Math.floor(Math.random() * 1000);      
+        username = `${username.substring(0, 7)}${randomNum}`.substring(0, 10);
+      }
+    } else {
+           const existingUser = await AdminsModel.findOne({ where: { username } });
+      
+      if (existingUser) {
+        return res.status(400).json({
+          error: true,
+          message: 'El nombre de usuario ya está en uso. Por favor, elige otro.',
+        });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = await AdminsModel.create({
@@ -40,7 +149,8 @@ export const createAdmin = async (req, res) => {
       username,
       password: hashedPassword,
       image,
-      status: 'active', 
+      status: 'active',
+      role_id: roleId
     });
     
     return res.status(201).json({ 
@@ -225,21 +335,34 @@ export const updateAdmin = async (req, res) => {
  */
 export const deleteAdmin = async (req, res) => {
   try {
-     // Validar que el ID sea proporcionado
-     if (!req.params.id) {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        error: true,
+        message: 'ID de administrador no proporcionado'
+      });
+    }
+
+    const admin = await AdminsModel.findByPk(id);
+
+    if (!admin) {
       return res.status(404).json({
         error: true,
         message: 'Administrador no encontrado'
       });
     }
 
-    await admin.destroy();
+    admin.status = 'inactive';
+    await admin.save();
+
     return res.status(200).json({
       error: false,
-      message: 'Administrador eliminado exitosamente'
+      message: 'Administrador desactivado exitosamente'
     });
+
   } catch (error) {
-    console.error('Error al eliminar admin:', error);
+    console.error('Error al desactivar admin:', error);
     return res.status(500).json({
       error: true,
       message: 'Error interno del servidor'

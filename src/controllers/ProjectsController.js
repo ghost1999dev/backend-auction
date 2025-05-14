@@ -29,9 +29,24 @@ export const createProject = async (req, res) => {
       });
 
       if (activeProjectsCount >= 5) {
+        const activeProjects = await ProjectsModel.count({
+          where: {
+            company_id: id,
+            status: 1
+          }
+        })
+
+        const pendingProjects = await ProjectsModel.count({
+          where: {
+            company_id: id,
+            status: 0
+          }
+        })
         return res.status(403).json({
-          message: "No se pueden crear más de 5 proyectos activos. Finaliza o desactiva alguno antes de crear uno nuevo.",
-          status: 403
+          message: "No se pueden crear más de 5 proyectos simultaneos. Finaliza o desactiva alguno antes de crear uno nuevo.",
+          status: 403,
+          activeProjects,
+          pendingProjects
         });
       }
       
@@ -518,44 +533,35 @@ export const getProjectsByCategory = async (req, res) => {
  */
 export const projectsCounterByCompany = async (req, res) => {
   try {
-    const { company_id } = req.params
+    const { id } = req.params
 
-    if (!company_id) {
+    if (!id) {
       return res.status(400).json({
         status: 400,
         message: "Falta el ID del empresa",
         error: "missing_fields"
       })
     }
-    const company = await CompaniesModel.findByPk(company_id)
+    const company = await CompaniesModel.findByPk(id)
 
     if (!company) {
       return res.status(404).json({
         status: 404,
         message: "Empresa no encontrada",
-        error: error.message
       })
     }
 
-    const projects = await ProjectsModel.count({
+    const projectsCount = await ProjectsModel.count({
       where: {
-        company_id,
+        company_id: id,
         status: [0, 1]
       }
     })
 
-    if (projects <= 0) {
-      return res.status(404).json({
-        status: 404,
-        message: "No se encontraron proyectos para esta empresa",
-        projects
-      })
-    }
-
     res.status(200).json({
       status: 200,
       message: "Proyectos contados exitosamente",
-      count: projects
+      count: projectsCount
     })
   } catch (error) {
     res.status(500).json({

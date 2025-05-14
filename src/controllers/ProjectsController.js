@@ -2,6 +2,7 @@ import ProjectsModel from "../models/ProjectsModel.js";
 import NotificationsModel from "../models/NotificationsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
+import CompaniesModel from "../models/CompaniesModel.js";
 
 /**
  * create project
@@ -506,3 +507,54 @@ export const getProjectsByCategory = async (req, res) => {
     res.status(500).json({ message: "Error retrieving category projects", error: error.message, status: 500 });
   }
 };
+
+export const projectsCounterByCompany = async (req, res) => {
+  try {
+    const { company_id } = req.params
+
+    if (!company_id) {
+      return res.status(400).json({
+        status: 400,
+        message: "Falta el ID del empresa",
+        error: "missing_fields"
+      })
+    }
+
+    const company = await CompaniesModel.findByPk(company_id)
+
+    if (!company) {
+      return res.status(404).json({
+        status: 404,
+        message: "Empresa no encontrada",
+        error: error.message
+      })
+    }
+
+    const projects = await ProjectsModel.count({
+      where: {
+        company_id,
+        status: [0, 1]
+      }
+    })
+
+    if (projects <= 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontraron proyectos para esta empresa",
+        projects
+      })
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: "Proyectos contados exitosamente",
+      count: projects
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al contar los proyectos",
+      error: error.message
+    });
+  }
+}

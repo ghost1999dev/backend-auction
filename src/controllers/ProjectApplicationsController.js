@@ -1,6 +1,8 @@
 import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import UsersModel from "../models/UsersModel.js";
+import DevelopersModel from "../models/DevelopersModel.js";
+import { where } from "sequelize";
 
 const APPLICATION_STATUS = {
   PENDING:  0,
@@ -47,7 +49,11 @@ export const createApplication = async (req, res, next) => {
 
     const [project, developer] = await Promise.all([
       ProjectsModel.findByPk(project_id),
-      UsersModel.findByPk(developer_id)
+      DevelopersModel.findOne({
+        where: {
+          id: developer_id
+        }
+      })
     ]);
 
     if (!project) {
@@ -75,6 +81,28 @@ export const createApplication = async (req, res, next) => {
         success: false,
         message: "Ya existe una aplicación para este proyecto",
         error: "application_exists"
+      });
+    }
+
+    const applications = await ProjectApplicationsModel.count({
+      where: { 
+        developer_id,
+        status: 1 
+      },
+      include: [{
+        model: ProjectsModel,
+        as: 'project',
+        where: {
+          status: 1
+        }
+      }]
+    })
+
+    if (applications >= 5) {
+      return res.status(403).json({
+        success: false,
+        message: "Ha alcanzado el límite de aplicaciones en curso",
+        error: "applications_limit"
       });
     }
 

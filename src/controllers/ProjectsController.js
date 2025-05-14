@@ -508,6 +508,14 @@ export const getProjectsByCategory = async (req, res) => {
   }
 };
 
+/**
+ * projectsCounterByCompany
+ * 
+ * function to count projects by company
+ * @param {Object} req
+ * @param {Object} res  
+ * @returns {Object} projects counter by company
+ */
 export const projectsCounterByCompany = async (req, res) => {
   try {
     const { company_id } = req.params
@@ -519,7 +527,6 @@ export const projectsCounterByCompany = async (req, res) => {
         error: "missing_fields"
       })
     }
-
     const company = await CompaniesModel.findByPk(company_id)
 
     if (!company) {

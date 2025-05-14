@@ -3,6 +3,7 @@ import NotificationsModel from "../models/NotificationsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
+import { createProjectSchema } from "../validations/projectSchema.js"
 
 /**
  * create project
@@ -14,12 +15,17 @@ import CompaniesModel from "../models/CompaniesModel.js";
  */
 export const createProject = async (req, res) => {
     try {
-      const { company_id, category_id, project_name, description, budget, days_available } = req.body;
-
-      if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
-        return res.status(400).json({ message: "All fields must be filled.", status: 400 });
-      }
       
+      const { error, value } = createProjectSchema.validate(req.body)
+
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Error de validación',
+          details: error.details.map(d => d.message),
+          status: 400
+        });
+      }
       
       const activeProjectsCount = await ProjectsModel.count({
        where: {

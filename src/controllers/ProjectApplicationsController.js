@@ -49,7 +49,7 @@ export const createApplication = async (req, res, next) => {
 
     const [project, developer] = await Promise.all([
       ProjectsModel.findByPk(project_id),
-      DevelopersModel.findOne({
+      DevelopersModel.findByPk({
         where: {
           id: developer_id
         }

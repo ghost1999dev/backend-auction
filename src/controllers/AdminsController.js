@@ -203,16 +203,23 @@ export const getAllAdmins = async (req, res) => {
 
     const adminsWithImage = await Promise.all(
       admins.map(async (admin) => {
-        let s3Key 
-        if (!admin.image) {
-          return {
-            ...admin.dataValues,
-            image: null,
-          }
+        
+        const imageUrl = await signImage(admin.image)
+
+        return {
+          ...admin.dataValues,
+          image: imageUrl 
         }
       })
     )
-    
+
+    res
+      .status(200)
+      .json({
+        status: 200,
+        message: "Admins retrieved successfully",
+        admins: adminsWithImage
+      })
   } catch (error) {
     console.error('Error al obtener admins:', error);
     return res.status(500).json({ 

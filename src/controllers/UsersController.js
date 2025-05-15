@@ -203,19 +203,7 @@ export const getUserById = async (req, res) => {
     });
     if (user.status === 1) {
 
-      let imageUrl = ''
-      if (user.image) {
-        const s3key = user.image.includes("amazonaws.com/") 
-          ? user.image.split("amazonaws.com/")[1]
-          : user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
+      const imageUrl = await signImage(user.image)
 
       const userWithImage = {
         ...user.dataValues,

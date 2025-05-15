@@ -37,7 +37,7 @@ const AdminsModel = sequelize.define(
         allowNull: false
       },
       image: {
-        type: DataTypes.STRING(100)
+        type: DataTypes.STRING
       },
       status: {
         type: DataTypes.STRING(50),
@@ -50,7 +50,6 @@ const AdminsModel = sequelize.define(
           key: 'id'
         }
 }
-
   },{
         timestamps: true,
 });

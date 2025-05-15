@@ -26,6 +26,8 @@ export const createProject = async (req, res) => {
           status: 400
         });
       }
+
+      const { company_id, category_id, project_name, description, long_description, budget, days_available } = value
       
       const activeProjectsCount = await ProjectsModel.count({
        where: {
@@ -65,7 +67,8 @@ export const createProject = async (req, res) => {
         description,
         budget,
         days_available,
-        status: projectStatus, 
+        status: projectStatus,
+        long_description
       });
   
       try {

@@ -278,24 +278,22 @@ export default router;
  *          type: string
  *        description:
  *          type: string
+ *          description: Short description of the project min 20 characters
+ *        long_description:
+ *          type: string
+ *          description: Long description of the project min 100 characters
  *        budget:
  *          type: number
  *        days_available:
  *          type: integer
- *        status:
- *          type: integer
- *          format: int32
- *          example: 1  
- *          enum: [0, 1]
- *          description: 0 = Inactive, 1 = Active
  *      required:
  *        - company_id
  *        - category_id
  *        - project_name
  *        - description
+ *        - long_description
  *        - budget
  *        - days_available
- *        - status
  * 
  *    projectUpdate:
  *      type: object

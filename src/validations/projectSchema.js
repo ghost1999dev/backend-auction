@@ -11,7 +11,11 @@ export const createProjectSchema = Joi.object({
         .messages({
             'string.min': 'La descripción del proyecto debe tener al menos 20 caracteres'
         }),
-    budget: Joi.float().min(100).required()
+    long_description: Joi.string().min(100).required()
+        .messages({
+            'string.min': 'La descripción larga del proyecto debe tener al menos 100 caracteres'
+        }),
+    budget: Joi.number().min(100).required()
         .messages({
             'number.min': 'El presupuesto del proyecto debe ser mayor o igual a 100',
             'number.base': 'El presupuesto del proyecto debe ser numérico',
@@ -36,7 +40,7 @@ export const updateProjectSchema = Joi.object({
         .messages({
             'string.min': 'La descripción del proyecto debe tener al menos 20 caracteres'
         }),
-    budget: Joi.float().min(100).required()
+    budget: Joi.number().min(100).required()
         .messages({
             'number.min': 'El presupuesto del proyecto debe ser mayor o igual a 100',
             'number.base': 'El presupuesto del proyecto debe ser numérico',

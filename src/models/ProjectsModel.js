@@ -47,6 +47,9 @@ const ProjectsModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 1  
+    },
+    long_description: {
+      type: DataTypes.TEXT
     }
   },
    {

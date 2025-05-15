@@ -10,6 +10,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"
 import RolesModel from "../models/RolesModel.js";
+import signImage from "../helpers/signImage.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -104,22 +105,8 @@ export const DetailsCompanyId = async (req, res) => {
     });
 
     if (company) {
-      let imageUrl = ''
-      if (company.user.image){
-        const s3key = company.user.image.includes("amazonaws.com/") 
-        ? company.user.image.split("amazonaws.com/")[1]
-        : company.user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
-      else {
-        imageUrl = path.join(__dirname, "../images/default-image.png")
-      }
+      
+      const imageUrl = await signImage(company.user.image)
 
       const companyWithImage = {
         ...company.dataValues,
@@ -195,22 +182,8 @@ export const DetailsCompanyIdUser = async (req, res) => {
     });
 
     if (company) {
-      let imageUrl = ''
-      if (company.user.image){
-        const s3key = company.user.image.includes("amazonaws.com/") 
-        ? company.user.image.split("amazonaws.com/")[1]
-        : company.user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
-      else {
-        imageUrl = path.join(__dirname, "../images/default-image.png")
-      }
+      
+      const imageUrl = await signImage(company.user.image)
 
       const companyWithImage = {
         ...company.dataValues,
@@ -283,26 +256,8 @@ export const ListAllCompany = async (req, res) => {
     if (companies) {
       const companiesWithImage = await Promise.all(
         companies.map(async (company) => {
-          if (!company.user.image) {
-            return {
-              ...company.dataValues,
-              user: {
-                ...company.user.dataValues,
-                image: path.join(__dirname, "../images/default-image.png")
-              }
-            }
-          }
-
-          const s3key = company.user.image.includes("amazonaws.com/") 
-          ? company.user.image.split("amazonaws.com/")[1]
-          : company.user.image
-
-          const command = new GetObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: s3key,
-          })
-
-          const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+          
+          const imageUrl = await signImage(company.user.image)
 
           return {
             ...company.dataValues,

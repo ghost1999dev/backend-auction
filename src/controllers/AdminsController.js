@@ -4,6 +4,7 @@ import CompaniesModel from '../models/CompaniesModel.js';
 import CategoriesModel from '../models/CategoriesModel.js';
 import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from "../models/NotificationsModel.js";
+import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
 import { sendProjectStatusEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
@@ -662,7 +663,16 @@ export const updateProjectStatus = async (req, res) => {
       error: error.message
     });
   }
-  
+};
 
-  
+/**
+ * upload image
+ *
+ * function to upload image
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} image uploaded
+ */
+export const uploadImageUser = async (req, res) => {
+  updateImage(req, res, AdminsModel);
 };

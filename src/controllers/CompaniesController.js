@@ -37,7 +37,7 @@ export const AddNewCompany = async (req, res) => {
         .status(400)
         .json({ 
           status: 400,
-          message: "El NRC o NIT ya existen" 
+          message: "Ya existe una empresa con el mismo NRC o NIT"
         });
     }
 

@@ -673,6 +673,6 @@ export const updateProjectStatus = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} image uploaded
  */
-export const uploadImageUser = async (req, res) => {
+export const uploadImageAdmin = async (req, res) => {
   updateImage(req, res, AdminsModel);
 };

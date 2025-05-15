@@ -257,9 +257,18 @@ export const getAdminById = async (req, res) => {
       });
     }
 
+    const imageUrl = await signImage(admin.image)
+
+    const adminWithImage = {
+      ...admin.dataValues,
+      image: imageUrl
+    }
+
     return res.status(200).json({
       error: false,
-      data: admin
+      message: 'Admin retrieved successfully',
+      status: 200,
+      data: adminWithImage
     });
   } catch (error) {
     console.error('Error al obtener admin por id:', error);

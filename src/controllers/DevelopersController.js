@@ -7,6 +7,7 @@ import { s3Client } from "../utils/s3Client.js"
 import dotenv from "dotenv";
 import path from "path"
 import { fileURLToPath } from "url"
+import signImage from "../helpers/signImage.js";
 
 dotenv.config()
 
@@ -94,22 +95,7 @@ export const DetailsDeveloperId = async (req, res) => {
 
         if (developer) {
 
-            let imageUrl = ''
-            if (developer.user.image){
-                const s3key = developer.user.image.includes("amazonaws.com/") 
-                ? developer.user.image.split("amazonaws.com/")[1]
-                : developer.user.image
-
-                const command = new GetObjectCommand({
-                    Bucket: process.env.BUCKET_NAME,
-                    Key: s3key,
-                })
-
-                imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-            }
-            else {
-                imageUrl = path.join(__dirname, "../images/default-image.png")
-            }
+            const imageUrl = await signImage(developer.user.image)
 
             const developerWithImage = {
                 ...developer.dataValues,
@@ -189,22 +175,7 @@ export const getDevelopersByIdUser = async (req, res) => {
 
         if (developer) {
 
-            let imageUrl = ''
-            if (developer.user.image){
-                const s3key = developer.user.image.includes("amazonaws.com/") 
-                ? developer.user.image.split("amazonaws.com/")[1]
-                : developer.user.image
-
-                const command = new GetObjectCommand({
-                    Bucket: process.env.BUCKET_NAME,
-                    Key: s3key,
-                })
-
-                imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-            }
-            else {
-                imageUrl = path.join(__dirname, "../images/default-image.png")
-            }
+            const imageUrl = await signImage(developer.user.image)
 
             const developerWithImage = {
                 ...developer.dataValues,
@@ -279,26 +250,8 @@ export const ListAllDevelopers = async (req, res) => {
 
             const developersWithImage = await Promise.all(
                 developers.map(async (developer) => {
-                    if (!developer.user.image) {
-                        return {
-                            ...developer.dataValues,
-                            user: {
-                                ...developer.user.dataValues,
-                                image: path.join(__dirname, "../images/default-image.png")
-                            }
-                        }
-                    }
-
-                    const s3key = developer.user.image.includes("amazonaws.com/") 
-                    ? developer.user.image.split("amazonaws.com/")[1]
-                    : developer.user.image
-
-                    const command = new GetObjectCommand({
-                    Bucket: process.env.BUCKET_NAME,
-                    Key: s3key,
-                    })
-
-                    const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+                    
+                    const imageUrl = await signImage(developer.user.image)
 
                     return {
                         ...developer.dataValues,

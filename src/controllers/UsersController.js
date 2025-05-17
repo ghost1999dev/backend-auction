@@ -4,9 +4,7 @@ import hashPassword from "../helpers/hashPassword.js";
 import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
-import { GetObjectCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { s3Client } from "../utils/s3Client.js"
+import signImage from "../helpers/signImage.js";
 import dotenv from "dotenv";
 import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/userSchema.js';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
@@ -159,23 +157,8 @@ export const getUsers = async (req, res) => {
     })
     const usersWithImage = await Promise.all(
       users.map(async (user) => {
-        if (!user.image) {
-          return {
-            ...user.dataValues,
-            image: null,
-          }
-        }
 
-        const s3key = user.image.includes("amazonaws.com/") 
-          ? user.image.split("amazonaws.com/")[1]
-          : user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+        const imageUrl = await signImage(user.image)
 
         return {
           ...user.dataValues,
@@ -183,6 +166,7 @@ export const getUsers = async (req, res) => {
         }
       })
     )
+
     res
       .status(200)
       .json({ 
@@ -219,19 +203,7 @@ export const getUserById = async (req, res) => {
     });
     if (user.status === 1) {
 
-      let imageUrl = ''
-      if (user.image) {
-        const s3key = user.image.includes("amazonaws.com/") 
-          ? user.image.split("amazonaws.com/")[1]
-          : user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
+      const imageUrl = await signImage(user.image)
 
       const userWithImage = {
         ...user.dataValues,

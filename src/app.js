@@ -101,7 +101,7 @@ class Server {
     this.app.use("/auth", loginRouter);
     this.app.use("/admins", adminRoutes);
     this.app.use("/auctions", AuctionRoutes);
-    this.app.use("/aplication-projects", ApplicationRoutes);
+    this.app.use("/application-projects", ApplicationRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

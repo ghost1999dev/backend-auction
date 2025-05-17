@@ -22,7 +22,7 @@ const RolesModel = sequelize.define(
         }
     },
     {
-        tiimestamps: true,
+        timestamps: true,
     }
 )
 

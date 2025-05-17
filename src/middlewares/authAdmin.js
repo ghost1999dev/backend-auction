@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import AdminsModel from '../models/AdminsModel.js';
+import RolesModel from '../models/RolesModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_segura';
 
@@ -27,17 +28,23 @@ export const validateAdmin = async (req, res, next) => {
       where: { 
         id: decoded.id,
         status: 'active'
-      } 
+      },
+      include: {
+      model: RolesModel,
+      as: 'role',
+      attributes: ['role_name']
+    } 
     });
     
-    if (!admin) {
+    if (!admin || !admin.role) {
       return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
     }
     
     req.user = {
       admin_id: admin.id,
       username: admin.username,
-      email: admin.email
+      email: admin.email,
+      role: admin.role.role_name
     };
     
     next();

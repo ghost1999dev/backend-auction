@@ -1,4 +1,5 @@
 import sequelize from "../config/connection.js";
+import RolesModel from "./RolesModel.js";
 import { DataTypes } from "sequelize";
 
 /**
@@ -36,15 +37,24 @@ const AdminsModel = sequelize.define(
         allowNull: false
       },
       image: {
-        type: DataTypes.STRING(100)
+        type: DataTypes.STRING
       },
       status: {
         type: DataTypes.STRING(50),
         defaultValue: 'active'
-      }
+      },
+      role_id: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: 'roles',
+          key: 'id'
+        }
+}
   },{
         timestamps: true,
 });
+
+AdminsModel.belongsTo(RolesModel, { foreignKey: "role_id" });
 
 
 export default AdminsModel;

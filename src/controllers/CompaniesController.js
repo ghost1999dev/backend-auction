@@ -5,14 +5,8 @@ import path from "path";
 import fs from "fs/promises";
 import sequelize from "../config/connection.js";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url"
-import { GetObjectCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { s3Client } from "../utils/s3Client.js"
 import RolesModel from "../models/RolesModel.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import signImage from "../helpers/signImage.js";
 
 dotenv.config()
 
@@ -28,39 +22,46 @@ export const AddNewCompany = async (req, res) => {
   try {
     const { user_id, nrc_number, business_type, web_site, nit_number } = req.body;
 
-    const existingNrcNumber = await CompaniesModel.findOne({ where: { nrc_number } });
-    const existingNitNumber = await CompaniesModel.findOne({ where: { nit_number } });
-
-    if (existingNrcNumber || existingNitNumber) {
-      return res
-        .status(400)
-        .json({ 
+    // Validar solo si los campos no están vacíos
+    if (nrc_number) {
+      const existingNrcNumber = await CompaniesModel.findOne({ where: { nrc_number } });
+      if (existingNrcNumber) {
+        return res.status(400).json({ 
           status: 400,
-          message: "El NRC o NIT ya existen" 
+          message: "Ya existe una empresa con el mismo NRC"
         });
+      }
+    }
+
+    if (nit_number) {
+      const existingNitNumber = await CompaniesModel.findOne({ where: { nit_number } });
+      if (existingNitNumber) {
+        return res.status(400).json({ 
+          status: 400,
+          message: "Ya existe una empresa con el mismo NIT"
+        });
+      }
     }
 
     const company = await CompaniesModel.create({
       user_id,
-      nrc_number,
+      nrc_number: nrc_number || null, // Guarda null si viene vacío
       business_type,
       web_site,
-      nit_number,
+      nit_number: nit_number || null, // Guarda null si viene vacío
     });
 
-    res
-      .status(201)
-      .json({
-        status: 201,
-        message: "Empresa creada con éxito", company 
-      });
+    res.status(201).json({
+      status: 201,
+      message: "Empresa creada con éxito", 
+      company 
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ 
-        status: 500,
-        message: "Error al crear la empresa", error 
-      });
+    res.status(500).json({ 
+      status: 500,
+      message: "Error al crear la empresa", 
+      error: error.message // Mejor práctica: mostrar solo el mensaje de error
+    });
   }
 };
 
@@ -104,22 +105,8 @@ export const DetailsCompanyId = async (req, res) => {
     });
 
     if (company) {
-      let imageUrl = ''
-      if (company.user.image){
-        const s3key = company.user.image.includes("amazonaws.com/") 
-        ? company.user.image.split("amazonaws.com/")[1]
-        : company.user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
-      else {
-        imageUrl = path.join(__dirname, "../images/default-image.png")
-      }
+      
+      const imageUrl = await signImage(company.user.image)
 
       const companyWithImage = {
         ...company.dataValues,
@@ -195,22 +182,8 @@ export const DetailsCompanyIdUser = async (req, res) => {
     });
 
     if (company) {
-      let imageUrl = ''
-      if (company.user.image){
-        const s3key = company.user.image.includes("amazonaws.com/") 
-        ? company.user.image.split("amazonaws.com/")[1]
-        : company.user.image
-
-        const command = new GetObjectCommand({
-          Bucket: process.env.BUCKET_NAME,
-          Key: s3key,
-        })
-
-        imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
-      }
-      else {
-        imageUrl = path.join(__dirname, "../images/default-image.png")
-      }
+      
+      const imageUrl = await signImage(company.user.image)
 
       const companyWithImage = {
         ...company.dataValues,
@@ -283,26 +256,8 @@ export const ListAllCompany = async (req, res) => {
     if (companies) {
       const companiesWithImage = await Promise.all(
         companies.map(async (company) => {
-          if (!company.user.image) {
-            return {
-              ...company.dataValues,
-              user: {
-                ...company.user.dataValues,
-                image: path.join(__dirname, "../images/default-image.png")
-              }
-            }
-          }
-
-          const s3key = company.user.image.includes("amazonaws.com/") 
-          ? company.user.image.split("amazonaws.com/")[1]
-          : company.user.image
-
-          const command = new GetObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: s3key,
-          })
-
-          const imageUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 * 60 * 24 })
+          
+          const imageUrl = await signImage(company.user.image)
 
           return {
             ...company.dataValues,

@@ -1,4 +1,5 @@
-import express from 'express';
+import { Router } from 'express';
+import upload from "../middlewares/upload.js";
 import { createAdmin, 
     getAllAdmins, 
     getAdminById, 
@@ -8,13 +9,14 @@ import { createAdmin,
     searchProjects,
     getProjectById,
     updateProjectStatus,
-    generateUsername
+    generateUsername,
+    uploadImageAdmin
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
 
 
-const router = express.Router();
+const router = Router();
     /**
      * @swagger
      * /admins/generate-username:
@@ -282,6 +284,46 @@ router.get('/get-project-by-id/:id', getProjectById);
      */
 
 router.put('/update-project-status/:id',updateProjectStatus);
+
+
+/**
+ * @swagger
+ * /admins/upload-image/{id}:
+ *  put:
+ *    tags: [Admins]
+ *    summary: Upload a admin image
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Admin id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              file:
+ *                type: string
+ *                format: url
+ *                description: Image url
+ *                example: https://example.com/image.jpg
+ *            required:
+ *              - image
+ *    responses:
+ *      200:
+ *        description: Image updated successfully
+ *      400:
+ *        description: Invalid file provided or file type not allowed
+ *      404:
+ *        description: Admin not found
+ *      500:
+ *        description: Server error
+ */
+router.put("/upload-image/:id", upload.single('file'), uploadImageAdmin);
 
 export default router;
     /**

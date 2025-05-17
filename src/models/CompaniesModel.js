@@ -22,20 +22,16 @@ const CompaniesModel = sequelize.define(
     },
     nrc_number: {
       type: DataTypes.STRING,
-      allowNull: false,
       unique: true,
     },
     business_type: {
       type: DataTypes.STRING,
-      allowNull: false
     },
     web_site: {
       type: DataTypes.STRING,
-      allowNull: true
     },
     nit_number: {
       type: DataTypes.STRING,
-      allowNull: true,
       unique: true
     },
   },

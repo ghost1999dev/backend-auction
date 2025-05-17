@@ -4,7 +4,11 @@ import CompaniesModel from '../models/CompaniesModel.js';
 import CategoriesModel from '../models/CategoriesModel.js';
 import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from "../models/NotificationsModel.js";
+import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
+import { GetObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { s3Client } from "../utils/s3Client.js"
 import { sendProjectStatusEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
@@ -191,11 +195,31 @@ export const createAdmin = async (req, res) => {
  */
 export const getAllAdmins = async (req, res) => {
   try {
-    const admins = await AdminsModel.findAll();
-    return res.status(200).json({
-      error: false,
-      data: admins
-    });
+    const admins = await AdminsModel.findAll({
+      attributes: {
+        exclude: ['password', 'createdAt']
+      }
+    })
+
+    const adminsWithImage = await Promise.all(
+      admins.map(async (admin) => {
+        
+        const imageUrl = await signImage(admin.image)
+
+        return {
+          ...admin.dataValues,
+          image: imageUrl 
+        }
+      })
+    )
+
+    res
+      .status(200)
+      .json({
+        status: 200,
+        message: "Admins retrieved successfully",
+        admins: adminsWithImage
+      })
   } catch (error) {
     console.error('Error al obtener admins:', error);
     return res.status(500).json({ 
@@ -233,9 +257,18 @@ export const getAdminById = async (req, res) => {
       });
     }
 
+    const imageUrl = await signImage(admin.image)
+
+    const adminWithImage = {
+      ...admin.dataValues,
+      image: imageUrl
+    }
+
     return res.status(200).json({
       error: false,
-      data: admin
+      message: 'Admin retrieved successfully',
+      status: 200,
+      data: adminWithImage
     });
   } catch (error) {
     console.error('Error al obtener admin por id:', error);
@@ -662,7 +695,16 @@ export const updateProjectStatus = async (req, res) => {
       error: error.message
     });
   }
-  
+};
 
-  
+/**
+ * upload image
+ *
+ * function to upload image
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} image uploaded
+ */
+export const uploadImageAdmin = async (req, res) => {
+  updateImage(req, res, AdminsModel);
 };

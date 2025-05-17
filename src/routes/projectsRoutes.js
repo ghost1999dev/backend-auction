@@ -6,7 +6,8 @@ import {
     updateProjectId,
     DesactivateProjectId,
     getProjectsByCompany,
-    getProjectsByCategory
+    getProjectsByCategory,
+    projectsCounterByCompany
 
 } from "../controllers/ProjectsController.js";
 
@@ -198,8 +199,30 @@ router.get("/show/companyProject/:id", getProjectsByCompany);
  *      500:
  *        description: Server error                         
  */
-
 router.get("/show/categoryProject/:id", getProjectsByCategory);
+
+/**
+ * @swagger
+ * /projects/counter/{id}:
+ *  get:
+ *    tags: [projects]
+ *    summary: Get projects counter by company
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Company id
+ *    responses:
+ *      200:
+ *        description: Returns projects counter
+ *      400: 
+ *        description: Company not found
+ *      500:
+ *        description: Server error
+ */
+router.get("/counter/:id", projectsCounterByCompany);
  
 export default router;
 /**
@@ -255,24 +278,22 @@ export default router;
  *          type: string
  *        description:
  *          type: string
+ *          description: Short description of the project min 20 characters
+ *        long_description:
+ *          type: string
+ *          description: Long description of the project min 100 characters
  *        budget:
  *          type: number
  *        days_available:
  *          type: integer
- *        status:
- *          type: integer
- *          format: int32
- *          example: 1  
- *          enum: [0, 1]
- *          description: 0 = Inactive, 1 = Active
  *      required:
  *        - company_id
  *        - category_id
  *        - project_name
  *        - description
+ *        - long_description
  *        - budget
  *        - days_available
- *        - status
  * 
  *    projectUpdate:
  *      type: object

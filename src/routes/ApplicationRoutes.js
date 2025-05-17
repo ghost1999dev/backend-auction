@@ -20,15 +20,15 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: aplication-projects
+ *   name: application-projects
  *   description: Solicitudes de desarrolladores a proyectos
  */
 
 /**
  * @swagger
- * /aplication-projects/create:
+ * /application-projects/create:
  *   post:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Crear una nueva aplicación
  *     requestBody:
  *       required: true
@@ -54,9 +54,9 @@ router.post(
 
 /**
  * @swagger
- * /aplication-projects/show/all:
+ * /application-projects/show/all:
  *   get:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Listar aplicaciones (con filtros)
  *     parameters:
  *       - in: query
@@ -92,9 +92,9 @@ router.get("/show/all", listApplications);
 
 /**
  * @swagger
- * /aplication-projects/{id}:
+ * /application-projects/{id}:
  *   get:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Obtener una aplicación por ID
  *     parameters:
  *       - in: path
@@ -119,9 +119,9 @@ router.get("/:id", getApplication);
 
 /**
  * @swagger
- * /aplication-projects/update/{id}:
+ * /application-projects/update/{id}:
  *   put:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Actualizar estado de la aplicación
  *     parameters:
  *       - in: path
@@ -154,9 +154,9 @@ router.put(
 
 /**
  * @swagger
- * /aplication-projects/delete/{id}:
+ * /application-projects/delete/{id}:
  *   delete:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Eliminar una aplicación
  *     parameters:
  *       - in: path
@@ -177,9 +177,9 @@ router.delete("/delete/:id", deleteApplication);
 
 /**
  * @swagger
- * /aplication-projects/counter/{developer_id}:
+ * /application-projects/counter/{developer_id}:
  *   get:
- *     tags: [aplication-projects]
+ *     tags: [application-projects]
  *     summary: Contar las aplicaciones de un desarrollador
  *     parameters:
  *       - in: path

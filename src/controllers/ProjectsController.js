@@ -122,7 +122,7 @@ export const createProject = async (req, res) => {
 export const updateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company_id, category_id, project_name, description, budget, days_available } = req.body;
+    const { company_id, category_id, project_name, description, long_description, budget, days_available } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -159,7 +159,8 @@ export const updateProjectId = async (req, res) => {
       description,
       budget,
       days_available,
-      status: currentStatus
+      status: currentStatus,
+      long_description: long_description
     };
 
     await ProjectsModel.update(updateData, {

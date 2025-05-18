@@ -12,6 +12,42 @@ import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
 
+const adminSchema = Joi.object({
+  full_name: Joi.string().required().min(3).max(100).messages({
+    'string.empty': 'El nombre completo es obligatorio',
+    'string.min': 'El nombre completo debe tener al menos 3 caracteres',
+    'string.max': 'El nombre completo no puede exceder los 100 caracteres',
+    'any.required': 'El nombre completo es obligatorio'
+  }),
+  phone: Joi.string().required().pattern(/^\d{7,15}$/).messages({
+    'string.empty': 'El número de teléfono es obligatorio',
+    'string.pattern.base': 'El número de teléfono debe contener entre 7 y 15 dígitos',
+    'any.required': 'El número de teléfono es obligatorio'
+  }),
+  email: Joi.string().required().email().messages({
+    'string.empty': 'El correo electrónico es obligatorio',
+    'string.email': 'Formato de correo electrónico inválido',
+    'any.required': 'El correo electrónico es obligatorio'
+  }),
+  password: Joi.string().required().min(8).max(30).messages({
+    'string.empty': 'La contraseña es obligatoria',
+    'string.min': 'La contraseña debe tener al menos 8 caracteres',
+    'string.max': 'La contraseña no puede exceder los 30 caracteres',
+    'any.required': 'La contraseña es obligatoria'
+  }),
+  image: Joi.string().allow('', null).optional(),
+  role: Joi.string().required().valid('Administrador', 'SuperAdministrador').messages({
+    'string.empty': 'El rol es obligatorio',
+    'any.only': 'Rol inválido. Los roles permitidos son: Administrador, SuperAdministrador',
+    'any.required': 'El rol es obligatorio'
+  }),
+  username: Joi.string().min(3).max(20).optional().messages({
+    'string.empty': 'El nombre de usuario no puede estar vacío si se proporciona',
+    'string.min': 'El nombre de usuario debe tener al menos 3 caracteres',
+    'string.max': 'El nombre de usuario no puede exceder los 20 caracteres'
+  })
+});
+
 /**
  * generate username
  *
@@ -67,38 +103,51 @@ export const generateUsername = async (req, res) => {
  * @returns {Object} admin created
  */ 
 export const createAdmin = async (req, res) => {
-  try {
+try {
 
     console.log("Usuario autenticado:", req.user);
-
-
     if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
-        message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.'
+        message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
+        status: 403
       });
     }
 
-    const { full_name, phone, email, password, image, role, username: customUsername } = req.body;
-
-      const requiredFields = { full_name, phone, email, password };
-      const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field]);
+    const { error, value } = adminSchema.validate(req.body, { abortEarly: false });
+    
+    if (error) {
+      const errors = error.details.map(detail => ({
+        field: detail.path[0],
+        message: detail.message
+      }));
       
-      if (missingFields.length > 0) {
-        return res.status(400).json({ 
-          error: true,
-          message: 'Campos requeridos faltantes', 
-          missingFields 
-        });
-      }
-
-      const validRoles = ['Administrador', 'SuperAdministrador'];
-    if (role && !validRoles.includes(role)) {
       return res.status(400).json({
         error: true,
-        message: 'Rol inválido. Los roles permitidos son: Administrador, SuperAdministrador',
+        message: 'Error de validación',
+        errors,
+        status: 400
       });
-    }  
+    }
+
+    const { full_name, phone, email, password, image, role, username: customUsername } = value;
+
+    const existingEmail = await AdminsModel.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(400).json({
+        error: true,
+        message: 'Este correo electrónico ya está registrado',
+        status: 400
+      });
+    }
+    const existingFullName = await AdminsModel.findOne({ where: { full_name } });
+    if (existingFullName) {
+      return res.status(400).json({
+        error: true,
+        message: 'Este nombre completo ya está registrado. Por favor, utiliza un nombre diferente.',
+        status: 400
+      });
+    }
 
     let roleId;
     if (role) {
@@ -107,24 +156,20 @@ export const createAdmin = async (req, res) => {
         return res.status(400).json({
           error: true,
           message: 'El rol especificado no existe en la base de datos.',
+          status: 400
         });
       }
-      roleId = roleRecord.id; // Asignar role_id según el nombre del rol
-    } else {
-      // Si no se pasa rol, asignamos 'Administrador' por defecto
-      roleId = 3; // ID para 'Administrador'
+      roleId = roleRecord.id;
     }
 
     let username = customUsername;
     
     if (!username) {
-      
       username = full_name
         .toLowerCase()
-        .replace(/[^a-zA-Z0-9]/g, '') 
-        .substring(0, 10); 
-    
-   
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substring(0, 10);
+      
       const existingUser = await AdminsModel.findOne({ where: { username } });
       
       if (existingUser) {      
@@ -132,33 +177,39 @@ export const createAdmin = async (req, res) => {
         username = `${username.substring(0, 7)}${randomNum}`.substring(0, 10);
       }
     } else {
-           const existingUser = await AdminsModel.findOne({ where: { username } });
+      const existingUser = await AdminsModel.findOne({ where: { username } });
       
       if (existingUser) {
         return res.status(400).json({
           error: true,
           message: 'El nombre de usuario ya está en uso. Por favor, elige otro.',
+          status: 400
         });
       }
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     const newAdmin = await AdminsModel.create({
       full_name,
       phone,
       email,
       username,
       password: hashedPassword,
-      image,
+      image: image,
       status: 'active',
       role_id: roleId
     });
+
+    const adminResponse = {
+      ...newAdmin.get(),
+      password: undefined
+    };
     
-    return res.status(201).json({ 
+    return res.status(201).json({
       error: false,
-      message: 'Admin creado exitosamente', 
-      data: newAdmin 
+      message: 'Admin creado exitosamente',
+      data: adminResponse,
+      status: 201
     });
   } catch (error) {
     console.error('Error al crear admin:', error);
@@ -172,13 +223,15 @@ export const createAdmin = async (req, res) => {
       return res.status(400).json({
         error: true,
         message: 'Error de validación',
-        errors
+        errors,
+        status: 400
       });
     }
     
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };

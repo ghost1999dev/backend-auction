@@ -6,9 +6,7 @@ import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from "../models/NotificationsModel.js";
 import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
-import { GetObjectCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import { s3Client } from "../utils/s3Client.js"
+import signImage from "../helpers/signImage.js";
 import { sendProjectStatusEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';

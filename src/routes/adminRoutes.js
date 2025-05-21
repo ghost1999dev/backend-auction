@@ -11,7 +11,9 @@ import { createAdmin,
     updateProjectStatus,
     generateUsername,
     uploadImageAdmin,
-    reactivateAdmin
+    reactivateAdmin,
+    forgotPassword,
+    resetPassword
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
@@ -354,6 +356,77 @@ router.put("/upload-image/:id", upload.single('file'), uploadImageAdmin);
  *        description: Server error         
  */ 
 router.put('/reactivatedAdmin/:id', validateAdmin, reactivateAdmin);
+
+/**
+ * @swagger
+ * /admins/forgot-password:
+ *  post:
+ *    tags: [Admins]
+ *    summary: Request a password reset
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                format: email
+ *                description: Email to reset password
+ *                example: example@example.com
+ *            required:
+ *              - email
+ *    responses:
+ *      200:
+ *        description: Correo de verificacion enviado
+ *      400: 
+ *        description: Correo no encontrado
+ *      500:
+ *        description: Server error
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /admins/reset-password:
+ *  post:
+ *    tags: [Admins]
+ *    summary: Reset a password
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *                format: email
+ *                description: Email to reset password
+ *                example: example@example.com
+ *              code:
+ *                type: string
+ *                description: Code to reset password
+ *                example: 123456
+ *              password:
+ *                type: string
+ *                format: password
+ *                description: New password
+ *                example: example123
+ *            required:
+ *              - email
+ *              - code
+ *              - password
+ *    responses:
+ *      200:
+ *        description: Usuario actualizado correctamente
+ *      400: 
+ *        description: Correo no encontrado, codigo incorrecto
+ *      500:
+ *        description: Server error
+ */
+router.post('/reset-password', resetPassword);
 
 export default router;
     /**

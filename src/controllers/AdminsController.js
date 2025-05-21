@@ -943,9 +943,9 @@ export const resetPassword = async (req, res) => {
           });
         }
         else {
-          const passwordHashed = hashPassword(password)
+          const hashedPassword = await bcrypt.hash(password, 10);
 
-          admin.password = passwordHashed
+          admin.password = hashedPassword
 
           await admin.save()
           res.status(200).json({

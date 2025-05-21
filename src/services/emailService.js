@@ -4,6 +4,11 @@ import cron from 'node-cron';
 import ProjectsModel from '../models/ProjectsModel.js';
 import UsersModel from '../models/UsersModel.js';
 import NotificationsModel from '../models/NotificationsModel.js';
+import signImage from '../helpers/signImage.js';
+
+//logo para enviar en los correos 
+const logoUrl = await signImage('logo-white.svg'); 
+console.log('URL firmada del logo:', logoUrl);
 
 
 dotenv.config();
@@ -88,7 +93,7 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
     <body>
       <div class="container">
         <div class="header">
-        <img src="https://tu-dominio.com/logo-white.svg" alt="Logo de Bluepixel" class="logo" />
+        <img src="${logoUrl}" alt="Logo de Bluepixel" class="logo" />
           <h2>Actualización de Proyecto</h2>
         </div>
         <div class="content">
@@ -276,7 +281,8 @@ export const sendReactivationEmail = async ({ email, name, tempPassword, expirat
     
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 5px;">
-        <h2 style="color: #333; text-align: center;">¡Bienvenido de vuelta!</h2>
+        <img src="${logoUrl}" alt="Logo" style="display: block; margin: 0 auto; max-width: 200px;" />
+      <h2 style="color: #333; text-align: center;">¡Bienvenido de vuelta!</h2>
         <p>Hola <strong>${name}</strong>,</p>
         <p>Tu cuenta de administrador ha sido reactivada exitosamente.</p>
         <p>Para acceder nuevamente al sistema, utiliza la siguiente contraseña temporal:</p>

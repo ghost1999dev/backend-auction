@@ -11,6 +11,8 @@ import { sendProjectStatusEmail, sendReactivationEmail } from '../services/email
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
+import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
+import hashPassword from "../helpers/hashPassword.js";
 
 const adminSchema = Joi.object({
   full_name: Joi.string().required().min(3).max(100).messages({
@@ -860,3 +862,113 @@ export const reactivateAdmin = async (req, res) => {
     });
   }
 };
+
+/**
+ * send password recovery email
+ * 
+ * function to send password recovery email
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} admin recovered
+ */
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({
+        message: 'Coreo no proporcionado',
+        error: error.message,
+        status: 400
+      });
+    }
+
+    const admin = await AdminsModel.findOne({ where: { email } })
+
+    if (!admin) {
+      return res.status(400).json({
+        message: 'Correo no encontrado',
+        error: error.message,
+        status: 400
+      });
+    }
+
+    const response = await requestPasswordRecovery(email)
+
+    if (response.status === 200) {
+      return res.status(200).json({
+        message: 'Codigo de recuperación enviado',
+        email: admin.email,
+        status: 200
+      });
+    }
+    else {
+      return res.status(response.status).json({
+        message: response.message,
+        error: error.message,
+        status: response.status
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al enviar el correo de recuperacion',
+      error: error.message,
+      status: 500
+    });
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, code, password } = req.body
+
+    if (!email || !code || !password) {
+      return res.status(400).json({
+        message: 'Error de validación',
+        error: error.message,
+        status: 400
+      });
+    }
+    else {
+      const response = await confirmEmailService(email, code)
+
+      if (response.status === 200) {
+        const admin = await AdminsModel.findOne({ where: { email } })
+
+        if (!admin) {
+          return res.status(400).json({
+            message: 'Correo no encontrado',
+            error: error.message,
+            status: 400
+          });
+        }
+        else {
+          const passwordHashed = hashPassword(password)
+
+          admin.password = passwordHashed
+
+          await admin.save()
+          res.status(200).json({
+            message: 'Contraseña actualizada correctamente',
+            admin: admin,
+            status: 200
+          })
+        }
+      }
+      else {
+        res.status(response.status)
+        .json({
+          message: response.message,
+          status: response.status
+        })
+      }
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ 
+        status: 500,
+        message: "Error al actualizar la contraseña", error: error.message 
+      })
+  }
+}

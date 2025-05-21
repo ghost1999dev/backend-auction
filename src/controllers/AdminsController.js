@@ -778,7 +778,7 @@ export const reactivateAdmin = async (req, res) => {
     if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
-        message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
+        message: 'No tienes permisos para Reactivar administradores. Solo el superAdministrador puede realizar esta acción.',
         status: 403
       });
     }

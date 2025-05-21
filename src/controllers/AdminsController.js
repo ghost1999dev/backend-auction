@@ -21,7 +21,6 @@ const adminSchema = Joi.object({
   }),
   phone: Joi.string().required().pattern(/^\d{7,15}$/).messages({
     'string.empty': 'El número de teléfono es obligatorio',
-    'string.pattern.base': 'El número de teléfono debe contener entre 7 y 15 dígitos',
     'any.required': 'El número de teléfono es obligatorio'
   }),
   email: Joi.string().required().email().messages({

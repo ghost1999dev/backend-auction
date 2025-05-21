@@ -201,7 +201,7 @@ router.get("/counter/:developer_id", applicationsCounterByDeveloper);
 
 /**
  * @swagger
- * /application-projects/projects-by-developer/{developer_id}:
+ * /application-projects/my-applications/{developer_id}":
  *   get:
  *     tags: [application-projects]
  *     summary: Obtener las aplicaciones de un desarrollador

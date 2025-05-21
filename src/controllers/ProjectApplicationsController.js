@@ -386,7 +386,19 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
         as: 'project',
         where: {
           status: 1
-        }
+        },
+        include: [{
+          model: CompaniesModel,
+          as: 'company_profile',
+          include: [{
+            model: UsersModel,
+            attributes: ['id', 'name', 'email', 'phone']
+          }] 
+        },{
+          model: CategoriesModel,
+          as: 'category',
+          attributes: ['id', 'name']
+        }]
       }]
     })
 

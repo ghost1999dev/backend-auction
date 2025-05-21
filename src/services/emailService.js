@@ -258,3 +258,63 @@ cron.schedule('0 0 * * *', async () => {
     console.error("Error en la verificación diaria de proyectos:", error);
   }
 });
+
+/**
+ * Send reactivation email with temporary password
+ * 
+ * @param {Object} options - Email options
+ * @param {string} options.email - Recipient email address
+ * @param {string} options.name - Recipient name
+ * @param {string} options.tempPassword - Temporary password
+ * @param {number} options.expirationHours - Hours until password expires
+ * @returns {Promise<void>}
+ */
+export const sendReactivationEmail = async ({ email, name, tempPassword, expirationHours = 24 }) => {
+  try {
+    
+    const subject = 'Tu cuenta ha sido reactivada - Acción requerida';
+    
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e1e1e1; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">¡Bienvenido de vuelta!</h2>
+        <p>Hola <strong>${name}</strong>,</p>
+        <p>Tu cuenta de administrador ha sido reactivada exitosamente.</p>
+        <p>Para acceder nuevamente al sistema, utiliza la siguiente contraseña temporal:</p>
+        <div style="background-color: #f5f5f5; padding: 10px; text-align: center; font-size: 18px; margin: 15px 0; border-radius: 3px;">
+          <code>${tempPassword}</code>
+        </div>
+        <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+          <p style="margin: 0; color: #d54400;"><strong>IMPORTANTE:</strong></p>
+          <ul style="padding-left: 20px; margin-top: 10px;">
+            <li>Esta contraseña expirará en <strong>${expirationHours} horas</strong>.</li>
+            <li>Se te solicitará cambiar esta contraseña en tu primer inicio de sesión.</li>
+            <li>No compartas esta contraseña con nadie.</li>
+          </ul>
+        </div>
+        <p>Si no solicitaste esta reactivación o tienes alguna pregunta, por favor contacta al administrador del sistema inmediatamente.</p>
+        <p style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
+          Este es un correo electrónico automático, por favor no respondas a este mensaje.
+        </p>
+                <div class="footer">
+          &copy; ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.
+        </div>
+      </div>
+      </div>
+    `;
+
+      const mailOptions = {
+        from: `"Bluepixel" <${process.env.SENDEMAIL}>`,
+        to: email,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Correo enviado con éxito: ${info.messageId}`);
+      return info;
+
+  } catch (error) {
+    console.error('Error al enviar correo de reactivación:', error);
+    throw new Error('No se pudo enviar el correo de reactivación');
+  }
+};

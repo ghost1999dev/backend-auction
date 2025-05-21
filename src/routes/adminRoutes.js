@@ -10,7 +10,8 @@ import { createAdmin,
     getProjectById,
     updateProjectStatus,
     generateUsername,
-    uploadImageAdmin
+    uploadImageAdmin,
+    reactivateAdmin
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
@@ -324,6 +325,35 @@ router.put('/update-project-status/:id',updateProjectStatus);
  *        description: Server error
  */
 router.put("/upload-image/:id", upload.single('file'), uploadImageAdmin);
+
+/**
+ * @swagger
+ * /admins/reactivatedAdmin/{id}:
+ *  put:
+ *    tags: [Admins]
+ *    summary: Reactivate an inactive admin
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Admin id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/adminUpdate'
+ *    responses:
+ *      200:
+ *        description: Returns updated admin
+ *      404:
+ *        description: Admin not found
+ *      500:
+ *        description: Server error         
+ */ 
+router.put('/reactivatedAdmin/:id', validateAdmin, reactivateAdmin);
 
 export default router;
     /**

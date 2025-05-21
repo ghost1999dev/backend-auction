@@ -7,7 +7,7 @@ import NotificationsModel from "../models/NotificationsModel.js";
 import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
 import signImage from "../helpers/signImage.js";
-import { sendProjectStatusEmail } from '../services/emailService.js';
+import { sendProjectStatusEmail, sendReactivationEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
@@ -760,4 +760,103 @@ export const updateProjectStatus = async (req, res) => {
  */
 export const uploadImageAdmin = async (req, res) => {
   updateImage(req, res, AdminsModel);
+};
+
+/**
+ * reactivate admin
+ *
+ * function to reactivate an inactive admin and send temporary password email
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} admin reactivated status
+ */
+
+export const reactivateAdmin = async (req, res) => {
+  try {
+
+    console.log("Usuario autenticado:", req.user);
+    if (!req.user || req.user.role !== 'SuperAdministrador') {
+      return res.status(403).json({
+        error: true,
+        message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
+        status: 403
+      });
+    }
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        error: true,
+        message: 'ID de administrador no proporcionado',
+        status: 400
+      });
+    }
+
+    const admin = await AdminsModel.findByPk(id);
+
+    if (!admin) {
+      return res.status(404).json({
+        error: true,
+        message: 'Administrador no encontrado',
+        status: 404
+      });
+    }
+
+    if (admin.status === 'active') {
+      return res.status(400).json({
+        error: true,
+        message: 'El administrador ya se encuentra activo',
+        status: 400
+      });
+    }
+
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    const length = Math.floor(Math.random() * 5) + 8; // Entre 8 y 12 caracteres
+    let tempPassword = '';
+    
+    for (let i = 0; i < length; i++) {
+      tempPassword += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + 24);
+
+    admin.status = 'active';
+    admin.password = hashedPassword;
+    admin.password_expires_at = expirationDate;
+    admin.password_change_required = true; 
+    await admin.save();
+    
+    try {
+      await sendReactivationEmail({
+        email: admin.email,
+        name: admin.full_name,
+        tempPassword: tempPassword,
+        expirationHours: 24
+      });
+      
+      return res.status(200).json({
+        error: false,
+        message: 'Administrador reactivado exitosamente. Se ha enviado un correo con la contraseña temporal válida por 24 horas.',
+        status: 200
+      });
+    } catch (emailError) {
+      console.error('Error al enviar correo de reactivación:', emailError);
+
+      return res.status(200).json({
+        error: false,
+        message: 'Administrador reactivado exitosamente, pero hubo un problema al enviar el correo con la contraseña temporal.',
+        status: 200
+      });
+    }
+  } catch (error) {
+    console.error('Error al reactivar admin:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Error interno del servidor',
+      status: 500
+    });
+  }
 };

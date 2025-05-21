@@ -3,6 +3,7 @@ import ProjectsModel from "../models/ProjectsModel.js";
 import UsersModel from "../models/UsersModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import { where } from "sequelize";
+import { stat } from "fs";
 
 const APPLICATION_STATUS = {
   PENDING:  0,
@@ -336,6 +337,69 @@ export const applicationsCounterByDeveloper = async (req, res) => {
     res.status(500).json({
       status: 500,
       message: "Error al contar las aplicaciones",
+      error: error.message
+    });
+  }
+}
+
+/**
+ * projects application by developer
+ * 
+ * function to get projects applications by developer
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} projects applications
+ */
+export const getProjectsApplicationsByDeveloper = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({
+        status: 400,
+        message: 'ID de desarrollador requerido',
+        error: 'missing_fields'
+      });
+    }
+
+    const developer = await DevelopersModel.findByPk(id)
+
+    if (!developer) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Desarrollador no encontrado',
+        error: 'developer_not_found'
+      });
+    }
+
+    const applications = await ProjectsModel.findAll({
+      where: { status: 1 },
+      include: [{
+        model: ProjectApplicationsModel,
+        as: 'applications',
+        where: {
+          developer_id: id
+        }
+      }]
+    })
+
+    if (applications.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'No se encontraron aplicaciones para este desarrollador',
+        error: 'applications_not_found'
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Aplicaciones obtenidas exitosamente',
+      applications
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Error al obtener las aplicaciones',
       error: error.message
     });
   }

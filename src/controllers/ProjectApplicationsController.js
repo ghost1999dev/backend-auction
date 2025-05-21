@@ -2,8 +2,8 @@ import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import UsersModel from "../models/UsersModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
-import { where } from "sequelize";
-import { stat } from "fs";
+import CompaniesModel from "../models/CompaniesModel.js";
+import CategoriesModel from "../models/CategoriesModel.js";
 
 const APPLICATION_STATUS = {
   PENDING:  0,
@@ -352,9 +352,9 @@ export const applicationsCounterByDeveloper = async (req, res) => {
  */
 export const getProjectsApplicationsByDeveloper = async (req, res) => {
   try {
-    const { id } = req.params
+    const { developer_id } = req.params
 
-    if (!id) {
+    if (!developer_id) {
       return res.status(400).json({
         status: 400,
         message: 'ID de desarrollador requerido',
@@ -362,7 +362,11 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       });
     }
 
-    const developer = await DevelopersModel.findByPk(id)
+    const developer = await DevelopersModel.findOne({
+      where: { 
+        id: developer_id
+      }
+    })
 
     if (!developer) {
       return res.status(404).json({
@@ -372,13 +376,16 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       });
     }
 
-    const applications = await ProjectsModel.findAll({
-      where: { status: 1 },
+    const applications = await ProjectApplicationsModel.findAll({
+      where: { 
+        status: 1,
+        developer_id 
+      },
       include: [{
-        model: ProjectApplicationsModel,
-        as: 'applications',
+        model: ProjectsModel,
+        as: 'project',
         where: {
-          developer_id: id
+          status: 1
         }
       }]
     })

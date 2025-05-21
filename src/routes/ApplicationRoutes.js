@@ -12,7 +12,8 @@ import {
   getApplication,
   updateApplication,
   deleteApplication,
-  applicationsCounterByDeveloper
+  applicationsCounterByDeveloper,
+  getProjectsApplicationsByDeveloper
 } from "../controllers/ProjectApplicationsController.js";
 
 const router = Router();
@@ -197,6 +198,35 @@ router.delete("/delete/:id", deleteApplication);
  *         description: Error del servidor
  */
 router.get("/counter/:developer_id", applicationsCounterByDeveloper);
+
+/**
+ * @swagger
+ * /application-projects/projects-by-developer/{developer_id}:
+ *   get:
+ *     tags: [application-projects]
+ *     summary: Obtener las aplicaciones de un desarrollador
+ *     parameters:
+ *       - in: path
+ *         name: developer_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del desarrollador
+ *     responses:
+ *       200:
+ *         description: Aplicaciones encontradas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Application'
+ *       404:
+ *         description: Desarrollador no encontrado o no tiene aplicaciones
+ *       500:
+ *         description: Error del servidor  
+ */
+router.get("/projects-by-developer/:developer_id", getProjectsApplicationsByDeveloper);
 
 export default router;
 

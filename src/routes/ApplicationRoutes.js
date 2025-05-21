@@ -226,7 +226,7 @@ router.get("/counter/:developer_id", applicationsCounterByDeveloper);
  *       500:
  *         description: Error del servidor  
  */
-router.get("/projects-by-developer/:developer_id", getProjectsApplicationsByDeveloper);
+router.get("/my-applications/:developer_id", getProjectsApplicationsByDeveloper);
 
 export default router;
 

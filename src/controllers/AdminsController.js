@@ -19,11 +19,13 @@ const adminSchema = Joi.object({
     'string.max': 'El nombre completo no puede exceder los 100 caracteres',
     'any.required': 'El nombre completo es obligatorio'
   }),
-  phone: Joi.string().required().pattern(/^\d{7,15}$/).messages({
-    'string.empty': 'El número de teléfono es obligatorio',
-    'string.pattern.base': 'El número de teléfono debe contener entre 7 y 15 dígitos',
-    'any.required': 'El número de teléfono es obligatorio'
-  }),
+phone: Joi.string()
+  .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
+  .required()
+    .messages({
+      'string.pattern.base': 'Phone numbers format is wrong',
+      'string.empty': 'Number is empty'
+    }),
   email: Joi.string().required().email().messages({
     'string.empty': 'El correo electrónico es obligatorio',
     'string.email': 'Formato de correo electrónico inválido',

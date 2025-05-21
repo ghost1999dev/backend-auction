@@ -255,10 +255,7 @@ export default router;
  *           type: integer
  *         developer_id:
  *           type: integer
- *         status:
- *           type: integer
- *           description: '0=pending,1=approved,2=rejected'
- *       required: [project_id, developer_id, status]
+ *       required: [project_id, developer_id]
  *
  *     ApplicationUpdate:
  *       type: object

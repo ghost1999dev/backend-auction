@@ -5,7 +5,7 @@ import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 
 
-export const getAll = async (req, res) => {
+export const getAllRatings = async (req, res) => {
    try {
     const {
       developer_id,
@@ -63,7 +63,7 @@ export const getAll = async (req, res) => {
   }
 }
 
-  export const getById = async (req, res) => {
+  export const getByIdRating = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);
       if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
@@ -73,7 +73,7 @@ export const getAll = async (req, res) => {
     }
   }
 
- export const create = async (req, res) => {
+ export const createRatings = async (req, res) => {
     try {
 
        const { error } = createRatingSchema.validate(req.body);
@@ -94,7 +94,7 @@ export const getAll = async (req, res) => {
     }
   }
 
- export const update = async (req, res) => {
+ export const updateRatings = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);
       if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
@@ -106,7 +106,7 @@ export const getAll = async (req, res) => {
     }
   }
 
- export const deletev = async (req, res) => {
+ export const deleteRatings = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);
       if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });

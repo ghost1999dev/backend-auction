@@ -30,6 +30,7 @@ import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
 import ProjectRoutes from "./routes/projectsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import ratingRoutes from "./routes/ratingsRoutes.js";
 
 config();
 const app = express();
@@ -102,6 +103,7 @@ class Server {
     this.app.use("/admins", adminRoutes);
     this.app.use("/auctions", AuctionRoutes);
     this.app.use("/application-projects", ApplicationRoutes);
+    this.app.use("/ratings", ratingRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

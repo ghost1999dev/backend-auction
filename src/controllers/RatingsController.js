@@ -6,22 +6,63 @@ import bcrypt from 'bcrypt';
 
 
 export const getAll = async (req, res) => {
-  // Obtener todas las calificaciones visibles
-    try {
-      const ratings = await RatingModel.findAll({
-        where: { isVisible: true },
-        include: [
-          { model: UsersModel, as: 'developer', attributes: ['id', 'name'] },
-          { model: UsersModel, as: 'company', attributes: ['id', 'name'] },
-        ],
-      });
-      res.json(ratings);
-    } catch (error) {
-      res.status(500).json({ message: 'Error al obtener ratings', error });
-    }
-};
+   try {
+    const {
+      developer_id,
+      company_id,
+      score_min,
+      score_max,
+      score,
+      isVisible,
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt', 
+      order = 'desc',        
+    } = req.query;
 
-  // Obtener una calificación por ID
+    const where = {};
+
+    if (developer_id) where.developer_id = developer_id;
+    if (company_id) where.company_id = company_id;
+    if (isVisible !== undefined) where.isVisible = isVisible === 'true';
+
+    if (score) {
+      where.score = score;
+    } else if (score_min || score_max) {
+      where.score = {
+        ...(score_min && { [Op.gte]: parseFloat(score_min) }),
+        ...(score_max && { [Op.lte]: parseFloat(score_max) }),
+      };
+    }
+
+    const offset = (page - 1) * limit;
+
+    const allowedSortFields = ['score', 'createdAt'];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const sortOrder = order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+    const ratings = await Rating.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      include: [
+        { model: User, as: 'developer', attributes: ['id', 'name'] },
+        { model: User, as: 'company', attributes: ['id', 'name'] },
+      ],
+      order: [[sortField, sortOrder]],
+    });
+
+    res.json({
+      data: ratings.rows,
+      total: ratings.count,
+      page: parseInt(page),
+      totalPages: Math.ceil(ratings.count / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener ratings', error });
+  }
+}
+
   export const getById = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);
@@ -32,7 +73,6 @@ export const getAll = async (req, res) => {
     }
   }
 
-  // Crear una calificación
  export const create = async (req, res) => {
     try {
 
@@ -54,7 +94,6 @@ export const getAll = async (req, res) => {
     }
   }
 
-  // Actualizar una calificación
  export const update = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);
@@ -67,7 +106,6 @@ export const getAll = async (req, res) => {
     }
   }
 
-  // Eliminar (opcionalmente soft delete) una calificación
  export const deletev = async (req, res) => {
     try {
       const rating = await RatingModel.findByPk(req.params.id);

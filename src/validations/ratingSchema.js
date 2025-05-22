@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi'
 
 export const createRatingSchema = Joi.object({
   developer_id: Joi.number().required(),

@@ -192,6 +192,18 @@ export const getAllRatings = async (req, res) => {
 
         const rating = await RatingModel.findByPk(req.params.id);
         if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+    
+        if (req.body.comment && req.body.comment !== rating.comment) {
+        const now = new Date();
+        const createdAt = new Date(rating.createdAt);
+        const hoursSinceCreation = (now - createdAt) / (1000 * 60 * 60);
+
+        if (hoursSinceCreation > 1) {
+            return res.status(400).json({
+            message: 'No puedes editar el comentario después de una hora de haberlo creado',
+            });
+        }
+        }  
 
         await rating.update(req.body);
 

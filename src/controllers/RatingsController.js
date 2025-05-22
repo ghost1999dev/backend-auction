@@ -2,7 +2,6 @@ import UsersModel from '../models/UsersModel.js';
 import RatingModel from '../models/RatingModel.js';
 import { createRatingSchema } from '../validations/ratingSchema.js';
 import { Op } from 'sequelize';
-import bcrypt from 'bcrypt';
 
 
 export const getAllRatings = async (req, res) => {
@@ -41,7 +40,7 @@ export const getAllRatings = async (req, res) => {
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
     const sortOrder = order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
-    const ratings = await Rating.findAndCountAll({
+    const ratings = await RatingModel.findAndCountAll({
       where,
       limit: parseInt(limit),
       offset: parseInt(offset),
@@ -59,7 +58,8 @@ export const getAllRatings = async (req, res) => {
       totalPages: Math.ceil(ratings.count / limit),
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener ratings', error });
+    console.error("Error al obtener ratings:", error);
+    res.status(500).json({ message: 'Error al obtener ratings', error: error.message || error });
   }
 }
 
@@ -69,7 +69,8 @@ export const getAllRatings = async (req, res) => {
       if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
       res.json(rating);
     } catch (error) {
-      res.status(500).json({ message: 'Error al obtener rating', error });
+        console.error("Error al obtener rating:", error);
+        res.status(500).json({ message: 'Error al obtener rating', error: error.message || error });   
     }
   }
 
@@ -81,7 +82,7 @@ export const getAllRatings = async (req, res) => {
 
       const { developer_id, company_id, score, comment, isVisible } = req.body;
 
-      const rating = await Rating.create({
+      const rating = await RatingModel.create({
         developer_id,
         company_id,
         score,
@@ -90,7 +91,8 @@ export const getAllRatings = async (req, res) => {
       });
       res.status(201).json(rating);
     } catch (error) {
-      res.status(500).json({ message: 'Error al crear rating', error });
+       console.error("Error al crear rating:", error);
+       res.status(500).json({ message: 'Error al crear rating', error: error.message || error });
     }
   }
 
@@ -102,7 +104,8 @@ export const getAllRatings = async (req, res) => {
       await rating.update(req.body);
       res.json(rating);
     } catch (error) {
-      res.status(500).json({ message: 'Error al actualizar rating', error });
+        console.error("Error al actualizar rating:", error);
+        res.status(500).json({ message: 'Error al actualizar rating', error: error.message || error });
     }
   }
 
@@ -112,13 +115,15 @@ export const getAllRatings = async (req, res) => {
       if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
 
        if (req.user.id !== rating.company_id) {
+
       return res.status(403).json({ message: 'No autorizado para eliminar este rating' });
     }
 
       await rating.destroy();
       res.json({ message: 'Rating eliminado' });
     } catch (error) {
-      res.status(500).json({ message: 'Error al eliminar rating', error });
+        console.error("Error al eliminar rating:", error);
+        res.status(500).json({ message: 'Error al eliminar rating', error: error.message || error });
     }
   }
 

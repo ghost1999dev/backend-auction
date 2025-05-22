@@ -44,7 +44,7 @@ import UsersModel from "./UsersModel.js";
 
   // Asociaciones
   RatingModel.associate = (models) => {
-    Rating.belongsTo(models.UsersModel, {
+    RatingModel.belongsTo(models.UsersModel, {
       foreignKey: 'developer_id',
       as: 'developer'
     });

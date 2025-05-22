@@ -1,11 +1,13 @@
 import UsersModel from '../models/UsersModel.js';
+import DevelopersModel from '../models/DevelopersModel.js';
+import CompaniesModel from '../models/CompaniesModel.js';
 import RatingModel from '../models/RatingModel.js';
 import { createRatingSchema } from '../validations/ratingSchema.js';
 import { Op } from 'sequelize';
 
 
 export const getAllRatings = async (req, res) => {
-   try {
+  try {
     const {
       developer_id,
       company_id,
@@ -15,8 +17,8 @@ export const getAllRatings = async (req, res) => {
       isVisible,
       page = 1,
       limit = 10,
-      sortBy = 'createdAt', 
-      order = 'desc',        
+      sortBy = 'createdAt',
+      order = 'desc',
     } = req.query;
 
     const where = {};
@@ -45,51 +47,140 @@ export const getAllRatings = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       include: [
-        { model: User, as: 'developer', attributes: ['id', 'name'] },
-        { model: User, as: 'company', attributes: ['id', 'name'] },
+        {
+          model: DevelopersModel,
+          as: 'developer',
+          attributes: ['id'],
+          include: [
+            {
+              model: UsersModel,
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+        {
+          model: CompaniesModel,
+          as: 'company',
+          attributes: ['id'],
+          include: [
+            {
+              model: UsersModel,
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
       ],
       order: [[sortField, sortOrder]],
     });
 
     res.json({
-      data: ratings.rows,
-      total: ratings.count,
-      page: parseInt(page),
-      totalPages: Math.ceil(ratings.count / limit),
+    data: ratings.rows.map(rating => ({
+        id: rating.id,
+        score: rating.score,
+        comment: rating.comment,
+        isVisible: rating.isVisible,
+        createdAt: rating.createdAt,
+        updatedAt: rating.updatedAt,
+        developer_id: rating.developer_id,
+        company_id: rating.company_id,
+        developer_name: rating.developer?.user?.name || null,
+        company_name: rating.company?.user?.name || null,
+    })),
+    total: ratings.count,
+    page: parseInt(page),
+    totalPages: Math.ceil(ratings.count / limit),
     });
+
   } catch (error) {
-    console.error("Error al obtener ratings:", error);
-    res.status(500).json({ message: 'Error al obtener ratings', error: error.message || error });
+    console.error('Error al obtener ratings:', error);
+    res.status(500).json({ message: 'Error al obtener ratings', error });
   }
-}
+};
 
   export const getByIdRating = async (req, res) => {
-    try {
-      const rating = await RatingModel.findByPk(req.params.id);
-      if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
-      res.json(rating);
-    } catch (error) {
-        console.error("Error al obtener rating:", error);
-        res.status(500).json({ message: 'Error al obtener rating', error: error.message || error });   
-    }
+     try {
+    const rating = await RatingModel.findByPk(req.params.id, {
+      include: [
+        {
+          model: DevelopersModel,
+          as: 'developer',
+          attributes: ['id'],
+          include: [
+            {
+              model: UsersModel,
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+        {
+          model: CompaniesModel,
+          as: 'company',
+          attributes: ['id'],
+          include: [
+            {
+              model: UsersModel,
+              attributes: ['id', 'name'],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+
+    res.json({
+      id: rating.id,
+      score: rating.score,
+      comment: rating.comment,
+      isVisible: rating.isVisible,
+      createdAt: rating.createdAt,
+      updatedAt: rating.updatedAt,
+      developer_id: rating.developer_id,
+      company_id: rating.company_id,
+      developer_name: rating.developer?.user?.name || null,
+      company_name: rating.company?.user?.name || null,
+    });
+  } catch (error) {
+    console.error('Error al obtener rating:', error);
+    res.status(500).json({ message: 'Error al obtener rating', error });
   }
+};
 
  export const createRatings = async (req, res) => {
-    try {
+  try {
+    const { error } = createRatingSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
 
-       const { error } = createRatingSchema.validate(req.body);
-       if (error) return res.status(400).json({ message: error.details[0].message }); 
+    const { developer_id, company_id, score, comment, isVisible } = req.body;
 
-      const { developer_id, company_id, score, comment, isVisible } = req.body;
+    const rating = await RatingModel.create({
+      developer_id,
+      company_id,
+      score,
+      comment,
+      isVisible,
+    });
 
-      const rating = await RatingModel.create({
-        developer_id,
-        company_id,
-        score,
-        comment,
-        isVisible,
-      });
-      res.status(201).json(rating);
+    const developer = await DevelopersModel.findByPk(developer_id, {
+      include: { model: UsersModel, attributes: ['name'] }
+    });
+    const company = await CompaniesModel.findByPk(company_id, {
+      include: { model: UsersModel, attributes: ['name'] }
+    });
+
+    res.status(201).json({
+      id: rating.id,
+      score: rating.score,
+      comment: rating.comment,
+      isVisible: rating.isVisible,
+      createdAt: rating.createdAt,
+      updatedAt: rating.updatedAt,
+      developer_id,
+      company_id,
+      developer_name: developer?.user?.name || null,
+      company_name: company?.user?.name || null,
+    });
+    
     } catch (error) {
        console.error("Error al crear rating:", error);
        res.status(500).json({ message: 'Error al crear rating', error: error.message || error });
@@ -97,17 +188,38 @@ export const getAllRatings = async (req, res) => {
   }
 
  export const updateRatings = async (req, res) => {
-    try {
-      const rating = await RatingModel.findByPk(req.params.id);
-      if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+  try {
 
-      await rating.update(req.body);
-      res.json(rating);
+        const rating = await RatingModel.findByPk(req.params.id);
+        if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+
+        await rating.update(req.body);
+
+        const developer = await DevelopersModel.findByPk(rating.developer_id, {
+        include: { model: UsersModel, attributes: ['name'] }
+        });
+        const company = await CompaniesModel.findByPk(rating.company_id, {
+        include: { model: UsersModel, attributes: ['name'] }
+        });
+
+        res.json({
+        id: rating.id,
+        score: rating.score,
+        comment: rating.comment,
+        isVisible: rating.isVisible,
+        createdAt: rating.createdAt,
+        updatedAt: rating.updatedAt,
+        developer_id: rating.developer_id,
+        company_id: rating.company_id,
+        developer_name: developer?.user?.name || null,
+        company_name: company?.user?.name || null,
+        });
+
     } catch (error) {
         console.error("Error al actualizar rating:", error);
         res.status(500).json({ message: 'Error al actualizar rating', error: error.message || error });
     }
-  }
+  };
 
  export const deleteRatings = async (req, res) => {
     try {

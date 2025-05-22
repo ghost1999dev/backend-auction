@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { getAllRatings, 
+import { 
+    getAllRatings, 
     getByIdRating, 
     createRatings, 
     updateRatings,

@@ -1,6 +1,7 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
-import UsersModel from "./UsersModel.js";
+import DevelopersModel from "./DevelopersModel.js";
+import CompaniesModel from "./CompaniesModel.js";
 
 /**
  * Rating model.
@@ -42,19 +43,17 @@ import UsersModel from "./UsersModel.js";
     timestamps: true
   });  
 
-  // Asociaciones
-  RatingModel.associate = (models) => {
-    RatingModel.belongsTo(models.UsersModel, {
-      foreignKey: 'developer_id',
-      as: 'developer'
-    });
+// Asociaciones
+RatingModel.belongsTo(DevelopersModel, {
+  foreignKey: 'developer_id',
+  as: 'developer'
+});
 
-    RatingModel.belongsTo(models.UsersModel, {
-      foreignKey: 'company_id',
-      as: 'company'
-    });
-  };
- 
+RatingModel.belongsTo(CompaniesModel, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
   export default RatingModel;
 
 

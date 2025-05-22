@@ -192,6 +192,18 @@ export const getAllRatings = async (req, res) => {
 
         const rating = await RatingModel.findByPk(req.params.id);
         if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+            // Verificación de propiedad
+        const developer = await DevelopersModel.findByPk(rating.developer_id);
+        const company = await CompaniesModel.findByPk(rating.company_id);
+
+        const isOwner = (developer && developer.user_id === req.user.id) ||
+                        (company && company.user_id === req.user.id);
+
+        if (!isOwner) {
+        return res.status(403).json({ message: 'No autorizado para editar este rating' });
+        }
+
+
     
         if (req.body.comment && req.body.comment !== rating.comment) {
         const now = new Date();
@@ -207,10 +219,10 @@ export const getAllRatings = async (req, res) => {
 
         await rating.update(req.body);
 
-        const developer = await DevelopersModel.findByPk(rating.developer_id, {
+        const developerUser = await DevelopersModel.findByPk(rating.developer_id, {
         include: { model: UsersModel, attributes: ['name'] }
         });
-        const company = await CompaniesModel.findByPk(rating.company_id, {
+        const companyUser = await CompaniesModel.findByPk(rating.company_id, {
         include: { model: UsersModel, attributes: ['name'] }
         });
 
@@ -223,8 +235,8 @@ export const getAllRatings = async (req, res) => {
         updatedAt: rating.updatedAt,
         developer_id: rating.developer_id,
         company_id: rating.company_id,
-        developer_name: developer?.user?.name || null,
-        company_name: company?.user?.name || null,
+        developer_name: developerUser?.user?.name || null,
+        company_name: companyUser?.user?.name || null,
         });
 
     } catch (error) {
@@ -234,20 +246,26 @@ export const getAllRatings = async (req, res) => {
   };
 
  export const deleteRatings = async (req, res) => {
-    try {
-      const rating = await RatingModel.findByPk(req.params.id);
-      if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
+  try {
+    const rating = await RatingModel.findByPk(req.params.id);
+    if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
 
-       if (req.user.id !== rating.company_id) {
+    const developer = await DevelopersModel.findByPk(rating.developer_id);
+    const company = await CompaniesModel.findByPk(rating.company_id);
 
+    const isOwner = (developer && developer.user_id === req.user.id) ||
+                    (company && company.user_id === req.user.id);
+
+    if (!isOwner) {
       return res.status(403).json({ message: 'No autorizado para eliminar este rating' });
     }
 
-      await rating.destroy();
-      res.json({ message: 'Rating eliminado' });
-    } catch (error) {
-        console.error("Error al eliminar rating:", error);
-        res.status(500).json({ message: 'Error al eliminar rating', error: error.message || error });
-    }
+    await rating.destroy();
+    
+    res.json({ message: 'Rating eliminado' });
+  } catch (error) {
+    console.error("Error al eliminar rating:", error);
+    res.status(500).json({ message: 'Error al eliminar rating', error: error.message || error });
   }
+};
 

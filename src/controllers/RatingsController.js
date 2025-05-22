@@ -153,6 +153,28 @@ export const getAllRatings = async (req, res) => {
 
     const { developer_id, company_id, score, comment, isVisible } = req.body;
 
+     let isOwner = false;
+
+    if (developer_id) {
+      const developer = await DevelopersModel.findByPk(developer_id);
+      if (!developer) return res.status(404).json({ message: 'Desarrollador no encontrado' });
+      if (developer.user_id === req.user.id) {
+        isOwner = true;
+      }
+    }
+
+    if (company_id) {
+      const company = await CompaniesModel.findByPk(company_id);
+      if (!company) return res.status(404).json({ message: 'Empresa no encontrada' });
+      if (company.user_id === req.user.id) {
+        isOwner = true;
+      }
+    }
+
+    if (!isOwner) {
+      return res.status(403).json({ message: 'No estás autorizado para crear este rating' });
+    }
+
     const rating = await RatingModel.create({
       developer_id,
       company_id,
@@ -192,7 +214,7 @@ export const getAllRatings = async (req, res) => {
 
         const rating = await RatingModel.findByPk(req.params.id);
         if (!rating) return res.status(404).json({ message: 'Rating no encontrado' });
-            // Verificación de propiedad
+
         const developer = await DevelopersModel.findByPk(rating.developer_id);
         const company = await CompaniesModel.findByPk(rating.company_id);
 
@@ -261,7 +283,7 @@ export const getAllRatings = async (req, res) => {
     }
 
     await rating.destroy();
-    
+
     res.json({ message: 'Rating eliminado' });
   } catch (error) {
     console.error("Error al eliminar rating:", error);

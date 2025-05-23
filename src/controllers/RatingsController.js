@@ -4,6 +4,8 @@ import CompaniesModel from '../models/CompaniesModel.js';
 import RatingModel from '../models/RatingModel.js';
 import { createRatingSchema } from '../validations/ratingSchema.js';
 import { Op } from 'sequelize';
+import { Sequelize } from 'sequelize';
+
 
 
 export const getAllRatings = async (req, res) => {
@@ -290,4 +292,208 @@ export const getAllRatings = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar rating', error: error.message || error });
   }
 };
+
+export const getPromRatingByDeveloper = async (req, res) => {
+
+  const developerId = req.params.id;
+
+  if (!developerId) {
+    return res.status(400).json({ message: 'El parámetro developerId es requerido.' });
+  }
+
+  try {
+    const result = await RatingModel.findOne({
+      where: {
+        developer_id: developerId,
+        isVisible: true
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('score')), 'averageScore'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalRatings']
+      ]
+    });
+
+    const average = parseFloat(result.dataValues.averageScore || 0).toFixed(2);
+    const total = parseInt(result.dataValues.totalRatings);
+
+    res.json({
+      developer_id: developerId,
+      averageScore: parseFloat(average),
+      totalRatings: total
+    });
+  } catch (error) {
+    console.error('Error al calcular el promedio del developer:', error);
+    res.status(500).json({ message: 'Error al calcular el promedio del developer', error });
+  }
+}
+
+export const getPromRatingByCompany = async (req, res) => {
+  const companyId = req.params.id;
+
+  if (!companyId) {
+    return res.status(400).json({ message: 'El parámetro companyId es requerido.' });
+  }
+
+  try {
+    const result = await RatingModel.findOne({
+      where: {
+        company_id: companyId,
+        isVisible: true
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('score')), 'averageScore'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalRatings']
+      ]
+    });
+
+    const average = parseFloat(result?.dataValues?.averageScore || 0).toFixed(2);
+    const total = parseInt(result?.dataValues?.totalRatings || 0);
+
+    res.json({
+      company_id: companyId,
+      averageScore: parseFloat(average),
+      totalRatings: total
+    });
+  } catch (error) {
+    console.error('Error al calcular el promedio de la empresa:', error);
+    res.status(500).json({ message: 'Error al calcular el promedio de la empresa', error });
+  }
+};
+
+export const getGlobalPromRatingByCompany = async (req, res) => {
+  try {
+    const result = await RatingModel.findOne({
+      where: {
+        company_id: { [Op.ne]: null },
+        isVisible: true
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('score')), 'averageScore'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalRatings']
+      ]
+    });
+
+    const average = parseFloat(result?.dataValues?.averageScore || 0).toFixed(2);
+    const total = parseInt(result?.dataValues?.totalRatings || 0);
+
+    res.json({
+      averageScore: parseFloat(average),
+      totalRatings: total,
+      type: 'companies'
+    });
+  } catch (error) {
+    console.error('Error al calcular promedio global de empresas:', error);
+    res.status(500).json({ message: 'Error al calcular el promedio global de empresas', error });
+  }
+};
+
+export const getGlobalPromRatingByDeveloper = async (req, res) => {
+  try {
+    const result = await RatingModel.findOne({
+      where: {
+        developer_id: { [Op.ne]: null },
+        isVisible: true
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('score')), 'averageScore'],
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalRatings']
+      ]
+    });
+
+    const average = parseFloat(result?.dataValues?.averageScore || 0).toFixed(2);
+    const total = parseInt(result?.dataValues?.totalRatings || 0);
+
+    res.json({
+      averageScore: parseFloat(average),
+      totalRatings: total,
+      type: 'developers'
+    });
+  } catch (error) {
+    console.error('Error al calcular promedio global de developers:', error);
+    res.status(500).json({ message: 'Error al calcular el promedio global de developers', error });
+  }
+};
+
+export const getPublicProfile = async (req, res) => {
+  const userId = req.params.id;
+  const filterBy = req.query.filterBy; 
+
+  try {
+  
+    const user = await DevelopersModel.findByPk(userId) || await CompaniesModel.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    const ratingWhere = {
+      isVisible: true,
+      [Op.or]: [
+        { developer_id: userId },
+        { company_id: userId }
+      ]
+    };
+
+    if (filterBy === 'developer') {
+      ratingWhere.company_id = userId; 
+    } else if (filterBy === 'company') {
+      ratingWhere.developer_id = userId; 
+    }
+
+        const ratings = await RatingModel.findAll({
+      where: ratingWhere,
+      order: [['createdAt', 'DESC']],
+      attributes: ['score', 'comment', 'createdAt'],
+      include: [
+        (filterBy === 'developer' || !filterBy) && {
+          model: CompaniesModel,
+          as: 'company',
+          include: [{
+            model: UsersModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }]
+        },
+        (filterBy === 'company' || !filterBy) && {
+          model: DevelopersModel,
+          as: 'developer',
+          include: [{
+            model: UsersModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }]
+        }
+      ].filter(Boolean)
+    });
+
+    const totalRatings = ratings.length;
+    const avgScore = totalRatings
+      ? parseFloat((ratings.reduce((acc, r) => acc + r.score, 0) / totalRatings).toFixed(2))
+      : 0;
+
+    const recentRatings = ratings.map(r => ({
+      score: r.score,
+      comment: r.comment,
+      createdAt: r.createdAt,
+      reviewer: r.developer || r.company
+    }));
+
+    return res.json({
+      user,
+      ratingSummary: {
+        averageScore: avgScore,
+        totalRatings
+      },
+      recentRatings
+    });
+
+  } catch (error) {
+    console.error('Error al obtener perfil público:', error);
+    return res.status(500).json({ error: 'No se pudo obtener el perfil público.' });
+  }
+};
+
+
+
+
 

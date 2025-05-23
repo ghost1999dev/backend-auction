@@ -4,7 +4,15 @@ import {
     getByIdRating, 
     createRatings, 
     updateRatings,
-    deleteRatings } from '../controllers/RatingsController.js';
+    deleteRatings,
+    getPromRatingByCompany,
+    getPromRatingByDeveloper,
+    getGlobalPromRatingByCompany,
+    getGlobalPromRatingByDeveloper,
+    getPublicProfile
+
+} 
+    from '../controllers/RatingsController.js';
     import  authenticateToken  from '../middlewares/authenticateToken.js';
 
 const router = Router();
@@ -506,6 +514,13 @@ router.put('/update/:id',authenticateToken, updateRatings);
  *                 - message                 
  */ 
 router.delete('/delete/:id',authenticateToken, deleteRatings);
+
+router.get('/getPromCompany/:id', getPromRatingByCompany);
+router.get('/getPromDeveloper/:id',getPromRatingByDeveloper);
+router.get('/getGlobalPromCompany',getGlobalPromRatingByCompany);
+router.get('/getGlobalPromDeveloper',getGlobalPromRatingByDeveloper);
+router.get('/getPublicProfile/:id',getPublicProfile);
+
 
 export default router;
 /**

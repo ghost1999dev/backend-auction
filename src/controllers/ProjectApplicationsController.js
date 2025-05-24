@@ -2,7 +2,8 @@ import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import UsersModel from "../models/UsersModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
-import { where } from "sequelize";
+import CompaniesModel from "../models/CompaniesModel.js";
+import CategoriesModel from "../models/CategoriesModel.js";
 
 const APPLICATION_STATUS = {
   PENDING:  0,
@@ -109,7 +110,7 @@ export const createApplication = async (req, res, next) => {
     const app = await ProjectApplicationsModel.create({
       project_id,
       developer_id,
-      status: APPLICATION_STATUS.PENDING
+      status: 0
     });
 
     return res.status(201).json({
@@ -336,6 +337,88 @@ export const applicationsCounterByDeveloper = async (req, res) => {
     res.status(500).json({
       status: 500,
       message: "Error al contar las aplicaciones",
+      error: error.message
+    });
+  }
+}
+
+/**
+ * projects application by developer
+ * 
+ * function to get projects applications by developer
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} projects applications
+ */
+export const getProjectsApplicationsByDeveloper = async (req, res) => {
+  try {
+    const { developer_id } = req.params
+
+    if (!developer_id) {
+      return res.status(400).json({
+        status: 400,
+        message: 'ID de desarrollador requerido',
+        error: 'missing_fields'
+      });
+    }
+
+    const developer = await DevelopersModel.findOne({
+      where: { 
+        id: developer_id
+      }
+    })
+
+    if (!developer) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Desarrollador no encontrado',
+        error: 'developer_not_found'
+      });
+    }
+
+    const applications = await ProjectApplicationsModel.findAll({
+      where: { 
+        status: 1,
+        developer_id 
+      },
+      include: [{
+        model: ProjectsModel,
+        as: 'project',
+        where: {
+          status: 1
+        },
+        include: [{
+          model: CompaniesModel,
+          as: 'company_profile',
+          include: [{
+            model: UsersModel,
+            attributes: ['id', 'name', 'email', 'phone']
+          }] 
+        },{
+          model: CategoriesModel,
+          as: 'category',
+          attributes: ['id', 'name']
+        }]
+      }]
+    })
+
+    if (applications.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'No se encontraron aplicaciones para este desarrollador',
+        error: 'applications_not_found'
+      });
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Aplicaciones obtenidas exitosamente',
+      applications
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Error al obtener las aplicaciones',
       error: error.message
     });
   }

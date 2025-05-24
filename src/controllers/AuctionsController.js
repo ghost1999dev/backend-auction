@@ -101,8 +101,9 @@ export const listAuctions = async (req, res, next) => {
                 ...(end_date   && { [Op.lte]: end_date   })
             };
         }
+
         const auctions = await AuctionsModel.findAll({ 
-            attributes: ['id', 'project_id', 'status', 'createdAt', 'updatedAt'],
+            attributes: ['id', 'project_id', 'bidding_started_at', 'bidding_deadline', 'status', 'createdAt', 'updatedAt'],
             where, 
             order: [["createdAt", "DESC"]],
             include: [{

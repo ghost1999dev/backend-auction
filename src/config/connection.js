@@ -11,16 +11,14 @@ const __dirname = dirname(__filename);
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  host: 'serially-breezy-flatfish.data-1.use1.tembo.io',
+  host: 'ep-black-tree-a4gz5ynl-pooler.us-east-1.aws.neon.tech',
   port: 5432,
-  database: 'postgres',
-  username: 'postgres',
-  password: 'yoCiqPJ7FuiH2yA8',
+  database: 'neondb',
+  username: 'neondb_owner',
+  password: 'npg_2VAaLYxj6RQJ',
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: true,
-      ca: readFileSync(resolve(__dirname, 'ca.crt')).toString()
     }
   },
   pool: {

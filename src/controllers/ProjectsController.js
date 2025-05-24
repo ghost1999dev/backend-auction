@@ -2,6 +2,8 @@ import ProjectsModel from "../models/ProjectsModel.js";
 import NotificationsModel from "../models/NotificationsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
+import CompaniesModel from "../models/CompaniesModel.js";
+import { createProjectSchema } from "../validations/projectSchema.js"
 
 /**
  * create project
@@ -13,12 +15,19 @@ import UsersModel from "../models/UsersModel.js";
  */
 export const createProject = async (req, res) => {
     try {
-      const { company_id, category_id, project_name, description, budget, days_available } = req.body;
-
-      if (!company_id || !category_id || !project_name || !description || !budget || !days_available) {
-        return res.status(400).json({ message: "All fields must be filled.", status: 400 });
-      }
       
+      const { error, value } = createProjectSchema.validate(req.body)
+
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Error de validación',
+          details: error.details.map(d => d.message),
+          status: 400
+        });
+      }
+
+      const { company_id, category_id, project_name, description, long_description, budget, days_available } = value
       
       const activeProjectsCount = await ProjectsModel.count({
        where: {
@@ -28,9 +37,24 @@ export const createProject = async (req, res) => {
       });
 
       if (activeProjectsCount >= 5) {
+        const activeProjects = await ProjectsModel.count({
+          where: {
+            company_id: id,
+            status: 1
+          }
+        })
+
+        const pendingProjects = await ProjectsModel.count({
+          where: {
+            company_id: id,
+            status: 0
+          }
+        })
         return res.status(403).json({
-          message: "No se pueden crear más de 5 proyectos activos. Finaliza o desactiva alguno antes de crear uno nuevo.",
-          status: 403
+          message: "No se pueden crear más de 5 proyectos simultaneos. Finaliza o desactiva alguno antes de crear uno nuevo.",
+          status: 403,
+          activeProjects,
+          pendingProjects
         });
       }
       
@@ -43,7 +67,8 @@ export const createProject = async (req, res) => {
         description,
         budget,
         days_available,
-        status: projectStatus, 
+        status: projectStatus,
+        long_description
       });
   
       try {
@@ -97,7 +122,7 @@ export const createProject = async (req, res) => {
 export const updateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company_id, category_id, project_name, description, budget, days_available } = req.body;
+    const { company_id, category_id, project_name, description, long_description, budget, days_available } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -134,7 +159,8 @@ export const updateProjectId = async (req, res) => {
       description,
       budget,
       days_available,
-      status: currentStatus
+      status: currentStatus,
+      long_description: long_description
     };
 
     await ProjectsModel.update(updateData, {
@@ -506,3 +532,52 @@ export const getProjectsByCategory = async (req, res) => {
     res.status(500).json({ message: "Error retrieving category projects", error: error.message, status: 500 });
   }
 };
+
+/**
+ * projectsCounterByCompany
+ * 
+ * function to count projects by company
+ * @param {Object} req
+ * @param {Object} res  
+ * @returns {Object} projects counter by company
+ */
+export const projectsCounterByCompany = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({
+        status: 400,
+        message: "Falta el ID del empresa",
+        error: "missing_fields"
+      })
+    }
+    const company = await CompaniesModel.findByPk(id)
+
+    if (!company) {
+      return res.status(404).json({
+        status: 404,
+        message: "Empresa no encontrada",
+      })
+    }
+
+    const projectsCount = await ProjectsModel.count({
+      where: {
+        company_id: id,
+        status: [0, 1]
+      }
+    })
+
+    res.status(200).json({
+      status: 200,
+      message: "Proyectos contados exitosamente",
+      count: projectsCount
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al contar los proyectos",
+      error: error.message
+    });
+  }
+}

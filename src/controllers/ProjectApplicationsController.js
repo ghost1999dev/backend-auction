@@ -169,7 +169,7 @@ export const listApplications = async (req, res, next) => {
       ]
     });
 
-    res.json(applications);
+    res.json({applications});
 
   } catch (err) { next(err); }
 };

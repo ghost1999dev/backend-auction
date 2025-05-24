@@ -21,6 +21,7 @@ const adminSchema = Joi.object({
     'string.max': 'El nombre completo no puede exceder los 100 caracteres',
     'any.required': 'El nombre completo es obligatorio'
   }),
+<<<<<<< HEAD
 
   phone: Joi.string()
   .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
@@ -34,7 +35,23 @@ const adminSchema = Joi.object({
     'string.empty': 'El correo electrónico es obligatorio',
     'string.email': 'Formato de correo electrónico inválido',
     'any.required': 'El correo electrónico es obligatorio'
+=======
+  phone: Joi.string().required().pattern(/^\d{7,15}$/).messages({
+    'string.empty': 'El número de teléfono es obligatorio',
+    'string.pattern.base': 'El número de teléfono debe contener entre 7 y 15 dígitos',
+    'any.required': 'El número de teléfono es obligatorio'
+>>>>>>> ecad2e855be6ba560e5118215c3565f36d06e273
   }),
+  email: Joi.string()
+    .required()
+    .email()
+    .pattern(/@(empresa\.com|company\.com|corporacion\.com)$/)
+    .messages({
+      'string.empty': 'El correo electrónico es obligatorio',
+      'string.email': 'Formato de correo electrónico inválido',
+      'string.pattern.base': 'Solo se permiten correos corporativos (@empresa.com, @company.com, @corporacion.com)',
+      'any.required': 'El correo electrónico es obligatorio'
+    }),
   password: Joi.string().required().min(8).max(30).messages({
     'string.empty': 'La contraseña es obligatoria',
     'string.min': 'La contraseña debe tener al menos 8 caracteres',
@@ -354,21 +371,29 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    const { full_name, phone, email, username, password, image, status } = req.body;
-
-     if (!full_name && !phone && !email && !username && !password && !image && !status) {
-      return res.status(400).json({
-        error: true,
-        message: 'Debe proporcionar al menos un campo para actualizar'
-      });
-    }
-
     const admin = await AdminsModel.findByPk(req.params.id);
-
     if (!admin) {
       return res.status(404).json({
         error: true,
         message: 'Administrador no encontrado'
+      });
+    }
+
+    const { email } = req.body;
+    if (email && admin.role_id === 2) {
+      return res.status(403).json({
+        error: true,
+        message: 'No está permitido modificar el email siendo administrador',
+        error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED'
+      });
+    }
+
+    const { full_name, phone, username, password, image, status } = req.body;
+
+     if (!full_name && !phone && !username && !password && !image && !status) {
+      return res.status(400).json({
+        error: true,
+        message: 'Debe proporcionar al menos un campo para actualizar'
       });
     }
 

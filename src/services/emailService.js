@@ -8,7 +8,7 @@ import signImage from '../helpers/signImage.js';
 
 //logo para enviar en los correos 
 const logoUrl = await signImage('logo-white.svg'); 
-console.log('URL firmada del logo:', logoUrl);
+//console.log('URL firmada del logo:', logoUrl);
 
 
 dotenv.config();

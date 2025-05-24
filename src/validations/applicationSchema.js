@@ -18,16 +18,6 @@ export const applicationSchema = Joi.object({
     .messages({
       "number.base":  "developer_id debe ser numérico",
       "any.required": "developer_id es obligatorio"
-    }),
-
-  status: Joi.number()
-    .integer()
-    .valid(...STATUS_CODES)
-    .required()
-    .messages({
-      "number.base":  "status debe ser un número",
-      "any.only":     `status válido: ${STATUS_CODES.join(", ")}`,
-      "any.required": "status es obligatorio"
     })
 }).options({ abortEarly: false, stripUnknown: true });
 

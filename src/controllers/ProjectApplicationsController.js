@@ -48,14 +48,18 @@ export const createApplication = async (req, res, next) => {
       });
     }
 
-    const [project, developer] = await Promise.all([
-      ProjectsModel.findByPk(project_id),
-      DevelopersModel.findByPk({
+    const project = await ProjectsModel.findOne({
+        where: {
+          id: project_id,
+          status: 1
+        }
+      })
+
+    const developer = await DevelopersModel.findOne({
         where: {
           id: developer_id
         }
       })
-    ]);
 
     if (!project) {
       return res.status(404).json({
@@ -110,7 +114,7 @@ export const createApplication = async (req, res, next) => {
     const app = await ProjectApplicationsModel.create({
       project_id,
       developer_id,
-      status: 0
+      status: APPLICATION_STATUS.ACCEPTED
     });
 
     return res.status(201).json({

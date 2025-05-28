@@ -31,6 +31,7 @@ import sequelize from "./config/connection.js";
 import ProjectRoutes from "./routes/projectsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import ratingRoutes from "./routes/ratingsRoutes.js";
+import reportRoutes from "./routes/reportsRoutes.js";
 
 config();
 const app = express();
@@ -104,6 +105,7 @@ class Server {
     this.app.use("/auctions", AuctionRoutes);
     this.app.use("/application-projects", ApplicationRoutes);
     this.app.use("/ratings", ratingRoutes);
+    this.app.use("/reports", reportRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

@@ -126,7 +126,7 @@ router.get("/show/:id", DetailsProjectId);
 router.put("/update/:id", updateProjectId);
 /**
  * @swagger
- * /projects/delete/{id}:
+ * /projects/desactivate/{id}:
  *  delete:
  *    tags: [projects]
  *    summary: Delete a project
@@ -275,7 +275,7 @@ export default router;
  *          type: integer
  *          format: int32
  *        project_name:
- *          type: string
+ *          type: string    
  *        description:
  *          type: string
  *          description: Short description of the project min 20 characters

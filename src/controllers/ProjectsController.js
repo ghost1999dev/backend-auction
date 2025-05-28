@@ -3,6 +3,7 @@ import NotificationsModel from "../models/NotificationsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
+import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import { createProjectSchema } from "../validations/projectSchema.js"
 
 /**
@@ -240,9 +241,29 @@ export const DesactivateProjectId = async (req, res) => {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
     }
     
-    const project = await ProjectsModel.findByPk(id);
+    const project = await ProjectsModel.findOne({
+      where: { 
+        id,
+        status: [0, 1]
+      }
+    });
     if (!project) {
       return res.status(404).json({ message: "Project not found", status: 404 });
+    }
+
+    const applications = await ProjectApplicationsModel.count({
+      where: { 
+        project_id: id,
+        status: 1
+      }
+    })
+
+    if (applications > 0) {
+      return res.status(403).json({
+        message: "No se pueden desactivar proyectos con suscripciones activas.",
+        status: 403,
+        applications
+      });
     }
 
     const currentStatus = project.status;

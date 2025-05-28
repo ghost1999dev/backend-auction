@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { createReport 
+import { createReport,
+         getAllReports
 
 } 
 from '../controllers/ReportsController.js';
@@ -14,5 +15,6 @@ const router = Router();
  */
 
 router.post('/create', createReport);
+router.get('/show/all', getAllReports);
 
 export default router;

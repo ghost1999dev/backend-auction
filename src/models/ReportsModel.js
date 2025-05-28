@@ -46,22 +46,20 @@ import UsersModel from "./UsersModel.js";
     timestamps: true,
   });
 
-  ReportsModel.associate = (models) => {
-    ReportsModel.belongsTo(models, {
-      foreignKey: 'reporter_id',
-      as: 'reporter'
-    });
+ReportsModel.belongsTo(UsersModel, {
+  foreignKey: 'reporter_id',
+  as: 'reporter'
+});
 
-    ReportsModel.belongsTo(UsersModel, {
-      foreignKey: 'user_id',
-      as: 'reportedUser'
-    });
+ReportsModel.belongsTo(UsersModel, {
+  foreignKey: 'user_id',
+  as: 'reportedUser'
+});
 
-    ReportsModel.belongsTo(ProjectsModel, {
-      foreignKey: 'project_id',
-      as: 'project'
-    });
-  };
+ReportsModel.belongsTo(ProjectsModel, {
+  foreignKey: 'project_id',
+  as: 'project'
+});
 
-  return ReportsModel;
+export default ReportsModel;
 

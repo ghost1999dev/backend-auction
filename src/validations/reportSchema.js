@@ -1,9 +1,11 @@
 import Joi from 'joi';
 
 export const reportSchema = Joi.object({
-  user_id: Joi.number().required(),
-  reported_user_role: Joi.string().valid('company', 'developer').required(),
-  project_id: Joi.number().optional().allow(null),
+  reporter_id: Joi.number().integer().required(),
+  user_id: Joi.number().integer().required(),
+  user_role: Joi.string().required(),
+  project_id: Joi.number().integer().allow(null),
   reason: Joi.string().max(255).required(),
-  comment: Joi.string().allow(''),
+  comment: Joi.string().allow('', null),
+  status: Joi.string().required()
 });

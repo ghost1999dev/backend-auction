@@ -108,3 +108,65 @@ export const getAllReports = async (req, res) => {
     res.status(500).json({ error: 'No se pudieron obtener los reportes.' });
   }
 };
+
+/**
+ * getByIdReport
+ * Get a report by id.
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {object} The response object.
+ */
+
+export const getReportById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await ReportsModel.findOne({
+      where: { id },
+      include: [
+        {
+          model: UsersModel,
+          as: 'reporter',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: UsersModel,
+          as: 'reportedUser',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: ProjectsModel,
+          as: 'project',
+          attributes: ['id', 'project_name']
+        }
+      ]
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+
+    res.json({
+      id: report.id,
+      reporter_id: report.reporter_id,
+      user_id: report.user_id,
+      user_role: report.user_role,
+      project_id: report.project_id,
+      reason: report.reason,
+      comment: report.comment,
+      status: report.status,
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+      reporter_name: report.reporter?.name || null,
+      reporter_email: report.reporter?.email || null,
+      reportedUser_name: report.reportedUser?.name || null,
+      reportedUser_email: report.reportedUser?.email || null,
+      project_name: report.project?.project_name || null
+    });
+
+  } catch (err) {
+    console.error('Error al obtener el reporte por ID:', err);
+    res.status(500).json({ error: 'No se pudo obtener el reporte.' });
+  }
+};
+

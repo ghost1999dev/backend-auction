@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createReport,
-         getAllReports
+         getAllReports,
+         getReportById
 
 } 
 from '../controllers/ReportsController.js';
@@ -16,5 +17,6 @@ const router = Router();
 
 router.post('/create', createReport);
 router.get('/show/all', getAllReports);
+router.get('/show/:id', getReportById);
 
 export default router;

@@ -23,7 +23,7 @@ export const createReport = async (req, res) => {
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   try {
-    const report = await ReportModel.create({
+    const report = await ReportsModel.create({
       ...req.body,
       reporter_id: req.user.id,
     });

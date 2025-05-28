@@ -22,23 +22,50 @@ export const createReport = async (req, res) => {
   const { error } = reportSchema.validate(req.body);
   if (error) return res.status(400).json({ error: error.details[0].message });
 
+  const { user_id, project_id, reason, comment } = req.body;
+  const reporter_id = req.user.id;
+  const user_role = req.user.role_id; 
+
   try {
-    const report = await 
-    ReportsModel.create (req.body)/*({
-      ...req.body,
-      reporter_id: req.user.id,
-    });*/
-  return res.status(201).json({ 
-    status: 201, 
-    message: 'Reporte creado exitosamente', 
-    report });
+    const existingReport = await ReportsModel.findOne({
+      where: {
+        reporter_id,
+        status: 'pendiente',
+        ...(project_id ? { project_id } : { user_id })
+      }
+    });
+
+    if (existingReport) {
+      return res.status(400).json({
+        status: 400,
+        error: 'Ya existe un reporte pendiente para este usuario o proyecto. Espera a que se finalice antes de crear otro.'
+      });
+    }
+
+    const report = await ReportsModel.create({
+      user_id,
+      project_id,
+      reason,
+      comment,
+      reporter_id,
+      user_role, 
+      status: 'pendiente'
+    });
+
+    return res.status(201).json({
+      status: 201,
+      message: 'Reporte creado exitosamente',
+      report
+    });
   } catch (err) {
     console.error('Error al crear el reporte:', err);
-    return res.status(500).json({ 
-        status: 500, 
-        error: 'No se pudo crear el reporte.' });
+    return res.status(500).json({
+      status: 500,
+      error: 'No se pudo crear el reporte.'
+    });
   }
 };
+
 
 /**
  * getReports
@@ -49,14 +76,21 @@ export const createReport = async (req, res) => {
  */
 export const getAllReports = async (req, res) => {
   try {
-    const { status, reporter_id, user_role, page = 1, limit = 10 } = req.query;
+    const { status, user_role, page = 1, limit = 10 } = req.query;
+    const reporter_id = req.user.id;
 
-    const where = {};
+    const where = { reporter_id };
     if (status) where.status = status;
-    if (reporter_id) where.reporter_id = reporter_id;
     if (user_role) where.user_role = user_role;
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const translateUserRole = (role) => {
+        const roleNum = Number(role); 
+      if (roleNum === 1) return 'Company';
+      if (roleNum === 2) return 'Developer';
+      return 'Desconocido';
+    };
 
     const reports = await ReportsModel.findAndCountAll({
       where,
@@ -64,21 +98,9 @@ export const getAllReports = async (req, res) => {
       offset,
       order: [['createdAt', 'DESC']],
       include: [
-        {
-          model: UsersModel,
-          as: 'reporter',
-          attributes: ['id', 'name', 'email']
-        },
-        {
-          model: UsersModel,
-          as: 'reportedUser',
-          attributes: ['id', 'name', 'email']
-        },
-        {
-          model: ProjectsModel,
-          as: 'project',
-          attributes: ['id', 'project_name']
-        }
+        { model: UsersModel, as: 'reporter', attributes: ['id', 'name', 'email'] },
+        { model: UsersModel, as: 'reportedUser', attributes: ['id', 'name', 'email'] },
+        { model: ProjectsModel, as: 'project', attributes: ['id', 'project_name'] }
       ]
     });
 
@@ -87,7 +109,7 @@ export const getAllReports = async (req, res) => {
         id: report.id,
         reporter_id: report.reporter_id,
         user_id: report.user_id,
-        user_role: report.user_role,
+        user_role: translateUserRole(report.user_role),
         project_id: report.project_id,
         reason: report.reason,
         comment: report.comment,
@@ -109,6 +131,7 @@ export const getAllReports = async (req, res) => {
   }
 };
 
+
 /**
  * getByIdReport
  * Get a report by id.
@@ -120,6 +143,13 @@ export const getAllReports = async (req, res) => {
 export const getReportById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const translateUserRole = (role) => {
+    const roleNum = Number(role); 
+      if (roleNum === 1) return 'Company';
+      if (roleNum === 2) return 'Developer';
+      return 'Desconocido';
+    };
 
     const report = await ReportsModel.findOne({
       where: { id },
@@ -150,7 +180,7 @@ export const getReportById = async (req, res) => {
       id: report.id,
       reporter_id: report.reporter_id,
       user_id: report.user_id,
-      user_role: report.user_role,
+      user_role: translateUserRole(report.user_role),
       project_id: report.project_id,
       reason: report.reason,
       comment: report.comment,
@@ -167,6 +197,59 @@ export const getReportById = async (req, res) => {
   } catch (err) {
     console.error('Error al obtener el reporte por ID:', err);
     res.status(500).json({ error: 'No se pudo obtener el reporte.' });
+  }
+};
+
+export const updateReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason, comment, user_role } = req.body;
+
+    const report = await ReportsModel.findByPk(id);
+    if (!report) {
+      return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+
+    if (req.body.comment && req.body.comment !== rating.comment) {
+        const now = new Date();
+        const createdAt = new Date(rating.createdAt);
+        const hoursSinceCreation = (now - createdAt) / (1000 * 60 * 60);
+
+        if (hoursSinceCreation > 1) {
+            return res.status(400).json({
+            message: 'No puedes editar el Reporte después de una hora de haberlo creado',
+            });
+        }
+        }  
+
+    await report.update({
+      reason: reason ?? report.reason,
+      comment: comment ?? report.comment,
+      user_role: user_role ?? report.user_role
+    });
+
+    res.json({ message: 'Reporte actualizado correctamente.', report });
+  } catch (err) {
+    console.error('Error al actualizar el reporte:', err);
+    res.status(500).json({ error: 'No se pudo actualizar el reporte.' });
+  }
+};
+
+export const deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await ReportsModel.findByPk(id);
+    if (!report) {
+      return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+
+    await report.update({ status: 'Desactivado' });
+
+    res.json({ message: 'Reporte desactivado correctamente.' });
+  } catch (err) {
+    console.error('Error al desactivar el reporte:', err);
+    res.status(500).json({ error: 'No se pudo desactivar el reporte.' });
   }
 };
 

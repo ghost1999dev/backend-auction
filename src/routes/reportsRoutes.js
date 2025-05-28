@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { createReport,
          getAllReports,
-         getReportById
+         getReportById,
+         updateReport,
+         deleteReport
 
 } 
 from '../controllers/ReportsController.js';
+import  authenticateToken  from '../middlewares/authenticateToken.js';
 
 const router = Router();
 
@@ -15,8 +18,10 @@ const router = Router();
  *   description: Operations about reports
  */
 
-router.post('/create', createReport);
-router.get('/show/all', getAllReports);
-router.get('/show/:id', getReportById);
+router.post('/create', authenticateToken, createReport);
+router.get('/show/all', authenticateToken, getAllReports);
+router.get('/show/:id', authenticateToken, getReportById);
+router.put('/update/:id', authenticateToken, updateReport);
+router.delete('/delete/:id', authenticateToken, deleteReport);
 
 export default router;

@@ -44,7 +44,8 @@ export const createApplication = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: "Faltan campos requeridos",
-        error: "missing_fields"
+        error: "missing_fields",
+        status: 400
       });
     }
 
@@ -65,7 +66,9 @@ export const createApplication = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "Proyecto no encontrado",
-        error: "project_not_found"
+        error: "project_not_found",
+        status: 400
+        
       });
     }
 
@@ -73,7 +76,8 @@ export const createApplication = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "Desarrollador no encontrado",
-        error: "developer_not_found"
+        error: "developer_not_found",
+        status: 400
       });
     }
 
@@ -85,7 +89,8 @@ export const createApplication = async (req, res, next) => {
       return res.status(409).json({
         success: false,
         message: "Ya existe una aplicación para este proyecto",
-        error: "application_exists"
+        error: "application_exists",
+        status: 400
       });
     }
 
@@ -107,7 +112,8 @@ export const createApplication = async (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: "Ha alcanzado el límite de aplicaciones en curso",
-        error: "applications_limit"
+        error: "applications_limit",
+        status: 403
       });
     }
 
@@ -120,14 +126,16 @@ export const createApplication = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Aplicación creada exitosamente",
-      data: app
+      data: app,
+      status: 201
     });
 
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error al crear la aplicación",
-      error: error.message
+      error: error.message,
+      status: 500
     });
   }
 };
@@ -148,7 +156,7 @@ export const listApplications = async (req, res, next) => {
     if (status !== undefined) {
       const s = Number(status);
       if (![0,1,2].includes(s))
-        return res.status(422).json({ message: "status debe ser 0, 1 o 2" });
+        return res.status(422).json({ message: "status debe ser 0, 1 o 2", status: 422 });
       filters.status = s;
     }
 
@@ -202,13 +210,15 @@ export const getApplication = async (req, res, next) => {
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: "Aplicación no encontrada"
+        message: "Aplicación no encontrada",
+        status: 404
       });
     }
 
     return res.json({
       success: true,
-      data: application
+      data: application,
+      status: 200
     });
   } catch (error) {
     next(error);
@@ -230,7 +240,8 @@ export const updateApplication = async (req, res, next) => {
     if (!app) {
       return res.status(404).json({
         success: false,
-        message: "Aplicación no encontrada"
+        message: "Aplicación no encontrada",
+        status: 404
       });
     }
 
@@ -238,14 +249,16 @@ export const updateApplication = async (req, res, next) => {
     if (Number.isNaN(newStatus) || !Object.values(APPLICATION_STATUS).includes(newStatus)) {
       return res.status(422).json({
         success: false,
-        message: "status debe ser 0 (pending), 1 (accepted) o 2 (rejected)"
+        message: "status debe ser 0 (pending), 1 (accepted) o 2 (rejected)",
+        status: 422
       });
     }
 
     if (!isValidTransition(app.status, newStatus)) {
       return res.status(422).json({
         success: false,
-        message: `Transición no permitida: ${app.status} → ${newStatus}`
+        message: `Transición no permitida: ${app.status} → ${newStatus}`,
+        status: 422
       });
     }
 
@@ -268,14 +281,16 @@ export const deleteApplication = async (req, res, next) => {
     if (!app) {
       return res.status(404).json({ 
         success: false,
-        message: "Aplicación no encontrada"
+        message: "Aplicación no encontrada",
+        status: 404
       });
     }
 
     await app.destroy();
     res.json({
       success: true,
-      message: "Aplicación eliminada exitosamente"
+      message: "Aplicación eliminada exitosamente",
+      status: 200
     });
   } catch (e) { 
     next(e);

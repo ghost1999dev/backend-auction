@@ -79,7 +79,8 @@ export const generateUsername = async (req, res) => {
     if (!full_name) {
       return res.status(400).json({
         error: true,
-        message: 'El nombre completo es requerido para generar un nombre de usuario'
+        message: 'El nombre completo es requerido para generar un nombre de usuario',
+        status: 400
       });
     }  
     let username = full_name
@@ -99,13 +100,15 @@ export const generateUsername = async (req, res) => {
       error: false,
       data: {
         suggested_username: username
-      }
+      },
+      status: 200
     });
   } catch (error) {
     console.error('Error al generar nombre de usuario:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -291,7 +294,8 @@ export const getAllAdmins = async (req, res) => {
     console.error('Error al obtener admins:', error);
     return res.status(500).json({ 
       error: true,
-      message: 'Error interno del servidor' 
+      message: 'Error interno del servidor' ,
+      status: 500
     });
   }
 };
@@ -311,7 +315,8 @@ export const getAdminById = async (req, res) => {
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
-        message: 'ID de administrador requerido'
+        message: 'ID de administrador requerido',
+        status: 400
       });
     }
 
@@ -320,7 +325,8 @@ export const getAdminById = async (req, res) => {
     if (!admin) {
       return res.status(400).json({
         error: true,
-        message: 'Administrador no encontrado'
+        message: 'Administrador no encontrado',
+        status: 400
       });
     }
 
@@ -341,7 +347,8 @@ export const getAdminById = async (req, res) => {
     console.error('Error al obtener admin por id:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -360,7 +367,8 @@ export const updateAdmin = async (req, res) => {
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
-        message: 'ID de administrador requerido'
+        message: 'ID de administrador requerido',
+        status: 400
       });
     }
 
@@ -368,7 +376,8 @@ export const updateAdmin = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         error: true,
-        message: 'Administrador no encontrado'
+        message: 'Administrador no encontrado',
+        status: 404
       });
     }
 
@@ -377,7 +386,8 @@ export const updateAdmin = async (req, res) => {
       return res.status(403).json({
         error: true,
         message: 'No está permitido modificar el email siendo administrador',
-        error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED'
+        error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED',
+        status: 403
       });
     }
 
@@ -386,7 +396,8 @@ export const updateAdmin = async (req, res) => {
      if (!full_name && !phone && !username && !password && !image && !status) {
       return res.status(400).json({
         error: true,
-        message: 'Debe proporcionar al menos un campo para actualizar'
+        message: 'Debe proporcionar al menos un campo para actualizar',
+        status: 400
       });
     }
 
@@ -408,7 +419,8 @@ export const updateAdmin = async (req, res) => {
     return res.status(200).json({
       error: false,
       message: 'Administrador actualizado exitosamente',
-      data: admin
+      data: admin,
+      status: 200
     });
   } catch (error) {
     console.error('Error al actualizar admin:', error);
@@ -422,13 +434,15 @@ export const updateAdmin = async (req, res) => {
       return res.status(400).json({
         error: true,
         message: 'Error de validación',
-        errors
+        errors,
+        status: 400
       });
     }
     
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -448,7 +462,8 @@ export const deleteAdmin = async (req, res) => {
     if (!id) {
       return res.status(400).json({
         error: true,
-        message: 'ID de administrador no proporcionado'
+        message: 'ID de administrador no proporcionado',
+        status: 400
       });
     }
 
@@ -457,7 +472,8 @@ export const deleteAdmin = async (req, res) => {
     if (!admin) {
       return res.status(404).json({
         error: true,
-        message: 'Administrador no encontrado'
+        message: 'Administrador no encontrado',
+        status: 400
       });
     }
 
@@ -466,14 +482,16 @@ export const deleteAdmin = async (req, res) => {
 
     return res.status(200).json({
       error: false,
-      message: 'Administrador desactivado exitosamente'
+      message: 'Administrador desactivado exitosamente',
+      status: 200
     });
 
   } catch (error) {
     console.error('Error al desactivar admin:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -505,13 +523,15 @@ export const getAllProjects = async (req, res) => {
 
     return res.status(200).json({
       error: false,
-      data: projects
+      data: projects,
+      status: 200
     });
   } catch (error) {
     console.error('Error al obtener proyectos:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -532,7 +552,8 @@ export const searchProjects = async (req, res) => {
      if (!company_name && !project_name && !category_id) {
       return res.status(400).json({
         error: true,
-        message: 'Debe proporcionar al menos un criterio de búsqueda (company_name, project_name o category_id)'
+        message: 'Debe proporcionar al menos un criterio de búsqueda (company_name, project_name o category_id)',
+        status: 400
       });
     }    
     
@@ -597,7 +618,8 @@ export const searchProjects = async (req, res) => {
     console.error('Error al buscar proyectos:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };
@@ -615,7 +637,8 @@ export const getProjectById = async (req, res) => {
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
-        message: 'ID de proyecto requerido'
+        message: 'ID de proyecto requerido',
+        status: 400
       });
     }
     const project = await ProjectsModel.findByPk(req.params.id, {
@@ -640,18 +663,20 @@ export const getProjectById = async (req, res) => {
     });
     
     if (!project) {
-      return res.status(404).json({ message: 'Proyecto no encontrado' });
+      return res.status(404).json({ message: 'Proyecto no encontrado', status: 404 });
     }
     
     return res.status(200).json({
       error: false,
-      data: project
+      data: project,
+      status: 200
     });
   } catch (error) {
     console.error('Error al obtener proyecto por id:', error);
     return res.status(500).json({
       error: true,
-      message: 'Error interno del servidor'
+      message: 'Error interno del servidor',
+      status: 500
     });
   }
 };

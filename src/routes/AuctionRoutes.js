@@ -7,6 +7,7 @@ import {
   listAuctions,
   getAuction,
   updateAuction,
+  updateAuctionDeadline,
   deleteAuction
 } from "../controllers/AuctionsController.js";
 
@@ -128,6 +129,44 @@ router.get("/show/id/:id", getAuction);
  *      500: { description: Error del servidor }
  */
 router.put("/update/:id", validate(auctionSchema), updateAuction);
+
+/* ---------- Actualizar fecha final ---------- */
+/**
+ * @swagger
+ * /subastas/update-deadline/{id}:
+ *  put:
+ *    tags: [Subastas]
+ *    summary: Actualizar solo la fecha final de una subasta
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema: { type: integer }
+ *        required: true
+ *        description: ID de la subasta
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              bidding_deadline:
+ *                type: string
+ *                format: date-time
+ *                description: Nueva fecha final de la subasta
+ *            required:
+ *              - bidding_deadline
+ *    responses:
+ *      200:
+ *        description: Fecha final de la subasta actualizada exitosamente
+ *      400:
+ *        description: Fecha inválida o anterior a la fecha actual/inicio
+ *      404:
+ *        description: Subasta no encontrada
+ *      500:
+ *        description: Error del servidor
+ */
+router.put("/update-deadline/:id", updateAuctionDeadline);
 
 /* ---------- Eliminar ---------- */
 /**

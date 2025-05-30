@@ -167,7 +167,8 @@ export const getAuction = async (req, res, next) => {
 export const updateAuction = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, bidding_deadline } = req.body;
+        const updateData = {};
 
         const auction = await AuctionsModel.findByPk(id);
         if (!auction) {
@@ -177,6 +178,7 @@ export const updateAuction = async (req, res, next) => {
             });
         }
 
+        // Si se proporciona un estado, validarlo
         if (status !== undefined) {
             const newStatus = Number(status);
             
@@ -193,16 +195,92 @@ export const updateAuction = async (req, res, next) => {
                     message: `Transición de estado no permitida: ${auction.status} → ${newStatus}`
                 });
             }
+            updateData.status = newStatus;
+        }
+
+        // Si se proporciona una nueva fecha final, validarla
+        if (bidding_deadline) {
+            const newDeadline = new Date(bidding_deadline);
+            if (newDeadline <= new Date()) {
+                return res.status(400).json({
+                    success: false,
+                    message: "La fecha final debe ser posterior a la fecha actual"
+                });
+            }
+            if (newDeadline <= new Date(auction.bidding_started_at)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "La fecha final debe ser posterior a la fecha de inicio"
+                });
+            }
+            updateData.bidding_deadline = newDeadline;
+        }
+
+        updateData.updatedAt = new Date();
+
+        const updatedAuction = await auction.update(updateData);
+
+        return res.json({
+            success: true,
+            data: updatedAuction
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * @desc    Actualizar solo la fecha final de una subasta
+ * @route   PUT /auctions/update-deadline/:id
+ * @param   {string} req.params.id - ID de la subasta
+ * @param   {Object} req.body.bidding_deadline - Nueva fecha final
+ */
+export const updateAuctionDeadline = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { bidding_deadline } = req.body;
+
+        if (!bidding_deadline) {
+            return res.status(400).json({
+                success: false,
+                message: "La fecha final es requerida"
+            });
+        }
+
+        const auction = await AuctionsModel.findByPk(id);
+        if (!auction) {
+            return res.status(404).json({
+                success: false,
+                message: "Subasta no encontrada"
+            });
+        }
+
+        // Validar que la nueva fecha sea posterior a la fecha actual
+        const newDeadline = new Date(bidding_deadline);
+        if (newDeadline <= new Date()) {
+            return res.status(400).json({
+                success: false,
+                message: "La fecha final debe ser posterior a la fecha actual"
+            });
+        }
+
+        // Validar que la nueva fecha sea posterior a la fecha de inicio
+        if (newDeadline <= new Date(auction.bidding_started_at)) {
+            return res.status(400).json({
+                success: false,
+                message: "La fecha final debe ser posterior a la fecha de inicio"
+            });
         }
 
         const updatedAuction = await auction.update({
-            ...req.body,
-            status: Number(status),
-            updatedAt: new Date() 
+            bidding_deadline: newDeadline,
+            updatedAt: new Date()
         });
 
         return res.json({
             success: true,
+            message: "Fecha final de la subasta actualizada exitosamente",
             data: updatedAuction
         });
 

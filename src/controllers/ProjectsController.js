@@ -15,21 +15,35 @@ import { createProjectSchema } from "../validations/projectSchema.js"
  * @returns {Object} project created
  */
 export const createProject = async (req, res) => {
-    try {
-      
-      const { error, value } = createProjectSchema.validate(req.body)
+    const { error, value } = createProjectSchema.validate(req.body)
 
-      if (error) {
-        return res.status(400).json({
-          success: false,
-          message: 'Error de validación',
-          details: error.details.map(d => d.message),
-          status: 400
-        });
+    if (error) {
+      return res.status(400).json({
+        message: 'Error de validación',
+        details: error.details.map(d => d.message),
+        status: 400
+      });
+    }
+
+    const { company_id, category_id, project_name, description, long_description, budget, days_available } = value
+    
+    try {
+      const user = await CompaniesModel.findOne({
+        include: [{
+          model: UsersModel,
+          attributes: ['id', 'status'],
+        }],
+        where: { id: company_id },
+        attributes: []
+      });
+
+      if (user.status === 5){
+        return res.status(403).json({
+          message: "No puedes realizar ninguna accion mientras estas bloqueado",
+          status: 403,
+          company})
       }
 
-      const { company_id, category_id, project_name, description, long_description, budget, days_available } = value
-      
       const activeProjectsCount = await ProjectsModel.count({
        where: {
          company_id,
@@ -110,7 +124,7 @@ export const createProject = async (req, res) => {
       console.error('Error creating project:', error);
       res.status(500).json({ message: "Error creating project", error: error.message, status: 500 });
     }
-  };
+  }
 
 /**
  * Update project
@@ -127,6 +141,22 @@ export const updateProjectId = async (req, res) => {
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
+    }
+
+    const user = await CompaniesModel.findOne({
+      include: [{
+        model: UsersModel,
+        attributes: ['id', 'status'],
+      }],
+      where: { id: company_id },
+      attributes: []
+    });
+
+    if (user.status === 5){
+      return res.status(403).json({
+        message: "No puedes realizar ninguna accion mientras estas bloqueado",
+        status: 403,
+        company})
     }
     
     const projectExists = await ProjectsModel.findByPk(id);
@@ -239,6 +269,22 @@ export const DesactivateProjectId = async (req, res) => {
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
+    }
+
+    const user = await CompaniesModel.findOne({
+      include: [{
+        model: UsersModel,
+        attributes: ['id', 'status'],
+      }],
+      where: { id: company_id },
+      attributes: []
+    });
+
+    if (user.status === 5){
+      return res.status(403).json({
+        message: "No puedes realizar ninguna accion mientras estas bloqueado",
+        status: 403,
+        company})
     }
     
     const project = await ProjectsModel.findOne({

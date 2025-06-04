@@ -13,6 +13,7 @@ import bcrypt from 'bcrypt';
 import Joi from 'joi';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 import hashPassword from "../helpers/hashPassword.js";
+import ReportsModel from "../models/ReportsModel.js";
 
 const adminSchema = Joi.object({
   full_name: Joi.string().required().min(3).max(100).messages({
@@ -1017,3 +1018,69 @@ export const resetPassword = async (req, res) => {
       })
   }
 }
+
+/**
+ * getAllUserReportsForAdmin
+ * Get all reports created by all users (admin only).
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {object} The response object.
+ */
+export const getAllUserReportsForAdmin = async (req, res) => {
+  try {
+
+    const { status, user_role, page = 1, limit = 10 } = req.query;
+
+    const where = {};
+    if (status) where.status = status;
+    if (user_role) where.user_role = user_role;
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const translateUserRole = (role) => {
+      const roleNum = Number(role);
+      if (roleNum === 1) return 'Company';
+      if (roleNum === 2) return 'Developer';
+      return 'Desconocido';
+    };
+
+    const reports = await ReportsModel.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset,
+      order: [['createdAt', 'DESC']],
+      include: [
+        { model: UsersModel, as: 'reporter', attributes: ['id', 'name', 'email'] },
+        { model: UsersModel, as: 'reportedUser', attributes: ['id', 'name', 'email'] },
+        { model: ProjectsModel, as: 'project', attributes: ['id', 'project_name'] }
+      ]
+    });
+
+    return res.json({
+      data: reports.rows.map(report => ({
+        id: report.id,
+        reporter_id: report.reporter_id,
+        reporter_name: report.reporter?.name || null,
+        reporter_email: report.reporter?.email || null,
+        reportedUser_id: report.user_id,
+        reportedUser_name: report.reportedUser?.name || null,
+        reportedUser_email: report.reportedUser?.email || null,
+        user_role: translateUserRole(report.user_role),
+        project_id: report.project_id,
+        project_name: report.project?.project_name || null,
+        reason: report.reason,
+        comment: report.comment,
+        status: report.status,
+        createdAt: report.createdAt,
+        updatedAt: report.updatedAt
+      })),
+      total: reports.count,
+      page: parseInt(page),
+      totalPages: Math.ceil(reports.count / parseInt(limit)),
+    });
+
+  } catch (err) {
+    console.error('Error al obtener reportes como administrador:', err);
+    res.status(500).json({ error: 'No se pudieron obtener los reportes.' });
+  }
+};

@@ -13,7 +13,8 @@ import { createAdmin,
     uploadImageAdmin,
     reactivateAdmin,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    getAllUserReportsForAdmin
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
@@ -427,6 +428,8 @@ router.post('/forgot-password', forgotPassword);
  *        description: Server error
  */
 router.post('/reset-password', resetPassword);
+
+router.get('/get-all-user-reports', validateAdmin, getAllUserReportsForAdmin);
 
 export default router;
     /**

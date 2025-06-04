@@ -263,7 +263,6 @@ export const getAllAdmins = async (req, res) => {
 export const getAdminById = async (req, res) => {
   try {
 
-    // Validar que el ID sea proporcionado
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
@@ -333,6 +332,27 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
+    const { error: validationError } = adminUpdateSchema.validate(req.body, {
+      abortEarly: false,
+      allowUnknown: false
+    });
+
+    
+    if (validationError) {
+      return res.status(400).json({
+        error: true,
+        message: 'Error de validación',
+        errors: validationError.details.map((err) => ({
+          field: err.path[0],
+          message: err.message
+        })),
+        status: 400
+      });
+    }
+
+
+    const { full_name, phone, username, password, image, status } = req.body;
+    
     const { email } = req.body;
     if (email && admin.role_id === 2) {
       return res.status(403).json({
@@ -343,15 +363,6 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    const { full_name, phone, username, password, image, status } = req.body;
-
-     if (!full_name && !phone && !username && !password && !image && !status) {
-      return res.status(400).json({
-        error: true,
-        message: 'Debe proporcionar al menos un campo para actualizar',
-        status: 400
-      });
-    }
 
     let hashedPassword = admin.password;
     if (password) {

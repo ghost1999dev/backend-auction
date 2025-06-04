@@ -49,7 +49,7 @@ export const adminUpdateSchema = Joi.object({
   username: Joi.string().min(3).max(30).optional(),
   password: Joi.string().min(6).max(100).optional(),
   image: Joi.string().uri().optional().allow(null),
-  status: Joi.string().valid('active', 'inactive').optional() // o ajusta según tu modelo
-}).or('email', 'full_name', 'phone', 'username', 'password', 'image', 'status'); // al menos uno
+  status: Joi.string().valid('active', 'inactive').optional() 
+}).or('email', 'full_name', 'phone', 'username', 'password', 'image', 'status');
 
 export default adminSchema;

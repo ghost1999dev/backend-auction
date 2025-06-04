@@ -429,8 +429,59 @@ router.post('/forgot-password', forgotPassword);
  *        description: Server error
  */
 router.post('/reset-password', resetPassword);
-
+/**
+ * @swagger
+ * /admins/get-all-user-reports:
+ *  get:
+ *    tags: [Admins]
+ *    summary: Get all user reports
+ *    responses:
+ *      200:
+ *        description: Returns all user reports
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Report'
+ *      500:
+ *        description: Server error         
+ */ 
 router.get('/get-all-user-reports', validateAdmin, getAllUserReportsForAdmin);
+/**
+ * @swagger
+ * /admins/respond-to-report/{id}:
+ *  put:
+ *    tags: [Admins]
+ *    summary: Respond to a report
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Report id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              responseMessage:
+ *                type: string
+ *                description: Response message
+ *              newStatus:
+ *                type: string
+ *                description: New status
+ *    responses:
+ *      200:
+ *        description: Report responded
+ *      400:
+ *        description: Report not found or already responded
+ *      500:
+ *        description: Server error         
+ */
 
 router.put('/respond-to-report/:id', respondToReport);
 

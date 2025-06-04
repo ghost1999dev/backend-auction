@@ -1,4 +1,3 @@
-// validations/reportSchema.js
 import Joi from 'joi';
 
 export const reportSchema = Joi.object({
@@ -25,3 +24,8 @@ export const reportSchema = Joi.object({
     'string.max': 'El comentario no debe superar los 1000 caracteres'
   })
 });
+
+export const reportUpdateSchema = Joi.object({
+  reason: Joi.string().min(3).max(255).optional(),
+  comment: Joi.string().min(3).max(1000).optional(),
+}).or('reason', 'comment');

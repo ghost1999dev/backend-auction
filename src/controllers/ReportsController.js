@@ -3,7 +3,7 @@ import { Sequelize } from 'sequelize';
 import ReportsModel from '../models/ReportsModel.js';
 import UsersModel from '../models/UsersModel.js';
 import ProjectsModel from '../models/ProjectsModel.js';
-import { reportSchema } from '../validations/reportSchema.js';
+import { reportSchema, reportUpdateSchema } from '../validations/reportSchema.js';
 
 /**
  * Reports controller.
@@ -203,6 +203,24 @@ export const getReportById = async (req, res) => {
 export const updateReport = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const { error: validationError } = reportUpdateSchema.validate(req.body, {
+      abortEarly: false,
+      allowUnknown: false
+    });
+
+    if (validationError) {
+      return res.status(400).json({
+        error: true,
+        message: 'Error de validación',
+        errors: validationError.details.map(err => ({
+          field: err.path[0],
+          message: err.message
+        })),
+        status: 400
+      });
+    }
+
     const { reason, comment, user_role } = req.body;
 
     const report = await ReportsModel.findByPk(id);
@@ -225,7 +243,7 @@ export const updateReport = async (req, res) => {
     await report.update({
       reason: reason ?? report.reason,
       comment: comment ?? report.comment,
-      user_role: user_role ?? report.user_role
+     // user_role: user_role ?? report.user_role
     });
 
     res.json({ message: 'Reporte actualizado correctamente.', report });

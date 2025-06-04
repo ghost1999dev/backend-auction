@@ -125,7 +125,6 @@ export const generateUsername = async (req, res) => {
 export const createAdmin = async (req, res) => {
 try {
 
-    console.log("Usuario autenticado:", req.user);
     if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,

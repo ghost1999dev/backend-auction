@@ -7,7 +7,7 @@ import NotificationsModel from "../models/NotificationsModel.js";
 import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
 import signImage from "../helpers/signImage.js";
-import { sendProjectStatusEmail, sendReactivationEmail } from '../services/emailService.js';
+import { sendProjectStatusEmail, sendReactivationEmail, sendReportReplyEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
@@ -1084,3 +1084,54 @@ export const getAllUserReportsForAdmin = async (req, res) => {
     res.status(500).json({ error: 'No se pudieron obtener los reportes.' });
   }
 };
+/**
+ * respondToReport
+ * Admin responde un reporte, actualiza su estado y notifica por correo.
+ * @param {object} req
+ * @param {object} res
+ * @returns {object}
+ */
+
+export const respondToReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { responseMessage, newStatus } = req.body;
+
+    if (!['Resuelto', 'Rechazado'].includes(newStatus)) {
+      return res.status(400).json({ error: 'Estado inválido. Debe ser "resuelto" o "rechazado".' });
+    }
+
+    const report = await ReportsModel.findOne({
+      where: { id },
+      include: [{ model: UsersModel, as: 'reporter', attributes: ['email', 'name'] }]
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+
+    if (report.status !== 'Pendiente') {
+      return res.status(400).json({ error: 'Este reporte ya ha sido atendido.' });
+    }
+
+    await report.update({
+      status: newStatus,
+      admin_response: responseMessage
+    });
+
+    await sendReportReplyEmail({
+      to: report.reporter.email,
+      name: report.reporter.name,
+      reportId: report.id,
+      newStatus,
+      responseMessage
+    });
+
+    res.json({ message: 'Reporte respondido y correo enviado correctamente.' });
+
+  } catch (err) {
+    console.error('Error al responder el reporte:', err);
+    res.status(500).json({ error: 'No se pudo responder el reporte.' });
+  }
+};
+

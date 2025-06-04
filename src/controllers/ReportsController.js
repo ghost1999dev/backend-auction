@@ -30,7 +30,7 @@ export const createReport = async (req, res) => {
     const existingReport = await ReportsModel.findOne({
       where: {
         reporter_id,
-        status: 'pendiente',
+        status: 'Pendiente',
         ...(project_id ? { project_id } : { user_id })
       }
     });
@@ -49,7 +49,7 @@ export const createReport = async (req, res) => {
       comment,
       reporter_id,
       user_role, 
-      status: 'pendiente'
+      status: 'Pendiente'
     });
 
     return res.status(201).json({

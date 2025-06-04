@@ -324,3 +324,54 @@ export const sendReactivationEmail = async ({ email, name, tempPassword, expirat
     throw new Error('No se pudo enviar el correo de reactivación');
   }
 };
+
+
+export const sendReportReplyEmail = async ({ to, name, newStatus, responseMessage }) => {
+  const statusColor = newStatus === 'Resuelto' ? ' #4CAF50' : ' #f44336';
+  const statusLabel = newStatus === 'Resuelto' ? 'Resuelto' : 'Rechazado';
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;">
+      <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden;">
+        <div style="background-color: ${statusColor}; color: white; padding: 20px;">
+          <h2 style="margin: 0;">Respuesta a tu reporte</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p>Hola <strong>${name}</strong>,</p>
+          <p>Gracias por comunicarte con nosotros. El equipo de administración ha revisado tu reporte, ha sido marcado como <strong style="color: ${statusColor}">${statusLabel}</strong>.</p>
+          
+          <p><strong>Mensaje del administrador:</strong></p>
+          <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid ${statusColor}; margin-bottom: 20px;">
+            <em>${responseMessage}</em>
+          </div>
+
+          <p>Si tienes más dudas contacta al soporte técnico.</p>
+
+          <p style="margin-top: 30px;">Saludos cordiales,<br><strong>Equipo de Soporte</strong></p>
+        </div>
+        <div style="background-color: #f1f1f1; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+          Este correo fue enviado automáticamente. Por favor, no lo respondas directamente.
+        </div>
+      </div>
+    </div>
+  `;
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailConfig.user,
+      pass: emailConfig.password
+    }
+  });
+
+  const mailOptions = {
+    from: `"Bluepixel" <${process.env.SENDEMAIL}>`,
+    to,
+    subject: `Respuesta a tu reporte`,
+    html
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log('Correo enviado:', info.messageId);
+  return info;
+};

@@ -41,7 +41,11 @@ import UsersModel from "./UsersModel.js";
     status: {
       type: DataTypes.STRING(50),
       allowNull: false
-    }
+    },
+    admin_response: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
   }, {
     timestamps: true,
   });

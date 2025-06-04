@@ -228,9 +228,9 @@ export const updateReport = async (req, res) => {
       return res.status(404).json({ error: 'Reporte no encontrado.' });
     }
 
-    if (req.body.comment && req.body.comment !== rating.comment) {
+    if (req.body.comment && req.body.comment !== report.comment) {
         const now = new Date();
-        const createdAt = new Date(rating.createdAt);
+        const createdAt = new Date(report.createdAt);
         const hoursSinceCreation = (now - createdAt) / (1000 * 60 * 60);
 
         if (hoursSinceCreation > 1) {
@@ -243,7 +243,7 @@ export const updateReport = async (req, res) => {
     await report.update({
       reason: reason ?? report.reason,
       comment: comment ?? report.comment,
-     // user_role: user_role ?? report.user_role
+      user_role: user_role ?? report.user_role
     });
 
     res.json({ message: 'Reporte actualizado correctamente.', report });

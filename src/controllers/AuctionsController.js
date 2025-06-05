@@ -1,5 +1,7 @@
 import AuctionsModel from "../models/AuctionsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
+import CompaniesModel from "../models/CompaniesModel.js";
+import UsersModel from "../models/UsersModel.js";
 import { Op } from "sequelize";
 
 const AUCTION_STATUS = {
@@ -39,8 +41,26 @@ const isValidTransition = (currentStatus, newStatus) => {
 export const createAuction = async (req, res, next) => {
     try {
         const { project_id } = req.body;
-        
+
         const project = await ProjectsModel.findByPk(project_id);
+
+        const company = await CompaniesModel.findOne({
+            attributes: [],
+            include: [{
+                model: UsersModel,
+                attributes: ['id', 'status'],
+            }],
+            where: { id: project.company_id },
+        })
+
+        if (company.user.status === 5){
+            return res.status(403).json({
+                success: false,
+                message: "No puedes realizar ninguna accion mientras estas bloqueado",
+                status: 403,
+            })
+        }
+
         if (!project) {
             return res.status(404).json({
                 success: false,
@@ -171,6 +191,26 @@ export const updateAuction = async (req, res, next) => {
         const updateData = {};
 
         const auction = await AuctionsModel.findByPk(id);
+
+        const project = await ProjectsModel.findByPk(auction.project_id);
+
+        const getStatus = await CompaniesModel.findOne({
+            attributes: [],
+            include: [{
+                model: UsersModel,
+                attributes: ['id', 'status'],
+            }],
+            where: { id: project.company_id },
+        })
+
+        if (getStatus.user.status === 5){
+            return res.status(403).json({
+                success: false,
+                message: "No puedes realizar ninguna accion mientras estas bloqueado",
+                status: 403,
+            })
+        }
+
         if (!auction) {
             return res.status(404).json({
                 success: false,
@@ -249,6 +289,29 @@ export const updateAuctionDeadline = async (req, res, next) => {
         }
 
         const auction = await AuctionsModel.findByPk(id);
+
+        const getStatus = await ProjectsModel.findOne({
+            attributes: [],
+            include: [{
+                model: CompaniesModel,
+                as: 'company_profile',
+                attributes: [],
+                include: [{
+                    model: UsersModel,
+                    attributes: ['id', 'status'],
+                }]
+            }],
+            where: { id: auction.project_id },
+        })
+
+        if (getStatus.company.user.status === 5){
+            return res.status(403).json({
+                success: false,
+                message: "No puedes realizar ninguna accion mientras estas bloqueado",
+                status: 403,
+            })
+        }
+
         if (!auction) {
             return res.status(404).json({
                 success: false,
@@ -294,6 +357,26 @@ export const deleteAuction = async (req, res, next) => {
         const { id } = req.params;
         
         const auction = await AuctionsModel.findByPk(id);
+
+        const project = await ProjectsModel.findByPk(auction.project_id);
+
+        const getStatus = await CompaniesModel.findOne({
+            attributes: [],
+            include: [{
+                model: UsersModel,
+                attributes: ['id', 'status'],
+            }],
+            where: { id: project.company_id },
+        })
+
+        if (getStatus.user.status === 5){
+            return res.status(403).json({
+                success: false,
+                message: "No puedes realizar ninguna accion mientras estas bloqueado",
+                status: 403,
+            })
+        }
+
         if (!auction) {
             return res.status(404).json({ 
                 success: false,

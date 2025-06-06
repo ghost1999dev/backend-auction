@@ -682,7 +682,7 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
       include: [{
         model: ProjectsModel,
         as: 'project',
-        attributes: ['id', 'project_name', 'description', 'budget'],
+        attributes: ['id', 'project_name', 'description', 'budget', 'status'],
         include: [{
           model: CompaniesModel,
           as: 'company_profile',
@@ -696,7 +696,7 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
           as: 'category',
           attributes: ['name']
         }]
-      }],
+      },],
       where: {
         developer_id: id
       }

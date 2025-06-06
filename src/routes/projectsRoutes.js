@@ -7,7 +7,8 @@ import {
     DesactivateProjectId,
     getProjectsByCompany,
     getProjectsByCategory,
-    projectsCounterByCompany
+    projectsCounterByCompany,
+    getProjectsHistoryByDeveloper
 
 } from "../controllers/ProjectsController.js";
 
@@ -223,6 +224,29 @@ router.get("/show/categoryProject/:id", getProjectsByCategory);
  *        description: Server error
  */
 router.get("/counter/:id", projectsCounterByCompany);
+
+/**
+ * @swagger
+ * /projects/developer-history/{id}:
+ *  get:
+ *    tags: [projects]
+ *    summary: Get projects history by developer
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Developer id
+ *    responses:
+ *      200:
+ *        description: Returns projects history
+ *      400: 
+ *        description: Developer not found
+ *      500:
+ *        description: Server error
+ */
+router.get("/developer-history/:id", getProjectsHistoryByDeveloper);
  
 export default router;
 /**

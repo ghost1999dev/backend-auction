@@ -4,6 +4,7 @@ import CategoriesModel from "../models/CategoriesModel.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
+import DevelopersModel from "../models/DevelopersModel.js";
 import { createProjectSchema } from "../validations/projectSchema.js"
 
 /**
@@ -649,5 +650,63 @@ export const projectsCounterByCompany = async (req, res) => {
       message: "Error al contar los proyectos",
       error: error.message
     });
+  }
+}
+
+/**
+ * get projects history
+ * 
+ * function to get projects history
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} projects history
+ */
+export const getProjectsHistoryByDeveloper = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const developer = await DevelopersModel.findByPk(id, {
+      where: {
+        status: 1
+      }
+    })
+
+    if (!developer) {
+      return res.status(404).json({
+        status: 404,
+        message: "Developer not found",
+      })
+    }
+
+    const projects = await ProjectApplicationsModel.findAll({
+      attributes: [],
+      include: [{
+        model: ProjectsModel,
+        attributes: ['id', 'project_name', 'description', 'budget'],
+        include: [{
+          model: CategoriesModel,
+          attributes: ['id', 'category_name']
+        }],
+        include: [{
+          model: CompaniesModel,
+          as: 'company_profile',
+          attributes: ['id', 'company_name']
+        }]
+      }],
+      where: {
+        developer_id: id
+      }
+    })
+
+    res.status(200).json({
+      status: 200,
+      message: "Projects history retrieved successfully",
+      projects
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error retrieving projects history",
+      error: error.message
+    })
   }
 }

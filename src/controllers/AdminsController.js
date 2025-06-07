@@ -351,7 +351,7 @@ export const updateAdmin = async (req, res) => {
 
     const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
     
-    if (email && admin.role_id === 2) {
+    if (email && admin.role_id === 3) {
       return res.status(403).json({
         error: true,
         message: 'No está permitido modificar el email siendo administrador',

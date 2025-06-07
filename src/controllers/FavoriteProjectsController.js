@@ -67,3 +67,44 @@ export const createFavoriteProject = async (req, res) => {
         })
     }
 }
+
+export const deleteFavoriteProject = async (rqe, res) => {
+    const { id } = rqe.params
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Falta el ID del proyecto favorito",
+            error: "missing_fields",
+            status: 400
+        })
+    }
+
+    try {
+        const favoriteProject = await FavoriteProjectsModel.findByPk(id)
+
+        if (!favoriteProject){
+            return res.status(404).json({
+                success: false,
+                message: "Proyecto no encontrado",
+                error: "project_not_found",
+                status: 400
+            })
+        }
+
+        await favoriteProject.destroy()
+
+        res.status(200).json({
+            success: true,
+            message: "Proyecto eliminado de favoritos exitosamente",
+            status: 200
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error al eliminar el proyecto de favoritos",
+            error: error.message,
+            status: 500
+        })
+    }
+}

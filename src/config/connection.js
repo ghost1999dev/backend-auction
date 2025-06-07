@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  host: 'ep-black-tree-a4gz5ynl-pooler.us-east-1.aws.neon.tech',
+  host: 'ep-polished-cloud-a4l3jspp-pooler.us-east-1.aws.neon.tech',
   port: 5432,
   database: 'neondb',
   username: 'neondb_owner',
@@ -32,6 +32,7 @@ const sequelize = new Sequelize({
 export const getConnection = async () => {
   try {
     await sequelize.authenticate();
+    //sequelize.sync( { force: false } );
     console.log("Conexión establecida correctamente");
   } catch (err) {
     console.error("Error de conexión:", err);

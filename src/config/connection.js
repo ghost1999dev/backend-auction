@@ -32,6 +32,7 @@ const sequelize = new Sequelize({
 export const getConnection = async () => {
   try {
     await sequelize.authenticate();
+    //sequelize.sync( { force: false } );
     console.log("Conexión establecida correctamente");
   } catch (err) {
     console.error("Error de conexión:", err);

@@ -61,6 +61,7 @@ class Server {
     this.__dirname = __dirname;
     this.middlewares();
     this.routes();
+    this.dbConnection();
   }
 
   /**

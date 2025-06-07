@@ -486,84 +486,94 @@ router.get('/get-all-user-reports', validateAdmin, getAllUserReportsForAdmin);
 router.put('/respond-to-report/:id', respondToReport);
 
 export default router;
-    /**
-     * @swagger
-     * components:
-     *  schemas:
-     *    Admin:
-     *      type: object
-     *      properties:
-     *        id:
-     *          type: integer
-     *          format: int32
-     *        full_name:
-     *          type: string
-     *        phone:
-     *          type: string
-     *        email:
-     *          type: string
-     *        username:
-     *          type: string
-     *        password:
-     *          type: string
-     *        image:
-     *          type: string
-     *        status:
-     *          type: string
-     *      required:
-     *        - id
-     *        - full_name
-     *        - phone
-     *        - email
-     *        - username
-     *        - password
-     *        - image
-     *        - status
-     *    adminCreate:
-     *      type: object
-     *      properties:
-     *        full_name:
-     *          type: string
-     *        phone:
-     *          type: string
-     *        email:
-     *          type: string
-     *        username:
-     *          type: string
-     *        password:
-     *          type: string
-     *        image:
-     *          type: string
-     *      required:
-     *        - full_name
-     *        - phone
-     *        - email
-     *        - username
-     *        - password
-     *        - image
-     *    adminUpdate:
-     *      type: object
-     *      properties:
-     *        full_name:
-     *          type: string
-     *        phone:
-     *          type: string
-     *        email:
-     *          type: string
-     *        username:                         
-     *          type: string
-     *        password:
-     *          type: string
-     *        image:
-     *          type: string
-     *        status:
-     *          type: string
-     *      required:
-     *        - full_name
-     *        - phone
-     *        - email
-     *        - username
-     *        - password
-     *        - image
-     *        - status
-     */
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Admin:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32
+ *        full_name:
+ *          type: string
+ *        phone:
+ *          type: string
+ *        email:
+ *          type: string
+ *        username:
+ *          type: string
+ *        password:
+ *          type: string
+ *        image:
+ *          type: string
+ *        status:
+ *          type: string
+ *        role_id:
+ *          type: integer
+ *          format: int32
+ *      required:
+ *        - id
+ *        - full_name
+ *        - phone
+ *        - email
+ *        - username
+ *        - password
+ *        - image
+ *        - status
+ *        - role_id
+ *    adminCreate:
+ *      type: object
+ *      properties:
+ *        full_name:
+ *          type: string
+ *        phone:
+ *          type: string
+ *        email:
+ *          type: string
+ *        username:
+ *          type: string
+ *        password:
+ *          type: string
+ *        image:
+ *          type: string
+ *        role:
+ *          type: string
+ *      required:
+ *        - full_name
+ *        - phone
+ *        - email
+ *        - username
+ *        - password
+ *        - image
+ *        - role
+ *    adminUpdate:
+ *      type: object
+ *      properties:
+ *        full_name:
+ *          type: string
+ *        phone:
+ *          type: string
+ *        email:
+ *          type: string
+ *        username:                         
+ *          type: string
+ *        password:
+ *          type: string
+ *        image:
+ *          type: string
+ *        status:
+ *          type: string
+ *        role:
+ *          type: string
+ *      required:
+ *        - full_name
+ *        - phone
+ *        - email
+ *        - username
+ *        - password
+ *        - image
+ *        - status
+ *        - role        
+ */

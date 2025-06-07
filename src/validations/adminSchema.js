@@ -43,13 +43,65 @@ import { isCorporateEmail } from "../utils/emailValidation.js";
 });
 
 export const adminUpdateSchema = Joi.object({
-  email: Joi.string().email().optional(),
-  full_name: Joi.string().min(3).max(100).optional(),
-  phone: Joi.string().min(7).max(20).optional(),
-  username: Joi.string().min(3).max(30).optional(),
-  password: Joi.string().min(6).max(100).optional(),
-  image: Joi.string().uri().optional().allow(null),
-  status: Joi.string().valid('active', 'inactive').optional() 
-}).or('email', 'full_name', 'phone', 'username', 'password', 'image', 'status');
+full_name: Joi.string()
+    .min(3)
+    .max(100)
+    .messages({
+      'string.min': 'El nombre completo debe tener al menos 3 caracteres',
+      'string.max': 'El nombre completo no debe exceder los 100 caracteres'
+    }),
+
+ phone: Joi.string()
+  .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
+    .messages({
+      'string.pattern.base': 'Phone numbers format is wrong',
+      'string.empty': 'Number is empty'
+  }),
+
+  email: Joi.string()
+    .email()
+    .messages({
+      'string.email': 'El correo electrónico no es válido'
+    }),
+
+  password: Joi.string()
+    .min(6)
+    .max(50)
+    .messages({
+      'string.min': 'La contraseña debe tener al menos 6 caracteres',
+      'string.max': 'La contraseña no debe exceder los 50 caracteres'
+    }),
+
+  username: Joi.string()
+    .alphanum()
+    .min(3)
+    .max(30)
+    .messages({
+      'string.alphanum': 'El nombre de usuario solo puede contener letras y números',
+      'string.min': 'El nombre de usuario debe tener al menos 3 caracteres',
+      'string.max': 'El nombre de usuario no debe exceder los 30 caracteres'
+    }),
+
+  image: Joi.string()
+    .uri()
+    .allow(null, '')
+    .messages({
+      'string.uri': 'La imagen debe ser una URL válida'
+    }),
+
+  role: Joi.string()
+    .valid('Administrador', 'SuperAdministrador')
+    .messages({
+      'any.only': 'El rol debe ser "Administrador" o "SuperAdministrador"'
+    }),
+
+  status: Joi.string()
+    .valid('active', 'inactive')
+    .messages({
+      'any.only': 'El estado debe ser "active" o "inactive"'
+    })
+}).min(1).messages({
+  'object.min': 'Debes proporcionar al menos un campo para actualizar'
+});
 
 export default adminSchema;

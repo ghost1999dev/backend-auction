@@ -332,28 +332,25 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    const { error: validationError } = adminUpdateSchema.validate(req.body, {
-      abortEarly: false,
-      allowUnknown: false
-    });
+    const { error, value } = adminUpdateSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errors = error.details.map(detail => ({
+          field: detail.path[0],
+          message: detail.message
+        }));
 
-    
-    if (validationError) {
-      return res.status(400).json({
+       return res.status(400).json({
         error: true,
         message: 'Error de validación',
-        errors: validationError.details.map((err) => ({
-          field: err.path[0],
-          message: err.message
-        })),
+        errors,
         status: 400
       });
     }
 
 
-    const { full_name, phone, username, password, image, status } = req.body;
+
+    const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
     
-    const { email } = req.body;
     if (email && admin.role_id === 2) {
       return res.status(403).json({
         error: true,
@@ -361,6 +358,42 @@ export const updateAdmin = async (req, res) => {
         error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED',
         status: 403
       });
+    }
+
+    if (full_name && full_name !== admin.full_name) {
+      const existingFullName = await AdminsModel.findOne({ where: { full_name } });
+      if (existingFullName) {
+        return res.status(400).json({
+          error: true,
+          message: 'Este nombre completo ya está registrado. Por favor, utiliza un nombre diferente.',
+          status: 400
+        });
+      }
+    }
+
+    let roleId = admin.role_id;
+    if (role) {
+      const roleRecord = await RolesModel.findOne({ where: { role_name: role } });
+      if (!roleRecord) {
+        return res.status(400).json({
+          error: true,
+          message: 'El rol especificado no existe en la base de datos.',
+          status: 400
+        });
+      }
+      roleId = roleRecord.id;
+    }
+
+     let username = customUsername || admin.username;
+    if (customUsername && customUsername !== admin.username) {
+      const existingUser = await AdminsModel.findOne({ where: { username: customUsername } });
+      if (existingUser) {
+        return res.status(400).json({
+          error: true,
+          message: 'El nombre de usuario ya está en uso. Por favor, elige otro.',
+          status: 400
+        });
+      }
     }
 
 
@@ -376,13 +409,19 @@ export const updateAdmin = async (req, res) => {
     admin.password = hashedPassword;
     admin.image = image !== undefined ? image : admin.image;
     admin.status = status || admin.status;
+    admin.role_id = roleId;
 
     await admin.save();
+
+    const adminResponse = {
+      ...admin.get(),
+      password: undefined
+    };
 
     return res.status(200).json({
       error: false,
       message: 'Administrador actualizado exitosamente',
-      data: admin,
+      data: adminResponse,
       status: 200
     });
   } catch (error) {

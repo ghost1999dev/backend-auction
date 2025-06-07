@@ -127,33 +127,33 @@ router.get('/show/all', getAllAdmins);
      *        description: Server error         
      */ 
 router.get('/show/:id', getAdminById);
-    /**
-     * @swagger
-     * /admins/update/{id}:
-     *  put:
-     *    tags: [Admins]
-     *    summary: Update a admin
-     *    parameters:
-     *      - in: path
-     *        name: id
-     *        schema:
-     *          type: string
-     *        required: true
-     *        description: Admin id
-     *    requestBody:
-     *      required: true
-     *      content:
-     *        application/json:
-     *          schema:
-     *            $ref: '#/components/schemas/adminUpdate'
-     *    responses:
-     *      200:
-     *        description: Returns updated admin
-     *      404:
-     *        description: Admin not found
-     *      500:
-     *        description: Server error         
-     */
+/**
+ * @swagger
+ * /admins/update/{id}:
+ *  put:
+ *    tags: [Admins]
+ *    summary: Update a admin
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Admin id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/adminUpdate'
+ *    responses:
+ *      200:
+ *        description: Returns updated admin
+ *      404:
+ *        description: Admin not found
+ *      500:
+ *        description: Server error         
+ */ 
 router.put('/update/:id', updateAdmin);
     /**
      * @swagger

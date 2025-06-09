@@ -167,17 +167,52 @@ export const listApplications = async (req, res, next) => {
         {                   
           model: ProjectsModel,
           as: "project",
-          attributes: ["id", "project_name", "description"]
+          include: [
+            {
+              model: CompaniesModel,
+              as: 'company_profile'
+            },
+            {
+              model: CategoriesModel,
+              as: 'category',
+            }
+          ]
         },
         {                      
           model: UsersModel,
           as: "developer",
-          attributes: ["id", "name", "email"] 
+          attributes: {
+            exclude: ['password']
+          }
         }
       ]
     });
 
-    res.json({applications});
+    const projectDaysRemaining = applications.map(application => {
+      let daysRemaining = null;
+
+      if (application.project.status === 1) {
+        const activatedAt = new Date(application.project.updatedAt);
+        const today = new Date();
+
+        const msInDay = 24 * 60 * 60 * 1000;
+        const elapsedDays = Math.floor((today - activatedAt) / msInDay);
+        daysRemaining = application.project.days_available - elapsedDays;
+
+        if (daysRemaining < 0) daysRemaining = 0;
+      }
+
+      return {
+        ...application.project.dataValues,
+        days_remaining: daysRemaining
+      }
+    })
+
+    res.status(200).json({
+      success: true,
+      message: "Aplicaciones obtenidas exitosamente",
+      applications: projectDaysRemaining
+    })
 
   } catch (err) { next(err); }
 };

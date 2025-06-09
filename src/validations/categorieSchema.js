@@ -17,6 +17,6 @@ export const categorySchema = Joi.object({
   })
 });
 
-const categoryIdParam = Joi.number().integer().positive().required();
+export const categoryIdParam = Joi.number().integer().positive().required();
 
 export default categorySchema;

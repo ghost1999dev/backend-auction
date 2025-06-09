@@ -2,11 +2,14 @@ import Joi from "joi";
 import { isCorporateEmail } from "../utils/emailValidation.js";
 
  export const adminSchema = Joi.object({
-  full_name: Joi.string().required().min(3).max(100).messages({
-    'string.empty': 'El nombre completo es obligatorio',
+full_name: Joi.string()
+    .min(3)
+    .max(100)
+    .pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+     .messages({
     'string.min': 'El nombre completo debe tener al menos 3 caracteres',
-    'string.max': 'El nombre completo no puede exceder los 100 caracteres',
-    'any.required': 'El nombre completo es obligatorio'
+    'string.max': 'El nombre completo no debe exceder los 100 caracteres',
+    'string.pattern.base': 'El nombre completo solo puede contener letras y espacios, sin números ni caracteres especiales'
   }),
 
   phone: Joi.string()

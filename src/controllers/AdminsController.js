@@ -14,7 +14,7 @@ import Joi from 'joi';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 import hashPassword from "../helpers/hashPassword.js";
 import ReportsModel from "../models/ReportsModel.js";
-import { adminSchema, adminUpdateSchema } from "../validations/adminSchema.js";
+import { adminSchema, adminUpdateSchema, schemaParams, schemaBody } from "../validations/adminSchema.js";
 
 
 /**
@@ -687,22 +687,6 @@ export const updateProjectStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { newStatus } = req.body;
-
-    const schemaParams = Joi.object({
-      id: Joi.number().positive().required().messages({
-        'any.required': 'ID de proyecto requerido',
-        'number.base': 'El ID debe ser un número',
-        'number.positive': 'El ID debe ser un número positivo'
-      })
-    });
-
-    const schemaBody = Joi.object({
-      newStatus: Joi.number().valid(0, 1, 3, 4).required().messages({
-        'any.required': 'El nuevo estado es obligatorio',
-        'number.base': 'El estado debe ser un número',
-        'any.only': 'El estado debe ser uno de los siguientes valores: 0, 1, 3, 4'
-      })
-    });
 
     const validateParams = schemaParams.validate(req.params);
     const validateBody = schemaBody.validate(req.body);

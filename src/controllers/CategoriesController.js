@@ -1,11 +1,5 @@
 import CategoriesModel from "../models/CategoriesModel.js";
-import Joi from "joi";
-
-const categorySchema = Joi.object({
-  name: Joi.string().trim().min(3).max(50).required()
-});
-
-const categoryIdParam = Joi.number().integer().positive().required();
+import {categorySchema, categoryIdParam} from "../validations/categorieSchema.js";
 
 /**
  * Create category

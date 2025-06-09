@@ -19,7 +19,7 @@ export const createCategory = async (req, res) => {
   try {
     if (!req.user || !req.user.admin_id) {
       return res.status(403).json({ 
-        message: 'Access denied. Only active administrators can create categories.',
+        message: 'Acceso denegado. Solo los administradores activos pueden crear categorías.',
         status: 403
       });
     }
@@ -35,14 +35,14 @@ export const createCategory = async (req, res) => {
     const category = await CategoriesModel.create({ name: req.body.name });
 
     res.status(201).json({
-      message: "Category created successfully",
+      message: "Categoría creada exitosamente",
       status: 201,
       category
     });
   } catch (error) {
-    console.error('Error creating category:', error);
+    console.error('Error al crear categoría:', error);
     res.status(500).json({ 
-      message: "Error creating category", 
+      message: "Error al crear categoría:", 
       error: error.message,
       status: 500
     });
@@ -62,14 +62,14 @@ export const updateCategory = async (req, res) => {
   try {
     if (!req.user || !req.user.admin_id) {
       return res.status(403).json({ 
-        message: 'Access denied. Only active administrators can update categories.',
+        message: 'Acceso denegado. Solo los administradores activos pueden actualizar las categorías.',
         status: 403
       });
     }
 
     const { error: idError } = categoryIdParam.validate(req.params.id);
     if (idError) {
-      return res.status(400).json({ message: "Invalid category ID", status: 400 });
+      return res.status(400).json({ message: "ID de categoría no válida", status: 400 });
     }
 
     const { error } = categorySchema.validate(req.body);
@@ -79,7 +79,7 @@ export const updateCategory = async (req, res) => {
 
     const category = await CategoriesModel.findByPk(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: "Category not found", status: 404 });
+      return res.status(404).json({ message: "Categoría no encontrada", status: 404 });
     }
 
     await CategoriesModel.update(
@@ -90,13 +90,13 @@ export const updateCategory = async (req, res) => {
     const updatedCategory = await CategoriesModel.findByPk(req.params.id);
 
     res.status(200).json({
-      message: "Category updated successfully",
+      message: "Categoría actualizada exitosamente",
       status: 200,
       category: updatedCategory
     });
   } catch (error) {
-    console.error('Error updating category:', error);
-    res.status(500).json({ message: "Error updating category", error: error.message, status: 500 });
+    console.error('Error al actualizar la categoría:', error);
+    res.status(500).json({ message: "Error al actualizar la categoría:", error: error.message, status: 500 });
   }
 };
 
@@ -112,30 +112,30 @@ export const deleteCategory = async (req, res) => {
   try {
     if (!req.user || !req.user.admin_id) {
       return res.status(403).json({ 
-        message: 'Access denied. Only active administrators can delete categories.',
+        message: 'Acceso denegado. Solo los administradores activos pueden eliminar categorías.',
         status: 403
       });
     }
 
     const { error: idError } = categoryIdParam.validate(req.params.id);
     if (idError) {
-      return res.status(400).json({ message: "Invalid category ID", status: 400 });
+      return res.status(400).json({ message: "ID de categoría no válida", status: 400 });
     }
 
     const category = await CategoriesModel.findByPk(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: "Category not found", status: 404 });
+      return res.status(404).json({ message: "Categoría no encontrada", status: 404 });
     }
 
     await CategoriesModel.destroy({ where: { id: req.params.id } });
 
     res.status(200).json({
-      message: "Category deleted successfully",
+      message: "Categoría eliminada exitosamente",
       status: 200
     });
   } catch (error) {
-    console.error('Error deleting category:', error);
-    res.status(500).json({ message: "Error deleting category", error: error.message, status: 500 });
+    console.error('Error al eliminar la categoría:', error);
+    res.status(500).json({ message: "Error al eliminar la categoría:", error: error.message, status: 500 });
   }
 };
 /**
@@ -153,13 +153,13 @@ export const getAllCategories = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Categories retrieved successfully",
+      message: "Categorías recuperadas exitosamente",
       status: 200,
       categories
     });
   } catch (error) {
-    console.error('Error retrieving categories:', error);
-    res.status(500).json({ message: "Error retrieving categories", error: error.message, status: 500 });
+    console.error('Error al recuperar categorías:', error);
+    res.status(500).json({ message: "Error al recuperar categorías:", error: error.message, status: 500 });
   }
 };
 
@@ -175,21 +175,21 @@ export const getCategoryById = async (req, res) => {
   try {
     const { error: idError } = categoryIdParam.validate(req.params.id);
     if (idError) {
-      return res.status(400).json({ message: "Invalid category ID", status: 400 });
+      return res.status(400).json({ message: "ID de categoría no válida", status: 400 });
     }
 
     const category = await CategoriesModel.findByPk(req.params.id);
     if (!category) {
-      return res.status(404).json({ message: "Category not found", status: 404 });
+      return res.status(404).json({ message: "Categoría no encontrada", status: 404 });
     }
 
     res.status(200).json({
-      message: "Category retrieved successfully",
+      message: "Categoría recuperada exitosamente",
       status: 200,
       category
     });
   } catch (error) {
-    console.error('Error retrieving category:', error);
-    res.status(500).json({ message: "Error retrieving category", error: error.message, status: 500 });
+    console.error('Error al recuperar la categoría:', error);
+    res.status(500).json({ message: "Error al recuperar la categoría:", error: error.message, status: 500 });
   }
 };

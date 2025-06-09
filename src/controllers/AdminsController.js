@@ -220,7 +220,8 @@ export const getAllAdmins = async (req, res) => {
     const admins = await AdminsModel.findAll({
       attributes: {
         exclude: ['password', 'createdAt']
-      }
+      },
+      order: [['createdAt', 'DESC']]
     })
 
     const adminsWithImage = await Promise.all(

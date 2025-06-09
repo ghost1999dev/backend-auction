@@ -40,7 +40,7 @@ async function sendVerificationEmail(email, code) {
     text: `
           Hola,
 
-          Gracias por registrarte. Para continuar, por favor usa el siguiente código de verificación:
+          Para continuar, por favor usa el siguiente código de verificación:
 
           Código: ${code}
 

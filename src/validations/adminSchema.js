@@ -94,11 +94,7 @@ full_name: Joi.string()
       'string.uri': 'La imagen debe ser una URL válida'
     }),
 
-  role: Joi.string()
-    .valid('Administrador', 'SuperAdministrador')
-    .messages({
-      'any.only': 'El rol debe ser "Administrador" o "SuperAdministrador"'
-    }),
+   role: Joi.number().valid(3, 4).optional(),
 
   status: Joi.string()
     .valid('active', 'inactive')

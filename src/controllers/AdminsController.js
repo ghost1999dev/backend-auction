@@ -373,17 +373,26 @@ export const updateAdmin = async (req, res) => {
     }
 
     let roleId = admin.role_id;
-    if (role) {
-      const roleRecord = await RolesModel.findOne({ where: { role_name: role } });
-      if (!roleRecord) {
-        return res.status(400).json({
-          error: true,
-          message: 'El rol especificado no existe en la base de datos.',
-          status: 400
-        });
-      }
-      roleId = roleRecord.id;
-    }
+        if (role !== undefined) {
+          let roleRecord;
+
+          if (typeof role === 'number') {
+            roleRecord = await RolesModel.findByPk(role);
+          } else if (typeof role === 'string') {
+            roleRecord = await RolesModel.findOne({ where: { role_name: role } });
+          }
+
+          if (!roleRecord) {
+            return res.status(400).json({
+              error: true,
+              message: 'El rol especificado no existe en la base de datos.',
+              status: 400
+            });
+          }
+
+          roleId = roleRecord.id;
+        }
+
 
      let username = customUsername || admin.username;
     if (customUsername && customUsername !== admin.username) {

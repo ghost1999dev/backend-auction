@@ -16,8 +16,8 @@ full_name: Joi.string()
   .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
   .required()
     .messages({
-      'string.pattern.base': 'Phone numbers format is wrong',
-      'string.empty': 'Number is empty'
+      'string.pattern.base': 'El formato de los números de teléfono es incorrecto',
+      'string.empty': 'El número está vacío'
   }),
   
   email: Joi.string().required().email().messages({
@@ -59,8 +59,8 @@ full_name: Joi.string()
  phone: Joi.string()
   .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)
     .messages({
-      'string.pattern.base': 'Phone numbers format is wrong',
-      'string.empty': 'Number is empty'
+      'string.pattern.base': 'El formato de los números de teléfono es incorrecto',
+      'string.empty': 'El número está vacío'
   }),
 
   email: Joi.string()

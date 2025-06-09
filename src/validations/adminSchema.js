@@ -46,10 +46,12 @@ export const adminUpdateSchema = Joi.object({
 full_name: Joi.string()
     .min(3)
     .max(100)
-    .messages({
-      'string.min': 'El nombre completo debe tener al menos 3 caracteres',
-      'string.max': 'El nombre completo no debe exceder los 100 caracteres'
-    }),
+    .pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/)
+     .messages({
+    'string.min': 'El nombre completo debe tener al menos 3 caracteres',
+    'string.max': 'El nombre completo no debe exceder los 100 caracteres',
+    'string.pattern.base': 'El nombre completo solo puede contener letras y espacios, sin números ni caracteres especiales'
+  }),
 
  phone: Joi.string()
   .pattern(/^\+\(\d{3}\) \d{4}-\d{4}$/)

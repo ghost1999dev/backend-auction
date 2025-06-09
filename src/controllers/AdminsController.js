@@ -720,6 +720,14 @@ export const updateProjectStatus = async (req, res) => {
       });
     }
 
+    if (project.status !== 0) {
+      return res.status(403).json({
+        message: 'Solo se pueden actualizar los estados de proyectos que estén en "Pendiente".',
+        currentStatus: project.status,
+        status: 403
+      });
+    }
+
     project.status = newStatus;
     await project.save();
 

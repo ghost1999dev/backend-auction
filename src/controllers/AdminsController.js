@@ -14,7 +14,7 @@ import jwt from 'jsonwebtoken';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 import ReportsModel from "../models/ReportsModel.js";
 import { adminSchema, adminUpdateSchema, schemaParams, schemaBody } from "../validations/adminSchema.js";
-import { confirmEmailService } from "../helpers/emailVerification.js";
+import { confirmEmailService, emailVerificationService } from "../helpers/emailVerification.js";
 
 /**
  * generate username
@@ -76,13 +76,13 @@ export const generateUsername = async (req, res) => {
 export const createAdmin = async (req, res) => {
 try {
 
-  if (!req.user || req.user.role !== 'SuperAdministrador') {
+ /* if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
         message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
         status: 403
       });
-    }
+    }*/
 
     const { error, value } = adminSchema.validate(req.body, { abortEarly: false });
     
@@ -195,10 +195,8 @@ try {
     
     const resetLink = `${url_base}${resetToken}`;
 
-    const response = await confirmEmailService(email);
-    const verificationCode = response?.code || 'N/A';
 
-    await sendWelcomeEmail(email, full_name, username, resetLink, verificationCode);
+    await sendWelcomeEmail(email, full_name, username, resetLink);
 
 
 

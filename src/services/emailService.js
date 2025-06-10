@@ -377,7 +377,7 @@ export const sendReportReplyEmail = async ({ to, name, newStatus, responseMessag
 };
 
 
-export const sendWelcomeEmail = async (email, fullName, username, resetLink, verificationCode) => {
+export const sendWelcomeEmail = async (email, fullName, username, resetLink) => {
   const mailOptions = {
     from: '"Sistemas de Subastas" <no-reply@subastas.com>',
     to: email,
@@ -390,7 +390,8 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink, ver
         <p><strong>Tus credenciales de acceso son:</strong></p>
         <ul>
           <li><strong>Usuario:</strong> ${username}</li>
-          <li><strong>Código de verificación:</strong> ${verificationCode}</li>
+          <li><strong>Importante:</strong> El código de verificación se te mando al correo electrónico que elijiste en el registro
+          favor debes copiarlo y pegarlo en el siguiente enlace para continuar.</li>
           <br><br>
           <p style="color: #cc0000;"><strong>Este código es válido por 10 minutos. Si no lo solicitaste, puedes ignorar este mensaje.</strong></p>
         </ul>

@@ -79,7 +79,7 @@ router.post('/generate-username', generateUsername);
      *        description: Server error 
      */      
 
-router.post('/create', validateAdmin, createAdmin);
+router.post('/create', createAdmin);
 
     /**
      * @swagger
@@ -387,7 +387,7 @@ router.put('/reactivatedAdmin/:id', validateAdmin, reactivateAdmin);
  *      500:
  *        description: Server error
  */
-router.post('/forgot-password', validateAdmin, forgotPassword);
+router.post('/forgot-password', forgotPassword);
 
 /**
  * @swagger

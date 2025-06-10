@@ -76,13 +76,13 @@ export const generateUsername = async (req, res) => {
 export const createAdmin = async (req, res) => {
 try {
 
-  if (!req.user || req.user.role !== 'SuperAdministrador') {
+  /*if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
         message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
         status: 403
       });
-    }
+    }*/
 
     const { error, value } = adminSchema.validate(req.body, { abortEarly: false });
     
@@ -195,7 +195,7 @@ try {
     
     const resetLink = `${url_base}${resetToken}`;
 
-
+    const verificationCode = await emailVerificationService(email);
     await sendWelcomeEmail(email, full_name, username, resetLink);
 
 

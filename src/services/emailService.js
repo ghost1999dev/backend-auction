@@ -379,13 +379,13 @@ export const sendReportReplyEmail = async ({ to, name, newStatus, responseMessag
 
 export const sendWelcomeEmail = async (email, fullName, username, resetLink) => {
   const mailOptions = {
-    from: '"Subastas Corporativas" <no-reply@subastas.com>',
+    from: '"Sistemas de Subastas" <no-reply@subastas.com>',
     to: email,
     subject: 'Bienvenido a la plataforma de administración',
     html: `
       <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
         <h2 style="color: #0d6efd;">Bienvenido/a, ${fullName}</h2>
-        <p>Nos complace darte la bienvenida al sistema de administración de Subastas Corporativas.</p>
+        <p>Nos complace darte la bienvenida al sistema de administración de Subastas.</p>
 
         <p><strong>Tus credenciales de acceso son:</strong></p>
         <ul>
@@ -401,7 +401,7 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink) => 
 
         <p>Si no solicitaste esta cuenta, puedes ignorar este mensaje.</p>
 
-        <p style="margin-top: 30px;">Atentamente,<br>Equipo de Subastas Corporativas</p>
+        <p style="margin-top: 30px;">Atentamente,<br>Equipo de Administración de Subastas</p>
       </div>
     `,
   };

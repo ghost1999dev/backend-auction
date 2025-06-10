@@ -79,7 +79,7 @@ router.post('/generate-username', generateUsername);
      *        description: Server error 
      */      
 
-router.post('/create', createAdmin);
+router.post('/create', validateAdmin, createAdmin);
 
     /**
      * @swagger

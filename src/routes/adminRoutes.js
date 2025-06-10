@@ -387,7 +387,7 @@ router.put('/reactivatedAdmin/:id', validateAdmin, reactivateAdmin);
  *      500:
  *        description: Server error
  */
-router.post('/forgot-password', forgotPassword);
+router.post('/forgot-password', validateAdmin, forgotPassword);
 
 /**
  * @swagger
@@ -428,7 +428,7 @@ router.post('/forgot-password', forgotPassword);
  *      500:
  *        description: Server error
  */
-router.post('/reset-password', resetPassword);
+router.post('/reset-password',validateAdmin, resetPassword);
 /**
  * @swagger
  * /admins/get-all-user-reports:

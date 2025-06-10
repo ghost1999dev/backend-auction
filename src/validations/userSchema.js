@@ -37,7 +37,7 @@ export const updateUserSchema = Joi.object({
 export const passwordUserchema = Joi.object({
     currentPassword: Joi.string().optional().allow('',null),
   Newpassword: Joi.string()
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d[^A-Za-z\d]]{6,}$/)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d[^A-Za-z\d]]{6,20}$/)
     .required()
     .messages({
       'string.pattern.base': 'La nueva contraseña debe tener al menos una mayúscula, una minúscula, un número, un símbolo y mínimo 6 caracteres.',

@@ -12,9 +12,10 @@ import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
-import hashPassword from "../helpers/hashPassword.js";
 import ReportsModel from "../models/ReportsModel.js";
 import { adminSchema, adminUpdateSchema, schemaParams, schemaBody } from "../validations/adminSchema.js";
+import { confirmEmailService } from "../helpers/emailVerification.js";
+
 
 
 /**

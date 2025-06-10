@@ -25,12 +25,13 @@ full_name: Joi.string()
     'string.email': 'Formato de correo electrónico inválido',
     'any.required': 'El correo electrónico es obligatorio'
   }),
-  password: Joi.string().required().min(8).max(30).messages({
-    'string.empty': 'La contraseña es obligatoria',
-    'string.min': 'La contraseña debe tener al menos 8 caracteres',
-    'string.max': 'La contraseña no puede exceder los 30 caracteres',
-    'any.required': 'La contraseña es obligatoria'
-  }),
+  password: Joi.string()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,20}$/)
+    .messages({
+      'string.pattern.base': 'La contraseña debe tener entre 6 y 20 caracteres, e incluir al menos una mayúscula, una minúscula, un número y un símbolo.',
+      'string.empty': 'La contraseña no puede estar vacía.'
+    }),
+
   image: Joi.string().allow('', null).optional(),
 
   role: Joi.number().valid(3, 4).optional(),
@@ -69,12 +70,12 @@ full_name: Joi.string()
     }),
 
   password: Joi.string()
-    .min(8)
-    .max(50)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,20}$/)
     .messages({
-      'string.min': 'La contraseña debe tener al menos 8 caracteres',
-      'string.max': 'La contraseña no debe exceder los 50 caracteres'
+      'string.pattern.base': 'La contraseña debe tener entre 6 y 20 caracteres, e incluir al menos una mayúscula, una minúscula, un número y un símbolo.',
+      'string.empty': 'La contraseña no puede estar vacía.'
     }),
+
 
   username: Joi.string()
     .alphanum()
@@ -100,9 +101,9 @@ full_name: Joi.string()
     .messages({
       'any.only': 'El estado debe ser "active" o "inactive"'
     })
-}).min(1).messages({
-  'object.min': 'Debes proporcionar al menos un campo para actualizar'
-});
+  }).min(1).messages({
+    'object.min': 'Debes proporcionar al menos un campo para actualizar'
+  });
 
 export const schemaParams = Joi.object({
       id: Joi.number().positive().required().messages({

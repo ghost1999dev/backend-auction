@@ -953,50 +953,48 @@ export const reactivateAdmin = async (req, res) => {
  */
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body
+    const { email, url_base } = req.body;
 
-    if (!email) {
+    if (!email || !url_base) {
       return res.status(400).json({
-        message: 'Coreo no proporcionado',
-        error: error.message,
+        message: 'Correo y url_base son requeridos',
         status: 400
       });
     }
 
-    const admin = await AdminsModel.findOne({ where: { email } })
+    const admin = await AdminsModel.findOne({ where: { email } });
 
     if (!admin) {
       return res.status(400).json({
         message: 'Correo no encontrado',
-        error: error.message,
         status: 400
       });
     }
 
-    const response = await requestPasswordRecovery(email)
+    const response = await requestPasswordRecovery(email, url_base);
 
     if (response.status === 200) {
       return res.status(200).json({
-        message: 'Codigo de recuperación enviado',
+        message: 'Código de recuperación enviado',
         email: admin.email,
+        code: response.code, 
         status: 200
       });
-    }
-    else {
+    } else {
       return res.status(response.status).json({
         message: response.message,
-        error: error.message,
         status: response.status
       });
     }
   } catch (error) {
     res.status(500).json({
-      message: 'Error al enviar el correo de recuperacion',
+      message: 'Error al enviar el correo de recuperación',
       error: error.message,
       status: 500
     });
   }
-}
+};
+
 
 export const resetPassword = async (req, res) => {
   try {

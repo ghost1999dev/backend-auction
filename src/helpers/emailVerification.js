@@ -72,7 +72,7 @@ export const emailVerificationService = async (email) => {
     return { error: "El correo es requerido.", status: 400 };
   }
 
-  const verificationCode = uuidv4().substring(0, 6);
+  const verificationCode = uuidv4().substring(0, 6).toUpperCase();
 
   verificationCodes.set(email, {
     code: verificationCode,
@@ -82,7 +82,7 @@ export const emailVerificationService = async (email) => {
 
   try {
     await sendVerificationEmail(email, verificationCode);
-    return { message: "Correo de verificación enviado.", status: 200 };
+    return { message: "Correo de verificación enviado.", status: 200, code: verificationCode };
   } catch (error) {
     console.error("Error al enviar el correo:", error);
     return { error: "Error al enviar el correo de verificación.", status: 500 };
@@ -167,6 +167,7 @@ export const confirmEmailService = async (email, code) => {
       message:
         "Correo verificado correctamente. Se ha enviado un correo de confirmación.",
       status: 200,
+      code: verificationCode
     };
   } catch (error) {
     console.error("Error enviando el correo de confirmación:", error);

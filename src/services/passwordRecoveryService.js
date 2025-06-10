@@ -8,7 +8,7 @@ export const requestPasswordRecovery = async (email) => {
       return {
         status: 200,
         message: "Código de recuperación enviado.",
-        code: response.code // ✅ Propagamos el código
+        code: response.code 
       };
     } else {
       return {

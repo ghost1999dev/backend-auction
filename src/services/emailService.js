@@ -391,6 +391,8 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink, ver
         <ul>
           <li><strong>Usuario:</strong> ${username}</li>
           <li><strong>Código de verificación:</strong> ${verificationCode}</li>
+          <br><br>
+          <p style="color: #cc0000;"><strong>Este código es válido por 10 minutos. Si no lo solicitaste, puedes ignorar este mensaje.</strong></p>
         </ul>
 
         <p style="color: #cc0000;"><strong>Por motivos de seguridad, tu contraseña debe ser restablecida en un plazo máximo de 24 horas.</strong></p>

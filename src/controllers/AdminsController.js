@@ -77,7 +77,7 @@ export const generateUsername = async (req, res) => {
 export const createAdmin = async (req, res) => {
 try {
 
-    if (!req.user || req.user.role !== 'SuperAdministrador') {
+   if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
         message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
@@ -120,26 +120,26 @@ try {
       });
     }
 
-    let roleId = admin.role_id;
-        if (role !== undefined) {
-          let roleRecord;
+    let roleId = null;
+    if (role !== undefined) {
+      let roleRecord;
 
-          if (typeof role === 'number') {
-            roleRecord = await RolesModel.findByPk(role);
-          } else if (typeof role === 'string') {
-            roleRecord = await RolesModel.findOne({ where: { role_name: role } });
-          }
+      if (typeof role === 'number') {
+        roleRecord = await RolesModel.findByPk(role);
+      } else if (typeof role === 'string') {
+        roleRecord = await RolesModel.findOne({ where: { role_name: role } });
+      }
 
-          if (!roleRecord) {
-            return res.status(400).json({
-              error: true,
-              message: 'El rol especificado no existe en la base de datos.',
-              status: 400
-            });
-          }
+      if (!roleRecord) {
+        return res.status(400).json({
+          error: true,
+          message: 'El rol especificado no existe en la base de datos.',
+          status: 400
+        });
+      }
 
-          roleId = roleRecord.id;
-        }
+      roleId = roleRecord.id;
+    }
 
     let username = customUsername;
     
@@ -360,7 +360,7 @@ export const updateAdmin = async (req, res) => {
 
     const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
     
-    if (email && admin.role_id === 3) {
+    if (email && admin.role_id === 4) {
       return res.status(403).json({
         error: true,
         message: 'No está permitido modificar el email siendo administrador',

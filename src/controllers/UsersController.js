@@ -597,6 +597,16 @@ export const resetPassword = async (req, res) => {
       });
     }
     else {
+      const { error } = passwordUserchema.validate(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Error de validación',
+          details: error.details.map(d => d.message),
+          status: 400
+        });
+      }
       const response = await confirmEmailService(email, code)
 
       if (response.status === 200) {

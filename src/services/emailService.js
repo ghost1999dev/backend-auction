@@ -377,7 +377,7 @@ export const sendReportReplyEmail = async ({ to, name, newStatus, responseMessag
 };
 
 
-export const sendWelcomeEmail = async (email, fullName, username, resetLink) => {
+export const sendWelcomeEmail = async (email, fullName, username, resetLink, verificationCode) => {
   const mailOptions = {
     from: '"Sistemas de Subastas" <no-reply@subastas.com>',
     to: email,
@@ -390,6 +390,7 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink) => 
         <p><strong>Tus credenciales de acceso son:</strong></p>
         <ul>
           <li><strong>Usuario:</strong> ${username}</li>
+          <li><strong>Código de verificación:</strong> ${verificationCode}</li>
         </ul>
 
         <p style="color: #cc0000;"><strong>Por motivos de seguridad, tu contraseña debe ser restablecida en un plazo máximo de 24 horas.</strong></p>

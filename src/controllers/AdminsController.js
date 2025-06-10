@@ -194,9 +194,14 @@ try {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+    
     const resetLink = `${url_base}${resetToken}`;
 
-    await sendWelcomeEmail(email, full_name, username, resetLink);
+    const response = await confirmEmailService(email);
+    const verificationCode = response?.code || 'N/A';
+
+    await sendWelcomeEmail(email, full_name, username, resetLink, verificationCode);
+
 
 
     const adminResponse = {

@@ -39,7 +39,9 @@ full_name: Joi.string()
     'string.empty': 'El nombre de usuario no puede estar vacío si se proporciona',
     'string.min': 'El nombre de usuario debe tener al menos 3 caracteres',
     'string.max': 'El nombre de usuario no puede exceder los 20 caracteres'
-  })
+  }),
+
+  url_base:Joi.string().allow('', null).optional()
 });
 
 export const adminUpdateSchema = Joi.object({

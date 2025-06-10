@@ -67,7 +67,7 @@ full_name: Joi.string()
     }),
 
   password: Joi.string()
-    .min(6)
+    .min(8)
     .max(50)
     .messages({
       'string.min': 'La contraseña debe tener al menos 6 caracteres',

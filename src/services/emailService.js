@@ -375,3 +375,45 @@ export const sendReportReplyEmail = async ({ to, name, newStatus, responseMessag
   console.log('Correo enviado:', info.messageId);
   return info;
 };
+
+
+export const sendWelcomeEmail = async (email, fullName, username, resetLink) => {
+  const mailOptions = {
+    from: '"Subastas Corporativas" <no-reply@subastas.com>',
+    to: email,
+    subject: 'Bienvenido a la plataforma de administración',
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
+        <h2 style="color: #0d6efd;">Bienvenido/a, ${fullName}</h2>
+        <p>Nos complace darte la bienvenida al sistema de administración de Subastas Corporativas.</p>
+
+        <p><strong>Tus credenciales de acceso son:</strong></p>
+        <ul>
+          <li><strong>Usuario:</strong> ${username}</li>
+        </ul>
+
+        <p style="color: #cc0000;"><strong>Por motivos de seguridad, tu contraseña debe ser restablecida en un plazo máximo de 24 horas.</strong></p>
+        <p>Haz clic en el siguiente enlace para establecer una nueva contraseña:</p>
+
+        <p>
+          <a href="${resetLink}" style="background-color: #0d6efd; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">Restablecer contraseña</a>
+        </p>
+
+        <p>Si no solicitaste esta cuenta, puedes ignorar este mensaje.</p>
+
+        <p style="margin-top: 30px;">Atentamente,<br>Equipo de Subastas Corporativas</p>
+      </div>
+    `,
+  };
+    const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailConfig.user,
+      pass: emailConfig.password
+    }
+  });
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log('Correo enviado:', info.messageId);
+  return info;
+};

@@ -7,10 +7,10 @@ import NotificationsModel from "../models/NotificationsModel.js";
 import updateImage from "./ImagesController.js";
 import RolesModel from '../models/RolesModel.js';
 import signImage from "../helpers/signImage.js";
-import { sendProjectStatusEmail, sendReactivationEmail, sendReportReplyEmail } from '../services/emailService.js';
+import { sendProjectStatusEmail, sendReactivationEmail, sendReportReplyEmail, sendWelcomeEmail } from '../services/emailService.js';
 import { Op } from 'sequelize';
 import bcrypt from 'bcrypt';
-import Joi from 'joi';
+import jwt from 'jsonwebtoken';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 import hashPassword from "../helpers/hashPassword.js";
 import ReportsModel from "../models/ReportsModel.js";
@@ -77,13 +77,13 @@ export const generateUsername = async (req, res) => {
 export const createAdmin = async (req, res) => {
 try {
 
-   if (!req.user || req.user.role !== 'SuperAdministrador') {
+  /* if (!req.user || req.user.role !== 'SuperAdministrador') {
       return res.status(403).json({
         error: true,
         message: 'No tienes permisos para crear administradores. Solo el superAdministrador puede realizar esta acción.',
         status: 403
       });
-    }
+    }*/
 
     const { error, value } = adminSchema.validate(req.body, { abortEarly: false });
     
@@ -101,7 +101,15 @@ try {
       });
     }
 
-    const { full_name, phone, email, password, image, role, username: customUsername } = value;
+    const { full_name, phone, email, password, image, role, username: customUsername, url_base } = value;
+
+    if (!url_base) {
+      return res.status(400).json({
+        error: true,
+        message: 'La URL base para restablecer la contraseña es requerida (url_base)',
+        status: 400
+      });
+    }
 
     const existingEmail = await AdminsModel.findOne({ where: { email } });
     if (existingEmail) {
@@ -178,6 +186,16 @@ try {
       status: 'active',
       role_id: roleId
     });
+
+    const resetToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    const resetLink = `${url_base}${resetToken}`;
+
+    await sendWelcomeEmail(email, full_name, username, resetLink);
+
 
     const adminResponse = {
       ...newAdmin.get(),

@@ -185,7 +185,8 @@ try {
       password: hashedPassword,
       image: image,
       status: 'active',
-      role_id: roleId
+      role_id: roleId,
+      url_base
     });
 
     const resetToken = jwt.sign(

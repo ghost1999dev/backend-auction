@@ -33,11 +33,8 @@ full_name: Joi.string()
   }),
   image: Joi.string().allow('', null).optional(),
 
-  role: Joi.string().required().valid('Administrador', 'SuperAdministrador').messages({
-    'string.empty': 'El rol es obligatorio',
-    'any.only': 'Rol inválido. Los roles permitidos son: Administrador, SuperAdministrador',
-    'any.required': 'El rol es obligatorio'
-  }),
+  role: Joi.number().valid(3, 4).optional(),
+
   username: Joi.string().min(3).max(20).optional().messages({
     'string.empty': 'El nombre de usuario no puede estar vacío si se proporciona',
     'string.min': 'El nombre de usuario debe tener al menos 3 caracteres',

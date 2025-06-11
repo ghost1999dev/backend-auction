@@ -193,6 +193,16 @@ export default router;
  *         status:
  *           type: integer
  *           description: '0=activo, 1=ganador, 2=rechazado'
+ *         project:
+ *           $ref: '#/components/schemas/Project'
+ *         company_profile:
+ *           $ref: '#/components/schemas/Company'
+ *         user: 
+ *           $ref: '#/components/schemas/User'
+ *         developer:
+ *           $ref: '#/components/schemas/Developer'
+ *         category:
+ *           $ref: '#/components/schemas/Category'
  *
  *     ApplicationCreate:
  *       type: object

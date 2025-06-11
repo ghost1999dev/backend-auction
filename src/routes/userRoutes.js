@@ -382,8 +382,6 @@ export default router;
  *        email:
  *          type: string
  *          format: email
- *        password:
- *          type: string
  *        address:
  *          type: string
  *        phone:

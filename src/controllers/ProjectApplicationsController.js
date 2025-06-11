@@ -5,28 +5,6 @@ import DevelopersModel from "../models/DevelopersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 
-const APPLICATION_STATUS = {
-  PENDING:  0,
-  ACCEPTED: 1,
-  REJECTED: 2
-};
-
-const VALID_TRANSITIONS = {
-  [APPLICATION_STATUS.PENDING]:  [APPLICATION_STATUS.ACCEPTED, APPLICATION_STATUS.REJECTED],
-  [APPLICATION_STATUS.ACCEPTED]:  [],
-  [APPLICATION_STATUS.REJECTED]:  []
-};
-
-/**
- * @desc    Validar transición de estado para una aplicación
- * @param   {number} currentStatus - Estado actual
- * @param   {number} newStatus - Estado propuesto
- * @returns {boolean} True si la transición es válida
- */
-const isValidTransition = (currentStatus, newStatus) => {
-  return VALID_TRANSITIONS[currentStatus]?.includes(newStatus);
-};
-
 /**
  * @desc    Crear nueva aplicación a proyecto
  * @route   POST /applications/create
@@ -119,8 +97,7 @@ export const createApplication = async (req, res, next) => {
 
     const app = await ProjectApplicationsModel.create({
       project_id,
-      developer_id,
-      status: APPLICATION_STATUS.ACCEPTED
+      developer_id
     });
 
     return res.status(201).json({
@@ -205,7 +182,14 @@ export const listApplications = async (req, res, next) => {
       applications: projectDaysRemaining
     })
 
-  } catch (err) { next(err); }
+  } catch (error) { 
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las aplicaciones",
+      error: error.message,
+      status: 500
+    });
+   }
 };
 
 
@@ -221,17 +205,43 @@ export const getApplication = async (req, res, next) => {
         { 
           model: ProjectsModel,
           as: 'project',
-          required: false,
-          attributes: ['id', 'project_name', 'description']
+          include: [{
+            model: CompaniesModel,
+            as: 'company_profile'
+          },{
+            model: CategoriesModel,
+            as: 'category'
+          }]
         },
         { 
           model: UsersModel,
-          as: 'developer',
-          required: false,
-          attributes: ['id', 'user_name', 'email']
+          as: 'developer'
         }
       ]
     });
+
+    const projectDaysRemaining = () => {
+      let daysRemaining = null;
+
+      if (application.project.status === 1) {
+        const activatedAt = new Date(application.project.updatedAt);
+        const today = new Date();
+
+        const msInDay = 24 * 60 * 60 * 1000;
+        const elapsedDays = Math.floor((today - activatedAt) / msInDay);
+        daysRemaining = application.project.days_available - elapsedDays;
+
+        if (daysRemaining < 0) daysRemaining = 0;
+      }
+
+      return {
+        ...application.get({ plain: true }), 
+        project: {
+          ...application.project.get({ plain: true }),
+          days_remaining: daysRemaining
+        }
+      };
+    }
 
     if (!application) {
       return res.status(404).json({
@@ -241,58 +251,18 @@ export const getApplication = async (req, res, next) => {
       });
     }
 
-    return res.json({
+    res.json({
       success: true,
-      data: application,
+      application: projectDaysRemaining(),
       status: 200
     });
   } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @desc    Actualizar estado de una aplicación
- * @route   PUT /applications/:id
- * @param   {string} req.params.id - ID de la aplicación
- * @param   {Object} req.body - Datos a actualizar
- */
-export const updateApplication = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const app = await ProjectApplicationsModel.findByPk(id);
-    if (!app) {
-      return res.status(404).json({
-        success: false,
-        message: "Aplicación no encontrada",
-        status: 404
-      });
-    }
-
-    const newStatus = Number(status);
-    if (Number.isNaN(newStatus) || !Object.values(APPLICATION_STATUS).includes(newStatus)) {
-      return res.status(422).json({
-        success: false,
-        message: "status debe ser 0 (pending), 1 (accepted) o 2 (rejected)",
-        status: 422
-      });
-    }
-
-    if (!isValidTransition(app.status, newStatus)) {
-      return res.status(422).json({
-        success: false,
-        message: `Transición no permitida: ${app.status} → ${newStatus}`,
-        status: 422
-      });
-    }
-
-    await app.update({ status: newStatus });
-    res.json({ success: true, data: app });
-
-  } catch (error) {
-    next(error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener la aplicación",
+      error: error.message,
+      status: 500
+    });
   }
 };
 
@@ -318,8 +288,13 @@ export const deleteApplication = async (req, res, next) => {
       message: "Aplicación eliminada exitosamente",
       status: 200
     });
-  } catch (e) { 
-    next(e);
+  } catch (error) { 
+    res.status(500).json({
+      success: false,
+      message: "Error al eliminar la aplicación",
+      error: error.message,
+      status: 500
+    });
   }
 };
 
@@ -422,8 +397,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
     }
 
     const applications = await ProjectApplicationsModel.findAll({
-      where: { 
-        status: 1,
+      where: {
         developer_id 
       },
       include: [{

@@ -362,33 +362,31 @@ export const updateAdmin = async (req, res) => {
       });
     }
 
-    const { error, value } = adminUpdateSchema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errors = error.details.map(detail => ({
-          field: detail.path[0],
-          message: detail.message
-        }));
+  const { error, value } = adminUpdateSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+   
+    const messages = error.details.map(detail => detail.message);
 
-       return res.status(400).json({
-        error: true,
-        message: 'Error de validación',
-        errors,
-        status: 400
-      });
-    }
+    return res.status(400).json({
+      error: true,
+      message: 'Error de validación',
+      errors: messages,
+      status: 400
+    });
+  }
 
 
 
     const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
     
-    if (email && admin.role_id === 4) {
-      return res.status(403).json({
-        error: true,
-        message: 'No está permitido modificar el email siendo administrador',
-        error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED',
-        status: 403
-      });
-    }
+  if (email && req.user.role_id !== 4) {
+    return res.status(403).json({
+      error: true,
+      message: 'No está permitido modificar el email siendo administrador',
+      error_code: 'EMAIL_MODIFICATION_NOT_ALLOWED',
+      status: 403
+    });
+  }
 
     if (full_name && full_name !== admin.full_name) {
       const existingFullName = await AdminsModel.findOne({ where: { full_name } });

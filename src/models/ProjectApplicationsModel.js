@@ -40,7 +40,7 @@ const ProjectApplicationsModel = sequelize.define(
       allowNull: false,
       defaultValue: 0,
       validate: {
-        isIn: [[0, 1, 2]] // 0=pending, 1=accepted, 2=rejected
+        isIn: [[0, 1, 2]] // 0=activo, 1=ganador, 2=rechazado
       }
     }
   },
@@ -51,7 +51,6 @@ const ProjectApplicationsModel = sequelize.define(
   }
 );
 
-// Definir relaciones
 ProjectApplicationsModel.belongsTo(ProjectsModel, { 
   foreignKey: "project_id",   
   as: "project" 

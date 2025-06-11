@@ -4,13 +4,11 @@ import { Router } from "express";
 import validate from "../middlewares/validate.js";
 import {
   applicationSchema,
-  applicationUpdateSchema
 } from "../validations/applicationSchema.js";
 import {
   createApplication,
   listApplications,
   getApplication,
-  updateApplication,
   deleteApplication,
   applicationsCounterByDeveloper,
   getProjectsApplicationsByDeveloper
@@ -41,7 +39,7 @@ const router = Router();
  *       201:
  *         description: Aplicación creada
  *       409:
- *         description: Aplicación duplicada
+ *         description: Aplicación ya existe
  *       422:
  *         description: Datos inválidos
  *       500:
@@ -59,22 +57,6 @@ router.post(
  *   get:
  *     tags: [application-projects]
  *     summary: Listar aplicaciones (con filtros)
- *     parameters:
- *       - in: query
- *         name: developer_id
- *         schema:
- *           type: integer
- *         description: ID del desarrollador
- *       - in: query
- *         name: project_id
- *         schema:
- *           type: integer
- *         description: ID del proyecto
- *       - in: query
- *         name: status
- *         schema:
- *           type: integer
- *         description: Estado (0=pending,1=approved,2=rejected)
  *     responses:
  *       200:
  *         description: Lista de aplicaciones
@@ -93,7 +75,7 @@ router.get("/show/all", listApplications);
 
 /**
  * @swagger
- * /application-projects/{id}:
+ * /application-projects/show/{id}:
  *   get:
  *     tags: [application-projects]
  *     summary: Obtener una aplicación por ID
@@ -117,41 +99,6 @@ router.get("/show/all", listApplications);
  *         description: Error del servidor
  */
 router.get("/:id", getApplication);
-
-/**
- * @swagger
- * /application-projects/update/{id}:
- *   put:
- *     tags: [application-projects]
- *     summary: Actualizar estado de la aplicación
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID de la aplicación
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ApplicationUpdate'
- *     responses:
- *       200:
- *         description: Aplicación actualizada
- *       404:
- *         description: Aplicación no encontrada
- *       422:
- *         description: Regla de negocio violada o dato inválido
- *       500:
- *         description: Error del servidor
- */
-router.put(
-  "/update/:id",
-  validate(applicationUpdateSchema),
-  updateApplication
-);
 
 /**
  * @swagger
@@ -245,8 +192,7 @@ export default router;
  *           type: integer
  *         status:
  *           type: integer
- *           description: '0=pending,1=approved,2=rejected'
- *       required: [id, project_id, developer_id, status]
+ *           description: '0=activo, 1=ganador, 2=rechazado'
  *
  *     ApplicationCreate:
  *       type: object
@@ -257,11 +203,4 @@ export default router;
  *           type: integer
  *       required: [project_id, developer_id]
  *
- *     ApplicationUpdate:
- *       type: object
- *       properties:
- *         status:
- *           type: integer
- *           description: '0=pending,1=approved,2=rejected'
- *       required: [status]
  */

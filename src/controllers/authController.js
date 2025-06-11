@@ -15,6 +15,13 @@ export const loginAdmin = async (req, res) => {
       return res.status(404).json({ message: 'Admin not found.' });
     }
 
+    if (admin.status === 'inactive') {
+      console.log('Cuenta suspendida');
+      return res.status(403).json({
+        message: 'Su cuenta ha sido suspendida. Por favor, comuníquese con el equipo de soporte.'
+      });
+    }
+
     console.log('Admin encontrado:', admin);
 
     const isMatch = await bcrypt.compare(password, admin.password);

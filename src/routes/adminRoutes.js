@@ -428,7 +428,7 @@ router.post('/forgot-password', forgotPassword);
  *      500:
  *        description: Server error
  */
-router.post('/reset-password',validateAdmin, resetPassword);
+router.post('/reset-password', resetPassword);
 /**
  * @swagger
  * /admins/get-all-user-reports:

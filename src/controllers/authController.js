@@ -12,7 +12,7 @@ export const loginAdmin = async (req, res) => {
     
     if (!admin) {
       console.log('Admin no encontrado');
-      return res.status(404).json({ message: 'Admin not found.' });
+      return res.status(404).json({ message: 'Admin no encontrado', status: 404 });
     }
 
     if (admin.status === 'inactive') {
@@ -28,16 +28,16 @@ export const loginAdmin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       console.log('La contraseña no coincide');
-      return res.status(401).json({ message: 'Invalid password.', status: 401 });
+      return res.status(401).json({ message: 'La contraseña no coincide', status: 401 });
     }
 
     console.log('Contraseña válida, generando token');
     const token = generateAdminToken(admin);
 
-    return res.status(200).json({ message: 'Login successful', token, status: 200 });
+    return res.status(200).json({ message: 'Inicio de sesión exitoso.', token, status: 200 });
   } catch (error) {
     console.error('Login error:', error.message);
-    return res.status(500).json({ message: 'Internal server error.', status: 500 });
+    return res.status(500).json({ message: 'Error Interno del Servidor.', status: 500 });
   }
 };
 

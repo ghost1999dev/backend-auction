@@ -345,6 +345,14 @@ export const getAdminById = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
 
+   if (!req.user) {
+      return res.status(401).json({
+        error: true,
+        message: 'No autenticado',
+        status: 401
+      });
+    }
+
     if (!req.params.id) {
       return res.status(400).json({
         error: true,
@@ -379,7 +387,7 @@ export const updateAdmin = async (req, res) => {
 
     const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
     
-  if (email && req.user.role !== 4) {
+  if (email && req.user.role_id !== 4) {
     return res.status(403).json({
       error: true,
       message: 'No está permitido modificar el email siendo administrador',

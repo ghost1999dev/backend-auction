@@ -34,6 +34,7 @@ export const handleJWTLogin = async (req, res) => {
     const payload = {
       id: admin.id,
       username: admin.username,  
+      role_id: admin.role_i
     };
   
     const options = {

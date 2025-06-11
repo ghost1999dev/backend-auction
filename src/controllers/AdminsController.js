@@ -345,7 +345,7 @@ export const getAdminById = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
 
-   if (!req.user) {
+    if (!req.user) {
       return res.status(401).json({
         error: true,
         message: 'No autenticado',
@@ -362,6 +362,7 @@ export const updateAdmin = async (req, res) => {
     }
 
     const admin = await AdminsModel.findByPk(req.params.id);
+    
     if (!admin) {
       return res.status(404).json({
         error: true,

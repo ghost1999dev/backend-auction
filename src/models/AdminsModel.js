@@ -54,7 +54,8 @@ const AdminsModel = sequelize.define(
         timestamps: true,
 });
 
-AdminsModel.belongsTo(RolesModel, { foreignKey: "role_id" });
+AdminsModel.belongsTo(RolesModel, { foreignKey: 'role_id', as: 'role' });
+
 
 
 export default AdminsModel;

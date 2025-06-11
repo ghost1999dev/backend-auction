@@ -33,14 +33,17 @@ export const handleJWTLogin = async (req, res) => {
   export const generateAdminToken = (admin) => {
     const payload = {
       id: admin.id,
-      username: admin.username,  
-      role_id: admin.role_i
+      username: admin.username,
+      email: admin.email,
+      role_id: admin.role.id,      
+      role: admin.role.role_name   
     };
-  
+
     const options = {
-      expiresIn: '1h',  
+      expiresIn: '1h',
     };
-  
+
     const token = jwt.sign(payload, JWT_SECRET, options);
     return token;
   };
+

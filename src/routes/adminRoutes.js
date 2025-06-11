@@ -154,7 +154,7 @@ router.get('/show/:id', getAdminById);
  *      500:
  *        description: Server error         
  */ 
-router.put('/update/:id', updateAdmin);
+router.put('/update/:id', validateAdmin, updateAdmin);
     /**
      * @swagger
      * /admins/delete/{id}:

@@ -12,10 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_segura';
  * @param {Object} res - response object
  * @returns {Object} validation admin
  */
-
 export const validateAdmin = async (req, res, next) => {
   try {
-
     const token = req.headers.authorization?.split(' ')[1];
     
     if (!token) {
@@ -24,40 +22,19 @@ export const validateAdmin = async (req, res, next) => {
     
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    const admin = await AdminsModel.findOne({ 
-      where: { 
-        id: decoded.id,
-        status: 'active'
-      },
-      include: {
-      model: RolesModel,
-      as: 'role',
-      attributes: ['role_name']
-    } 
-    });
-    
-    if (!admin || !admin.role) {
-      return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-    }
-    
+    // Ya no necesitas buscar el admin en DB si en el token ya viene toda la info
     req.user = {
-      admin_id: admin.id,
-      username: admin.username,
-      email: admin.email,
-      role: admin.role.role_name
+      id: decoded.id,
+      username: decoded.username,
+      email: decoded.email,
+      role_id: decoded.role_id,
+      role: decoded.role
     };
     
     next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Invalid token.' });
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token expired.' });
-    }
-    
     console.error('Auth middleware error:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
+    return res.status(401).json({ message: 'Invalid or expired token.' });
   }
 };
+

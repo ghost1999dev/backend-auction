@@ -82,17 +82,10 @@ export const emailVerificationService = async (email) => {
 
   try {
     await sendVerificationEmail(email, verificationCode);
-    return {
-      message: "Correo de verificación enviado.",
-      status: 200,
-      code: verificationCode 
-    };
+    return { message: "Correo de verificación enviado.", status: 200 };
   } catch (error) {
     console.error("Error al enviar el correo:", error);
-    return {
-      error: "Error al enviar el correo de verificación.",
-      status: 500
-    };
+    return { error: "Error al enviar el correo de verificación.", status: 500 };
   }
 };
 
@@ -175,7 +168,6 @@ export const confirmEmailService = async (email, code) => {
       message:
         "Correo verificado correctamente. Se ha enviado un correo de confirmación.",
       status: 200,
-      code: verificationCode.code
     };
   } catch (error) {
     console.error("Error enviando el correo de confirmación:", error);

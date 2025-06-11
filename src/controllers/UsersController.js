@@ -28,7 +28,7 @@ export const verficationEmail = async (req, res) => {
 
     const existingEmail = await UsersModel.findOne({ where: { email } })
     if (existingEmail) {
-         return res.status(400).json({ status: 500, message: "Email already exists" })
+         return res.status(400).json({ status: 500, message: "Ya existe una cuenta con este correo, pruebe recurperar su cuenta o usar otro correo" })
     }else{
       if (existingEmail) {
         return res

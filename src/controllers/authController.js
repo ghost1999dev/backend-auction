@@ -18,7 +18,8 @@ export const loginAdmin = async (req, res) => {
     if (admin.status === 'inactive') {
       console.log('Cuenta suspendida');
       return res.status(403).json({
-        message: 'Su cuenta ha sido suspendida. Por favor, comuníquese con el equipo de soporte.'
+        message: 'Su cuenta ha sido suspendida. Por favor, comuníquese con el equipo de soporte.',
+        status: 403
       });
     }
 

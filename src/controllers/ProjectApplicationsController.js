@@ -149,21 +149,16 @@ export const createApplication = async (req, res, next) => {
  */
 export const listApplications = async (req, res, next) => {
   try {
-    const { developer_id, project_id, status } = req.query;
-    const filters = {};
-    if (developer_id) filters.developer_id = developer_id;
-    if (project_id)   filters.project_id   = project_id;
-    if (status !== undefined) {
-      const s = Number(status);
-      if (![0,1,2].includes(s))
-        return res.status(422).json({ message: "status debe ser 0, 1 o 2", status: 422 });
-      filters.status = s;
-    }
-
     const applications = await ProjectApplicationsModel.findAll({
-      where: filters,
       order: [["createdAt", "DESC"]],
       include: [
+        {                      
+          model: UsersModel,
+          as: "developer",
+          attributes: {
+            exclude: ['password']
+          }
+        },
         {                   
           model: ProjectsModel,
           as: "project",
@@ -177,13 +172,6 @@ export const listApplications = async (req, res, next) => {
               as: 'category',
             }
           ]
-        },
-        {                      
-          model: UsersModel,
-          as: "developer",
-          attributes: {
-            exclude: ['password']
-          }
         }
       ]
     });
@@ -203,9 +191,12 @@ export const listApplications = async (req, res, next) => {
       }
 
       return {
-        ...application.project.dataValues,
-        days_remaining: daysRemaining
-      }
+        ...application.get({ plain: true }), 
+        project: {
+          ...application.project.get({ plain: true }),
+          days_remaining: daysRemaining
+        }
+      };
     })
 
     res.status(200).json({

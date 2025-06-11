@@ -27,16 +27,16 @@ export const loginAdmin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       console.log('La contraseña no coincide');
-      return res.status(401).json({ message: 'Invalid password.' });
+      return res.status(401).json({ message: 'Invalid password.', status: 401 });
     }
 
     console.log('Contraseña válida, generando token');
     const token = generateAdminToken(admin);
 
-    return res.status(200).json({ message: 'Login successful', token });
+    return res.status(200).json({ message: 'Login successful', token, status: 200 });
   } catch (error) {
     console.error('Login error:', error.message);
-    return res.status(500).json({ message: 'Internal server error.' });
+    return res.status(500).json({ message: 'Internal server error.', status: 500 });
   }
 };
 

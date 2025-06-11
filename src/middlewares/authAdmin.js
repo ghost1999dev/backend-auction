@@ -22,7 +22,6 @@ export const validateAdmin = async (req, res, next) => {
     
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    // Ya no necesitas buscar el admin en DB si en el token ya viene toda la info
     req.user = {
       id: decoded.id,
       username: decoded.username,

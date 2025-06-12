@@ -442,3 +442,54 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
     });
   }
 }
+
+export const updateStatusApplication = async (req, res) => {
+  const { id } = req.params
+  const { newStatus } = req.body
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Falta el ID de la aplicación",
+      error: "missing_fields",
+      status: 400
+    })
+  }
+
+  if (!newStatus) {
+    return res.status(400).json({
+      success: false,
+      message: "Falta el estado de la aplicación",
+      error: "missing_fields",
+      status: 400
+    })
+  }
+
+  try {
+    const application = await ProjectApplicationsModel.findByPk(id)
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Aplicación no encontrada",
+        error: "application_not_found",
+        status: 400
+      })
+    }
+
+    application.status = newStatus
+    await application.save()
+
+    res.json({
+      success: true,
+      message: "Estado actualizado exitosamente",
+      status: 200
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar el estado de la aplicación",
+      error: error.message,
+      status: 500
+    })
+  }
+}

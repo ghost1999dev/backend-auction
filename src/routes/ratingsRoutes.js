@@ -514,11 +514,459 @@ router.put('/update/:id',authenticateToken, updateRatings);
  *                 - message                 
  */ 
 router.delete('/delete/:id',authenticateToken, deleteRatings);
-
+/**
+ * @swagger
+ * /ratings/getPromCompany/{id}:
+ *   get:
+ *     tags:               
+ *       - ratings
+ *     summary:            Obtener el promedio de la empresa
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: ID del rating
+ *     responses:
+ *       200:
+ *         description: Promedio obtenido               
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 averageScore:
+ *                   type: number
+ *                   description: Promedio del rating
+ *                 totalRatings:
+ *                   type: number
+ *                   description: Total de ratings
+ *                 type:
+ *                   type: string
+ *                   description: Tipo de rating
+ *       400:
+ *         description: Error en la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       403:
+ *         description: No autorizado para realizar la operación solicitada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       404:
+ *         description: Rating no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       500:
+ *         description: Error interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error                 
+ *               required:  
+ *                 - message                 
+ */
 router.get('/getPromCompany/:id', getPromRatingByCompany);
+/**
+ * @swagger
+ * /ratings/getPromDeveloper/{id}:
+ *   get:
+ *     tags:               
+ *       - ratings
+ *     summary:            Obtener el promedio del desarrollador
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: ID del rating
+ *     responses:
+ *       200:
+ *         description: Promedio obtenido               
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 averageScore:
+ *                   type: number
+ *                   description: Promedio del rating
+ *                 totalRatings:
+ *                   type: number
+ *                   description: Total de ratings
+ *                 type:
+ *                   type: string
+ *                   description: Tipo de rating
+ *       400:
+ *         description: Error en la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       403:
+ *         description: No autorizado para realizar la operación solicitada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       404:
+ *         description: Rating no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       500:
+ *         description: Error interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error                 
+ *               required:  
+ *                 - message                 
+ */ 
 router.get('/getPromDeveloper/:id',getPromRatingByDeveloper);
+/**
+ * @swagger
+ * /ratings/getGlobalPromCompany:
+ *   get:
+ *     tags:               
+ *       - ratings
+ *     summary:            Obtener el promedio global de la empresa
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Promedio obtenido               
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 averageScore:
+ *                   type: number
+ *                   description: Promedio del rating
+ *                 totalRatings:
+ *                   type: number
+ *                   description: Total de ratings
+ *                 type:
+ *                   type: string
+ *                   description: Tipo de rating
+ *       400:
+ *         description: Error en la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       403:
+ *         description: No autorizado para realizar la operación solicitada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       500:
+ *         description: Error interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error                 
+ *               required:  
+ *                 - message                 
+ */
 router.get('/getGlobalPromCompany',getGlobalPromRatingByCompany);
+/**
+ * @swagger
+ * /ratings/getGlobalPromDeveloper:
+ *   get:
+ *     tags:               
+ *       - ratings
+ *     summary:            Obtener el promedio global del desarrollador
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Promedio obtenido               
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 averageScore:
+ *                   type: number
+ *                   description: Promedio del rating
+ *                 totalRatings:
+ *                   type: number
+ *                   description: Total de ratings
+ *                 type:
+ *                   type: string
+ *                   description: Tipo de rating
+ *       400:
+ *         description: Error en la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       403:
+ *         description: No autorizado para realizar la operación solicitada
+ *         content:                
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       500:
+ *         description: Error interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error                 
+ *               required:  
+ *                 - message                 
+ */
 router.get('/getGlobalPromDeveloper',getGlobalPromRatingByDeveloper);
+/**
+ * @swagger
+ * /ratings/getPublicProfile/{id}:
+ *   get:
+ *     tags:               
+ *       - ratings
+ *     summary:            Obtener el perfil público
+ *     security:
+ *       - bearerAuth: []
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: ID del rating
+ *     responses:
+ *       200:
+ *         description: Perfil público obtenido               
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: number
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     image:
+ *                       type: string
+ *                     account_type:
+ *                       type: number
+ *                     status:
+ *                       type: number
+ *                     last_login:
+ *                       type: string
+ *                 ratingSummary:
+ *                   type: object
+ *                   properties:
+ *                     averageScore:
+ *                       type: number
+ *                     totalRatings:
+ *                       type: number
+ *                 recentRatings:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       score:
+ *                         type: number
+ *                       comment:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                       reviewer:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: number
+ *                           name:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *                           image:
+ *                             type: string
+ *                           account_type:
+ *                             type: number
+ *                           status:
+ *                             type: number
+ *                           last_login:
+ *                             type: string
+ *       400:
+ *         description: Error en la petición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       403:
+ *         description: No autorizado para realizar la operación solicitada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       404:
+ *         description: Rating no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error
+ *       500:
+ *         description: Error interno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Descripción del error                 
+ *               required:  
+ *                 - message                 
+ */     
 router.get('/getPublicProfile/:id',getPublicProfile);
 
 

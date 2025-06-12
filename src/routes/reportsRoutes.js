@@ -326,7 +326,7 @@ router.get('/show/all', authenticateToken, getAllReports);
  *               required:  
  *                 - message                 
  */
-router.get('/show/:id', authenticateToken, getReportById);
+router.get('/show/:id', getReportById);
 /**
  * @swagger
  * /reports/update/{id}:

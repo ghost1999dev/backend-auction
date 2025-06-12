@@ -1126,6 +1126,72 @@ export const getAllUserReportsForAdmin = async (req, res) => {
     res.status(500).json({ error: 'No se pudieron obtener los reportes.' });
   }
 };
+export const getReportByIdAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const translateUserRole = (role) => {
+    const roleNum = Number(role); 
+      if (roleNum === 1) return 'Company';
+      if (roleNum === 2) return 'Developer';
+      return 'Desconocido';
+    };
+
+    const report = await ReportsModel.findOne({
+      where: { id },
+      include: [
+        {
+          model: UsersModel,
+          as: 'reporter',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: UsersModel,
+          as: 'reportedUser',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: ProjectsModel,
+          as: 'project',
+          attributes: ['id', 'project_name']
+        }
+      ]
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+
+    const responseData = {
+      id: report.id,
+      reporter_id: report.reporter_id,
+      user_id: report.user_id,
+      user_role: translateUserRole(report.user_role),
+      project_id: report.project_id,
+      reason: report.reason,
+      comment: report.comment,
+      status: report.status,
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+      reporter_name: report.reporter?.name || null,
+      reporter_email: report.reporter?.email || null,
+      reportedUser_name: report.reportedUser?.name || null,
+      reportedUser_email: report.reportedUser?.email || null,
+      project_name: report.project?.project_name || null
+    };
+    const statusesWithAdminResponse = ['resuelto', 'rechazado'];
+    if (statusesWithAdminResponse.includes(report.status.toLowerCase())) {
+      responseData.admin_response = report.admin_response || null;
+    }
+    res.json(responseData);
+
+  } catch (err) {
+    console.error('Error al obtener el reporte por ID:', err);
+    res.status(500).json({ error: 'No se pudo obtener el reporte.' });
+  }
+};
+
+
 /**
  * respondToReport
  * Admin responde un reporte, actualiza su estado y notifica por correo.

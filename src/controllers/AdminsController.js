@@ -1024,7 +1024,6 @@ export const resetPassword = async (req, res) => {
         if (!admin) {
           return res.status(400).json({
             message: 'Correo no encontrado',
-            error: error.message,
             status: 400
           });
         }
@@ -1044,7 +1043,7 @@ export const resetPassword = async (req, res) => {
       else {
         res.status(response.status)
         .json({
-          message: response.message,
+          message: response.error,
           status: response.status
         })
       }

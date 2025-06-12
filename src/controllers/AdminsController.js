@@ -389,7 +389,7 @@ export const updateAdmin = async (req, res) => {
 
 
 
-    const { full_name, phone, email, password, image, status, role, username: customUsername } = value;
+    const { full_name, phone, email, password, status, role, username: customUsername } = value;
     
   if (email && req.user.role_id !== 4) {
     return res.status(403).json({
@@ -456,7 +456,6 @@ export const updateAdmin = async (req, res) => {
     admin.email = email || admin.email;
     admin.username = username || admin.username;
     admin.password = hashedPassword;
-    admin.image = image !== undefined ? image : admin.image;
     admin.status = status || admin.status;
     admin.role_id = roleId;
 

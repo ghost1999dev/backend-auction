@@ -86,14 +86,6 @@ full_name: Joi.string()
       'string.min': 'El nombre de usuario debe tener al menos 3 caracteres',
       'string.max': 'El nombre de usuario no debe exceder los 30 caracteres'
     }),
-
-  image: Joi.string()
-    .uri()
-    .allow(null, '')
-    .messages({
-      'string.uri': 'La imagen debe ser una URL válida'
-    }),
-
    role: Joi.number().valid(3, 4).optional(),
 
   status: Joi.string()

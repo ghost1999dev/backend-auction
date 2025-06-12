@@ -465,6 +465,14 @@ export const updateStatusApplication = async (req, res) => {
     })
   }
 
+  if (newStatus === 0){
+    return res.status(400).json({
+      success: false,
+      message: "Estado no valido",
+      status: 400
+    })
+  }
+
   try {
     const application = await ProjectApplicationsModel.findByPk(id)
     if (!application) {

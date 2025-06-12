@@ -6,8 +6,6 @@ import { createRatingSchema } from '../validations/ratingSchema.js';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize';
 
-
-
 export const getAllRatings = async (req, res) => {
   try {
     const {
@@ -99,7 +97,7 @@ export const getAllRatings = async (req, res) => {
   }
 };
 
-  export const getByIdRating = async (req, res) => {
+export const getByIdRating = async (req, res) => {
      try {
     const rating = await RatingModel.findByPk(req.params.id, {
       include: [

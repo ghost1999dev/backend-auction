@@ -6,7 +6,13 @@ import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
 import signImage from "../helpers/signImage.js";
 import dotenv from "dotenv";
-import { createUserSchema, validateEmailSchema, updateUserSchema, passwordUserchema } from '../validations/userSchema.js';
+import { 
+createUserSchema, 
+validateEmailSchema, 
+updateUserSchema, 
+passwordUserchema,
+resetPasswordSchema 
+} from '../validations/userSchema.js';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 
 dotenv.config()
@@ -585,28 +591,22 @@ export const forgotPassword = async (req, res) => {
  * @returns {Object} user recovered
  */
 export const resetPassword = async (req, res) => {
+
+  const { error, value } = resetPasswordSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error de validación',
+      details: error.details.map(d => d.message),
+      status: 400
+    });
+  }
+  
+  const { email, code, password } = value
+
   try {
-    const { email, code, password } = req.body;
-
-    if (!email || !code || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Error de validación',
-        error: error.message,
-        status: 400
-      });
-    }
-    else {
-      const { error } = passwordUserchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          success: false,
-          message: 'Error de validación',
-          details: error.details.map(d => d.message),
-          status: 400
-        });
-      }
+      
       const response = await confirmEmailService(email, code)
 
       if (response.status === 200) {
@@ -640,10 +640,9 @@ export const resetPassword = async (req, res) => {
           .status(response.status)
           .json({
             status: response.status,
-            message: response.message
+            message: response.error
           })
       }
-    }
   } catch (error) {
     res
       .status(500)

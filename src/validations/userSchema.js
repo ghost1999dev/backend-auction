@@ -45,3 +45,27 @@ export const passwordUserchema = Joi.object({
         'any.required': 'La nueva contraseña es obligatoria.'
       })
   });
+
+export const resetPasswordSchema = Joi.object({
+  email: Joi.string().email()
+    .required()
+    .messages({
+      'string.empty': 'Correo no puede estar vacío',
+      'any.required': 'Correo es obligatorio'
+    }),
+  code: Joi.string().min(6)
+    .required()
+    .messages({
+      'string.empty': 'El código de recuperación no puede estar vacío',
+      'string.min': 'El código de recuperación debe tener al menos 6 caracteres',
+      'any.required': 'El código de recuperación es obligatorio'
+    }),
+  password: Joi.string()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'La nueva contraseña debe tener al menos una mayúscula, una minúscula, un número y mínimo 6 caracteres alfanuméricos.',
+      'string.empty': 'La nueva contraseña no puede estar vacía.',
+      'any.required': 'La nueva contraseña es obligatoria.'
+    })
+}).options({ abortEarly: false });

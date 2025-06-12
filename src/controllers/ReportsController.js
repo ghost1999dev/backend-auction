@@ -176,7 +176,7 @@ export const getReportById = async (req, res) => {
       return res.status(404).json({ error: 'Reporte no encontrado.' });
     }
 
-    res.json({
+    const responseData = {
       id: report.id,
       reporter_id: report.reporter_id,
       user_id: report.user_id,
@@ -192,7 +192,12 @@ export const getReportById = async (req, res) => {
       reportedUser_name: report.reportedUser?.name || null,
       reportedUser_email: report.reportedUser?.email || null,
       project_name: report.project?.project_name || null
-    });
+    };
+    const statusesWithAdminResponse = ['resuelto', 'rechazado'];
+    if (statusesWithAdminResponse.includes(report.status.toLowerCase())) {
+      responseData.admin_response = report.admin_response || null;
+    }
+    res.json(responseData);
 
   } catch (err) {
     console.error('Error al obtener el reporte por ID:', err);
@@ -226,6 +231,14 @@ export const updateReport = async (req, res) => {
     const report = await ReportsModel.findByPk(id);
     if (!report) {
       return res.status(404).json({ error: 'Reporte no encontrado.' });
+    }
+    const nonEditableStatuses = ['resuelto', 'rechazado',['desactivado']];
+    if (nonEditableStatuses.includes(report.status.toLowerCase())) {
+      return res.status(400).json({
+        error: true,
+        message: 'No se puede editar un reporte que ya ha sido resuelto,rechazado o desactivado.',
+        status: 400
+      });
     }
 
     if (req.body.comment && req.body.comment !== report.comment) {

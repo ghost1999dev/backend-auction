@@ -15,7 +15,8 @@ import { createAdmin,
     forgotPassword,
     resetPassword,
     getAllUserReportsForAdmin,
-    respondToReport
+    respondToReport,
+    getReportByIdAdmin
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
@@ -484,6 +485,33 @@ router.get('/get-all-user-reports', validateAdmin, getAllUserReportsForAdmin);
  */
 
 router.put('/respond-to-report/:id', respondToReport);
+/**
+ * @swagger
+ * /admins/get-report/{id}:
+ *  get:
+ *    tags: [Admins]
+ *    summary: Get a report by id
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Report id
+ *    responses:
+ *      200:
+ *        description: Returns a report
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Report'
+ *      404:
+ *        description: Report not found
+ *      500:
+ *        description: Server error         
+ */ 
+
+router.get('/get-report/:id', getReportByIdAdmin);
 
 export default router;
 /**

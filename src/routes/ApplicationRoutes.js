@@ -11,7 +11,8 @@ import {
   getApplication,
   deleteApplication,
   applicationsCounterByDeveloper,
-  getProjectsApplicationsByDeveloper
+  getProjectsApplicationsByDeveloper,
+  updateStatusApplication
 } from "../controllers/ProjectApplicationsController.js";
 
 const router = Router();
@@ -174,6 +175,37 @@ router.get("/counter/:developer_id", applicationsCounterByDeveloper);
  *         description: Error del servidor  
  */
 router.get("/my-applications/:developer_id", getProjectsApplicationsByDeveloper);
+
+/**
+ * @swagger
+ * /application-projects/update-status/{id}:
+ *   put:
+ *     tags: [application-projects]
+ *     summary: Actualizar el estado de una aplicación
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID de la aplicación
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: string
+ *             enum: [1, 2]
+ *             description: 1=ganador, 2=rechazado
+ *     responses:
+ *       200:
+ *         description: Estado actualizado exitosamente
+ *       404:
+ *         description: Aplicación no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
+router.put("/update-status/:id", updateStatusApplication);
 
 export default router;
 

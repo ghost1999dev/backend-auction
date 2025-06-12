@@ -194,9 +194,11 @@ router.get("/my-applications/:developer_id", getProjectsApplicationsByDeveloper)
  *       content:
  *         application/json:
  *           schema:
- *             type: string
- *             enum: [1, 2]
- *             description: 1=ganador, 2=rechazado
+ *             type: object
+ *             properties:
+ *               newStatus:
+ *                 type: integer
+ *                 description: '1=ganador, 2=rechazado'
  *     responses:
  *       200:
  *         description: Estado actualizado exitosamente

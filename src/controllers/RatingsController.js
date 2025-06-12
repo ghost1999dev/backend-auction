@@ -87,15 +87,12 @@ export const getAllRatings = async (req, res) => {
     });
 
     const data = ratings.rows.map(rating => {
-      let developer_name = rating.developer?.user?.name || null;
-      let company_name = rating.company?.user?.name || null;
+      let author_name = null;
 
-      if (!developer_name && rating.author_role === 'Developer') {
-        developer_name = authorMap[rating.author_id] || null;
-      }
-
-      if (!company_name && rating.author_role === 'Company') {
-        company_name = authorMap[rating.author_id] || null;
+      if (rating.author_role?.toLowerCase() === 'developer') {
+        author_name = rating.developer?.user?.name || authorMap[rating.author_id] || null;
+      } else if (rating.author_role?.toLowerCase() === 'company') {
+        author_name = rating.company?.user?.name || authorMap[rating.author_id] || null;
       }
 
       return {
@@ -107,10 +104,9 @@ export const getAllRatings = async (req, res) => {
         updatedAt: rating.updatedAt,
         developer_id: rating.developer_id,
         company_id: rating.company_id,
-        developer_name,
-        company_name,
         author_id: rating.author_id,
-        author_role: rating.author_role
+        author_role: rating.author_role,
+        author_name,  
       };
     });
 
@@ -126,6 +122,7 @@ export const getAllRatings = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener ratings', error });
   }
 };
+
 
 
 export const getByIdRating = async (req, res) => {

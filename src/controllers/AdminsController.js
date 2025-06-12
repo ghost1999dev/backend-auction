@@ -370,19 +370,22 @@ export const updateAdmin = async (req, res) => {
         status: 404
       });
     }
+    
+     const { error, value } = adminUpdateSchema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errors = error.details.map(detail => ({
+          field: detail.path[0],
+          message: detail.message
+        }));
 
-  const { error, value } = adminUpdateSchema.validate(req.body, { abortEarly: false });
-  if (error) {
-   
-    const messages = error.details.map(detail => detail.message);
+       return res.status(400).json({
+        error: true,
+        message: 'Error de validación',
+        errors,
+        status: 400
+      });
+    }
 
-    return res.status(400).json({
-      error: true,
-      message: 'Error de validación',
-      errors: messages,
-      status: 400
-    });
-  }
 
 
 

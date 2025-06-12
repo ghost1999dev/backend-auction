@@ -13,7 +13,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { requestPasswordRecovery } from "../services/passwordRecoveryService.js";
 import ReportsModel from "../models/ReportsModel.js";
-import { adminSchema, adminUpdateSchema, schemaParams, schemaBody } from "../validations/adminSchema.js";
+import { adminSchema, adminUpdateSchema, schemaParams, schemaBody, resetPasswordSchema } from "../validations/adminSchema.js";
 import { confirmEmailService, emailVerificationService } from "../helpers/emailVerification.js";
 
 /**
@@ -1005,48 +1005,52 @@ export const forgotPassword = async (req, res) => {
 
 
 export const resetPassword = async (req, res) => {
+  const { error, value } = resetPasswordSchema.validate(req.body, { abortEarly: false });
+  
+  if (error) {
+    const messages = error.details.map(detail => detail.message);
+
+    return res.status(400).json({
+      error: true,
+      message: 'Error de validación',
+      errors: messages,
+      status: 400
+    });
+  }
+
+  const { email, code, password } = value;
+  
   try {
-    const { email, code, password } = req.body
+    const response = await confirmEmailService(email, code)
 
-    if (!email || !code || !password) {
-      return res.status(400).json({
-        message: 'Error de validación',
-        error: error.message,
-        status: 400
-      });
-    }
-    else {
-      const response = await confirmEmailService(email, code)
+    if (response.status === 200) {
+      const admin = await AdminsModel.findOne({ where: { email } })
 
-      if (response.status === 200) {
-        const admin = await AdminsModel.findOne({ where: { email } })
-
-        if (!admin) {
-          return res.status(400).json({
-            message: 'Correo no encontrado',
-            status: 400
-          });
-        }
-        else {
-          const hashedPassword = await bcrypt.hash(password, 10);
-
-          admin.password = hashedPassword
-
-          await admin.save()
-          res.status(200).json({
-            message: 'Contraseña actualizada correctamente',
-            admin: admin,
-            status: 200
-          })
-        }
+      if (!admin) {
+        return res.status(400).json({
+          message: 'Correo no encontrado',
+          status: 400
+        });
       }
       else {
-        res.status(response.status)
-        .json({
-          message: response.error,
-          status: response.status
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        admin.password = hashedPassword
+
+        await admin.save()
+        res.status(200).json({
+          message: 'Contraseña actualizada correctamente',
+          admin: admin,
+          status: 200
         })
       }
+    }
+    else {
+      res.status(response.status)
+      .json({
+        message: response.error,
+        status: response.status
+      })
     }
   } catch (error) {
     res

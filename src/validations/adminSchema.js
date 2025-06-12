@@ -120,7 +120,20 @@ export const schemaBody = Joi.object({
       })
     });
 
-
+export const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'El correo electrónico no es válido'
+  }),
+  code: Joi.string().required().messages({
+    'string.empty': 'El código de recuperación no puede estar vacío'
+  }),
+  password: Joi.string()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{6,20}$/)
+    .messages({
+      'string.pattern.base': 'La contraseña debe tener entre 6 y 20 caracteres, e incluir al menos una mayúscula, una minúscula, un número y un símbolo.',
+      'string.empty': 'La contraseña no puede estar vacía.'
+    })
+});
 
 
 export default adminSchema;

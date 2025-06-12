@@ -2,6 +2,7 @@ import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import DevelopersModel from "./DevelopersModel.js";
 import CompaniesModel from "./CompaniesModel.js";
+import UsersModel from "./UsersModel.js";
 
 /**
  * Rating model.
@@ -17,12 +18,20 @@ import CompaniesModel from "./CompaniesModel.js";
     },
     developer_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
     company_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
+    author_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+    author_role: {
+    type: DataTypes.ENUM('Developer', 'Company'),
+    allowNull: false
+  },
     score: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -52,6 +61,11 @@ RatingModel.belongsTo(DevelopersModel, {
 RatingModel.belongsTo(CompaniesModel, {
   foreignKey: 'company_id',
   as: 'company'
+});
+
+RatingModel.belongsTo(UsersModel, {
+  foreignKey: 'author_id',
+  as: 'authorUser'
 });
 
   export default RatingModel;

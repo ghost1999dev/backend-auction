@@ -152,7 +152,6 @@ export const getByIdRating = async (req, res) => {
     let developer_name = rating.developer?.user?.name || null;
     let company_name = rating.company?.user?.name || null;
 
-    // Si no viene el developer_name o company_name, lo buscamos por author_role
     if (!developer_name && rating.author_role === 'Developer') {
       const author = await UsersModel.findByPk(rating.author_id, { attributes: ['id', 'name'] });
       developer_name = author?.name || null;
@@ -275,11 +274,11 @@ export const updateRatings = async (req, res) => {
       return res.status(403).json({ message: 'No autorizado para editar este rating' });
     }
 
-    // Validar campos recibidos
+
     const { error } = updateRatingSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
-    // Si se intenta actualizar el comentario, verificar el tiempo
+
     if (req.body.comment && req.body.comment !== rating.comment) {
       const now = new Date();
       const createdAt = new Date(rating.createdAt);
@@ -292,7 +291,7 @@ export const updateRatings = async (req, res) => {
       }
     }
 
-    // Solo actualizamos los campos permitidos
+
     const updatedData = {
       score: req.body.score ?? rating.score,
       comment: req.body.comment ?? rating.comment,
@@ -437,7 +436,7 @@ export const getPublicProfile = async (req, res) => {
   const filterBy = req.query.filterBy;
 
   try {
-    // Buscamos si es developer o company
+
     let user = await DevelopersModel.findByPk(userId, {
       include: [{ model: UsersModel, attributes: ['name', 'email'] }]
     });
@@ -453,7 +452,6 @@ export const getPublicProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
 
-    // Armamos el filtro de ratings
     let ratingWhere = { isVisible: true };
 
     if (filterBy === 'developer') {
@@ -461,14 +459,14 @@ export const getPublicProfile = async (req, res) => {
     } else if (filterBy === 'company') {
       ratingWhere.company_id = userId;
     } else {
-      // Si no envían filtro, se buscan ambos
+
       ratingWhere[Op.or] = [
         { developer_id: userId },
         { company_id: userId }
       ];
     }
 
-    // Buscamos ratings
+
     const ratings = await RatingModel.findAll({
       where: ratingWhere,
       order: [['createdAt', 'DESC']],
@@ -487,7 +485,6 @@ export const getPublicProfile = async (req, res) => {
       ? parseFloat((ratings.reduce((acc, r) => acc + r.score, 0) / totalRatings).toFixed(2))
       : 0;
 
-    // Formateamos los ratings incluyendo el autor
     const recentRatings = ratings.map(rating => ({
       id: rating.id,
       score: rating.score,

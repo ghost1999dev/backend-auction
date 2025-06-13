@@ -104,6 +104,9 @@ export const getAllReports = async (req, res) => {
       ]
     });
 
+        console.log("THIS IS DATA: ", reports)
+
+
     res.json({
       data: reports.rows.map(report => ({
         id: report.id,

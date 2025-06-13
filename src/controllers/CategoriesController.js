@@ -54,12 +54,12 @@ export const createCategory = async (req, res) => {
  */
 export const updateCategory = async (req, res) => {
   try {
-    if (!req.user || !req.user.admin_id) {
+   /* if (!req.user || !req.user.admin_id) {
       return res.status(403).json({ 
         message: 'Acceso denegado. Solo los administradores activos pueden actualizar las categorías.',
         status: 403
       });
-    }
+    }*/
 
     const { error: idError } = categoryIdParam.validate(req.params.id);
     if (idError) {

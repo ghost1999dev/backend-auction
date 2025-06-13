@@ -113,7 +113,7 @@ const router = Router();
  *                   type: string
  *                   description: Descripción del error
  */
-router.get('/show/all',authenticateToken, getAllRatings);
+router.get('/show/all', getAllRatings);
 /**
  * @swagger
  * /ratings/show/{id}:

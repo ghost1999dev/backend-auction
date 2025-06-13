@@ -12,7 +12,7 @@ const authRoutes = (req, res, next) => {
         }
 
         const token = authHeader.split(" ")[1]
-        const user =jwt.verify(token, process.env.JWT_SECRET)
+        const user = jwt.verify(token, process.env.JWT_SECRET)
 
         req.user = user
         next()
@@ -26,3 +26,5 @@ const authRoutes = (req, res, next) => {
         res.status(500).json({ message: 'Autenticación fallida' })
     }
 }
+
+export default authRoutes

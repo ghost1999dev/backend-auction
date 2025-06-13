@@ -7,6 +7,8 @@ import {
   UpdateCompanyProfile,
   DetailsCompanyIdUser,
 } from "../controllers/CompaniesController.js";
+
+import authRoutes from "../middlewares/authRoutes.js";
 /**
  * 
  * Companies Routes
@@ -61,7 +63,7 @@ router.post("/create", AddNewCompany);
  *      500:
  *        description: Server error
  */
-router.get("/show/all", ListAllCompany);
+router.get("/show/all", authRoutes, ListAllCompany);
 
 /**
  * @swagger
@@ -88,7 +90,7 @@ router.get("/show/all", ListAllCompany);
  *      500:
  *        description: Server error
  */
-router.get("/show/:id", DetailsCompanyId);
+router.get("/show/:id", authRoutes, DetailsCompanyId);
 
 /**
  * @swagger
@@ -115,7 +117,7 @@ router.get("/show/:id", DetailsCompanyId);
  *      500:
  *        description: Server error
  */
-router.get("/show/user_id/:user_id", DetailsCompanyIdUser);
+router.get("/show/user_id/:user_id", authRoutes, DetailsCompanyIdUser);
 
 /**
  * @swagger
@@ -144,7 +146,7 @@ router.get("/show/user_id/:user_id", DetailsCompanyIdUser);
  *      500:
  *        description: Server error
  */
-router.put("/update/:id", UpdateCompanyId);
+router.put("/update/:id", authRoutes, UpdateCompanyId);
 
 
 /**
@@ -272,6 +274,6 @@ router.put("/update/:id", UpdateCompanyId);
  *         description: Error interno del servidor
  */
 
-router.put("/companies/:id/profile", UpdateCompanyProfile);
+router.put("/companies/:id/profile", authRoutes, UpdateCompanyProfile);
 
 export default router;

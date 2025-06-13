@@ -68,7 +68,7 @@ export const updateCategory = async (req, res) => {
 
     const { error } = categorySchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ message: "error.details[0].message", status: 400 });
+      return res.status(400).json({ message: error.details[0].message, status: 400 });
     }
 
     const category = await CategoriesModel.findByPk(req.params.id);

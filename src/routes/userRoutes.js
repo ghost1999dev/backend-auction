@@ -320,7 +320,7 @@ router.post("/auth", AuthUser);
  *      500:
  *        description: Server error
  */
-router.post("/forgot-password", authRoutes, forgotPassword);
+router.post("/forgot-password", forgotPassword);
 
 /**
  * @swagger
@@ -361,7 +361,7 @@ router.post("/forgot-password", authRoutes, forgotPassword);
  *      500:
  *        description: Server error
  */
-router.post("/reset-password", authRoutes, resetPassword);
+router.post("/reset-password", resetPassword);
 
 export default router;
 

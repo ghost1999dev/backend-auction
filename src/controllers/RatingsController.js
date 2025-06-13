@@ -179,19 +179,25 @@ export const getByIdRating = async (req, res) => {
 const ROLE_COMPANY = 1;
 const ROLE_DEVELOPER = 2;
 
-async function validateUserRoleByUserId(userId, expectedRoleId) {
-  const user = await UsersModel.findByPk(userId);
+async function validateUserRoleByProfileId(profileId, ProfileModel, expectedRoleId) {
+  const profile = await ProfileModel.findByPk(profileId);
+  if (!profile) {
+    return { valid: false, message: `Perfil con id ${profileId} no encontrado.` };
+  }
+
+  const user = await UsersModel.findByPk(profile.user_id);
   if (!user) {
-    return { valid: false, message: `Usuario con id ${userId} no encontrado.` };
+    return { valid: false, message: `Usuario asociado al perfil ${profileId} no encontrado.` };
   }
+
   if (user.role_id !== expectedRoleId) {
-    return { valid: false, message: `Usuario con id ${userId} no tiene el rol esperado.` };
+    return { valid: false, message: `El usuario asociado no tiene el rol esperado.` };
   }
+
   return { valid: true, user };
 }
 
 export const createRatings = async (req, res) => {
-
   try {
     const { error } = createRatingSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
@@ -222,11 +228,10 @@ export const createRatings = async (req, res) => {
         return res.status(400).json({ message: 'Un developer solo puede calificar a una company' });
       }
 
-      const validation = await validateUserRoleByUserId(company_id, ROLE_COMPANY);
+      const validation = await validateUserRoleByProfileId(company_id, CompaniesModel, ROLE_COMPANY);
       if (!validation.valid) {
         return res.status(400).json({ message: validation.message });
       }
-
 
       const existingRating = await RatingModel.findOne({
         where: { author_id: userId, company_id }
@@ -244,8 +249,7 @@ export const createRatings = async (req, res) => {
         return res.status(400).json({ message: 'Una company solo puede calificar a un developer' });
       }
 
-
-      const validation = await validateUserRoleByUserId(developer_id, ROLE_DEVELOPER);
+      const validation = await validateUserRoleByProfileId(developer_id, DevelopersModel, ROLE_DEVELOPER);
       if (!validation.valid) {
         return res.status(400).json({ message: validation.message });
       }

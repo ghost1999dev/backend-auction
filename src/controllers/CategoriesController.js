@@ -11,12 +11,12 @@ import {categorySchema, categoryIdParam} from "../validations/categorieSchema.js
  */
 export const createCategory = async (req, res) => {
   try {
-    if (!req.user || !req.user.admin_id) {
+    /* if (!req.user || !req.user.admin_id) {
       return res.status(403).json({ 
         message: 'Acceso denegado. Solo los administradores activos pueden crear categorías.',
         status: 403
       });
-    }
+    }*/
 
     const { error } = categorySchema.validate(req.body);
     if (error) {
@@ -68,7 +68,7 @@ export const updateCategory = async (req, res) => {
 
     const { error } = categorySchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ message: error.details[0].message, status: 400 });
+      return res.status(400).json({ message: "error.details[0].message", status: 400 });
     }
 
     const category = await CategoriesModel.findByPk(req.params.id);

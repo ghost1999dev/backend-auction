@@ -1,4 +1,3 @@
-import { auth } from "googleapis/build/src/apis/abusiveexperiencereport"
 import jwt from "jsonwebtoken"
 
 const authRoutes = (req, res, next) => {

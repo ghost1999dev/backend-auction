@@ -202,13 +202,24 @@ export const createRatings = async (req, res) => {
 
     const { developer_id, company_id, score, comment, isVisible } = req.body;
     const roleId = req.user.role_id;
+    const userId = req.user.id;
+    let author_role;
 
-
-    if ((developer_id && developer_id === req.user.id) || (company_id && company_id === req.user.id)) {
-      return res.status(400).json({ message: 'No puedes calificarte a ti mismo' });
+    if (developer_id) {
+      const devProfile = await DevelopersModel.findByPk(developer_id);
+      if (!devProfile) return res.status(404).json({ message: 'Developer no encontrado' });
+      if (devProfile.user_id === userId) {
+        return res.status(400).json({ message: 'No puedes calificarte a ti mismo' });
+      }
     }
 
-    let author_role;
+    if (company_id) {
+      const companyProfile = await CompaniesModel.findByPk(company_id);
+      if (!companyProfile) return res.status(404).json({ message: 'Company no encontrada' });
+      if (companyProfile.user_id === userId) {
+        return res.status(400).json({ message: 'No puedes calificarte a ti mismo' });
+      }
+    }
 
     if (roleId === ROLE_DEVELOPER) {
       if (!company_id || developer_id) {
@@ -222,7 +233,7 @@ export const createRatings = async (req, res) => {
 
 
       const existingRating = await RatingModel.findOne({
-        where: { author_id: req.user.id, company_id }
+        where: { author_id: userId, company_id }
       });
 
       if (existingRating) {
@@ -243,9 +254,8 @@ export const createRatings = async (req, res) => {
         return res.status(400).json({ message: validation.message });
       }
 
-
       const existingRating = await RatingModel.findOne({
-        where: { author_id: req.user.id, developer_id }
+        where: { author_id: userId, developer_id }
       });
 
       if (existingRating) {
@@ -259,22 +269,22 @@ export const createRatings = async (req, res) => {
     }
 
     const rating = await RatingModel.create({
-      developer_id,
-      company_id,
+      developer_id: developer_id || null,
+      company_id: company_id || null,
       score,
       comment,
       isVisible,
-      author_id: req.user.id,
+      author_id: userId,
       author_role,
     });
 
     res.status(201).json(rating);
-
   } catch (error) {
     console.error("Error al crear rating:", error);
     res.status(500).json({ message: 'Error al crear rating', error });
   }
 };
+
 
 
 

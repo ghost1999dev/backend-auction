@@ -33,6 +33,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import ratingRoutes from "./routes/ratingsRoutes.js";
 import reportRoutes from "./routes/reportsRoutes.js";
 
+import authRoutes from "./middlewares/authRoutes.js";
+
 config();
 const app = express();
 
@@ -96,16 +98,17 @@ class Server {
  routes() {
     this.app.use("/", indexRoutes);
     this.app.use("/users", UserRoutes);
+
     this.app.use("/companies", CompanyRoutes);
     this.app.use("/developers", DeveloperRoutes);
     this.app.use("/projects", ProjectRoutes);
-    this.app.use("/categories", categoryRoutes);
+    this.app.use("/categories", authRoutes, categoryRoutes);
     this.app.use("/auth", loginRouter);
     this.app.use("/admins", adminRoutes);
-    this.app.use("/auctions", AuctionRoutes);
-    this.app.use("/application-projects", ApplicationRoutes);
-    this.app.use("/ratings", ratingRoutes);
-    this.app.use("/reports", reportRoutes);
+    this.app.use("/auctions", authRoutes, AuctionRoutes);
+    this.app.use("/application-projects", authRoutes, ApplicationRoutes);
+    this.app.use("/ratings", authRoutes, ratingRoutes);
+    this.app.use("/reports", authRoutes, reportRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

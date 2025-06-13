@@ -7,6 +7,8 @@ import {
     UpdateDeveloperId,
 } from "../controllers/DevelopersController.js"
 
+import authRoutes from "../middlewares/authRoutes.js"
+
 const router = Router()
 
 /**
@@ -54,7 +56,7 @@ router.post("/create", AddNewDeveloper)
  *      500:
  *        description: Server error
  */
-router.get("/show/all", ListAllDevelopers)
+router.get("/show/all", authRoutes, ListAllDevelopers)
 
 /**
  * @swagger
@@ -82,7 +84,7 @@ router.get("/show/all", ListAllDevelopers)
  *        description: Server error
  */
 
-router.get("/show/:id", DetailsDeveloperId)
+router.get("/show/:id", authRoutes, DetailsDeveloperId)
 
 /**
  * @swagger
@@ -110,7 +112,7 @@ router.get("/show/:id", DetailsDeveloperId)
  *        description: Server error
  */
 
-router.get("/show/user_id/:user_id", getDevelopersByIdUser)
+router.get("/show/user_id/:user_id", authRoutes, getDevelopersByIdUser)
 
 /**
  * @swagger
@@ -140,7 +142,7 @@ router.get("/show/user_id/:user_id", getDevelopersByIdUser)
  *        description: Server error
  */
 
-router.put("/update/:id", UpdateDeveloperId)
+router.put("/update/:id", authRoutes, UpdateDeveloperId)
 
 export default router
 

@@ -20,6 +20,8 @@ import {
   resetPassword
 } from "../controllers/UsersController.js";
 
+import authRoutes from "../middlewares/authRoutes.js";
+
 const router = Router();
 
 /**
@@ -96,7 +98,7 @@ router.post("/create", createUser);
  *      500:
  *        description: Server error
  */
-router.get("/show/all", getUsers);
+router.get("/show/all", authRoutes, getUsers);
 /**
  * @swagger
  * /users/show/{id}:
@@ -123,7 +125,7 @@ router.get("/show/all", getUsers);
  *        description: Server error
  * 
  */
-router.get("/show/:id", getUserById);
+router.get("/show/:id", authRoutes, getUserById);
 /**
  * @swagger
  * /users/update/{id}:  
@@ -151,7 +153,7 @@ router.get("/show/:id", getUserById);
  *      500:
  *        description: Server error
  */
-router.put("/update/:id", updateUser);
+router.put("/update/:id", authRoutes, updateUser);
 /**
  * @swagger
  * /users/update-password/{id}:
@@ -191,7 +193,7 @@ router.put("/update/:id", updateUser);
  *      500:
  *        description: Server error
  */
-router.put("/update-password/:id", updatePassword);
+router.put("/update-password/:id", authRoutes, updatePassword);
 /**
  * @swagger
  * /users/delete/{id}:
@@ -213,7 +215,7 @@ router.put("/update-password/:id", updatePassword);
  *      500:
  *        description: Server error
  */
-router.delete("/delete/:id", deleteUser);
+router.delete("/delete/:id", authRoutes, deleteUser);
 /**
  * @swagger
  * /users/upload-image:
@@ -251,9 +253,9 @@ router.delete("/delete/:id", deleteUser);
  *      500:
  *        description: Server error
  */
-router.put("/upload-image/:id", upload.single('file'), uploadImageUser);
+router.put("/upload-image/:id", authRoutes, upload.single('file'), uploadImageUser);
 
-router.patch("/update-fields/:id", updateUserFieldsGoogle);
+router.patch("/update-fields/:id", authRoutes, updateUserFieldsGoogle);
 /**
  * @swagger
  * /users/auth:

@@ -12,6 +12,8 @@ import {
 
 } from "../controllers/ProjectsController.js";
 
+import authRoutes from "../middlewares/authRoutes.js";
+
 const router = Router();
 /**
  * @swagger
@@ -39,7 +41,7 @@ const router = Router();
  *      500:
  *        description: Server error
  */
-router.post("/create", createProject);
+router.post("/create", authRoutes, createProject);
 
 /**
  * @swagger
@@ -94,7 +96,7 @@ router.get("/show/all", getAllProjects);
  *      500:
  *        description: Server error
  */
-router.get("/show/:id", DetailsProjectId);
+router.get("/show/:id", authRoutes, DetailsProjectId);
 
 /**
  * @swagger
@@ -124,7 +126,7 @@ router.get("/show/:id", DetailsProjectId);
  *        description: Server error
  */ 
 
-router.put("/update/:id", updateProjectId);
+router.put("/update/:id", authRoutes, updateProjectId);
 /**
  * @swagger
  * /projects/desactivate/{id}:
@@ -147,7 +149,7 @@ router.put("/update/:id", updateProjectId);
  *        description: Server error 
  */
 
-router.delete("/desactivate/:id", DesactivateProjectId);
+router.delete("/desactivate/:id", authRoutes, DesactivateProjectId);
 /**
  * @swagger
  * /projects/show/companyProject/{id}:
@@ -173,7 +175,7 @@ router.delete("/desactivate/:id", DesactivateProjectId);
  *      500:
  *        description: Server error
  */
-router.get("/show/companyProject/:id", getProjectsByCompany);
+router.get("/show/companyProject/:id", authRoutes, getProjectsByCompany);
 
 /**
  * @swagger
@@ -200,7 +202,7 @@ router.get("/show/companyProject/:id", getProjectsByCompany);
  *      500:
  *        description: Server error                         
  */
-router.get("/show/categoryProject/:id", getProjectsByCategory);
+router.get("/show/categoryProject/:id", authRoutes, getProjectsByCategory);
 
 /**
  * @swagger
@@ -223,7 +225,7 @@ router.get("/show/categoryProject/:id", getProjectsByCategory);
  *      500:
  *        description: Server error
  */
-router.get("/counter/:id", projectsCounterByCompany);
+router.get("/counter/:id", authRoutes, projectsCounterByCompany);
 
 /**
  * @swagger
@@ -246,7 +248,7 @@ router.get("/counter/:id", projectsCounterByCompany);
  *      500:
  *        description: Server error
  */
-router.get("/developer-history/:id", getProjectsHistoryByDeveloper);
+router.get("/developer-history/:id", authRoutes, getProjectsHistoryByDeveloper);
  
 export default router;
 /**

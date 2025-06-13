@@ -61,7 +61,7 @@ export const resetPasswordSchema = Joi.object({
       'any.required': 'El código de recuperación es obligatorio'
     }),
   password: Joi.string()
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{6,20}$/)
     .required()
     .messages({
       'string.pattern.base': 'La nueva contraseña debe tener al menos una mayúscula, una minúscula, un número y mínimo 6 caracteres alfanuméricos.',

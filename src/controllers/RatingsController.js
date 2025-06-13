@@ -85,15 +85,12 @@ export const getAllRatings = async (req, res) => {
     });
 
     const data = ratings.rows.map(rating => {
-      let developer_name = rating.developer?.user?.name || null;
-      let company_name = rating.company?.user?.name || null;
+      let author_name = null;
 
-      if (!developer_name && rating.author_role === 'Developer') {
-        developer_name = authorMap[rating.author_id] || null;
-      }
-
-      if (!company_name && rating.author_role === 'Company') {
-        company_name = authorMap[rating.author_id] || null;
+      if (rating.author_role?.toLowerCase() === 'developer') {
+        author_name = rating.developer?.user?.name || authorMap[rating.author_id] || null;
+      } else if (rating.author_role?.toLowerCase() === 'company') {
+        author_name = rating.company?.user?.name || authorMap[rating.author_id] || null;
       }
 
       return {
@@ -105,10 +102,9 @@ export const getAllRatings = async (req, res) => {
         updatedAt: rating.updatedAt,
         developer_id: rating.developer_id,
         company_id: rating.company_id,
-        developer_name,
-        company_name,
         author_id: rating.author_id,
-        author_role: rating.author_role
+        author_role: rating.author_role,
+        author_name,  
       };
     });
 
@@ -180,77 +176,101 @@ export const getByIdRating = async (req, res) => {
   }
 };
 
+const ROLE_COMPANY = 1;
+const ROLE_DEVELOPER = 2;
+
+async function validateUserRoleByUserId(userId, expectedRoleId) {
+  const user = await UsersModel.findByPk(userId);
+  if (!user) {
+    return { valid: false, message: `Usuario con id ${userId} no encontrado.` };
+  }
+  if (user.role_id !== expectedRoleId) {
+    return { valid: false, message: `Usuario con id ${userId} no tiene el rol esperado.` };
+  }
+  return { valid: true, user };
+}
 
 export const createRatings = async (req, res) => {
-  
-  try {
 
+  try {
     const { error } = createRatingSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     const { developer_id, company_id, score, comment, isVisible } = req.body;
-
-    let targetDeveloper = null;
-    let targetCompany = null;
+    const roleId = req.user.role_id;
+    const userId = req.user.id;
+    let author_role;
 
     if (developer_id) {
-      targetDeveloper = await DevelopersModel.findByPk(developer_id);
-      if (!targetDeveloper) return res.status(404).json({ message: 'Developer no encontrado' });
+      const devProfile = await DevelopersModel.findByPk(developer_id);
+      if (!devProfile) return res.status(404).json({ message: 'Developer no encontrado' });
+      if (devProfile.user_id === userId) {
+        return res.status(400).json({ message: 'No puedes calificarte a ti mismo' });
+      }
     }
 
     if (company_id) {
-      targetCompany = await CompaniesModel.findByPk(company_id);
-      if (!targetCompany) return res.status(404).json({ message: 'Company no encontrada' });
+      const companyProfile = await CompaniesModel.findByPk(company_id);
+      if (!companyProfile) return res.status(404).json({ message: 'Company no encontrada' });
+      if (companyProfile.user_id === userId) {
+        return res.status(400).json({ message: 'No puedes calificarte a ti mismo' });
+      }
     }
 
-    const roleId = req.user.role_id;
-    let author_role;
-
-    if (roleId === 1) { // developer
+    if (roleId === ROLE_DEVELOPER) {
       if (!company_id || developer_id) {
-        return res.status(400).json({ message: 'Developer solo puede calificar a una company' });
+        return res.status(400).json({ message: 'Un developer solo puede calificar a una company' });
       }
-      author_role = 'Developer';
+
+      const validation = await validateUserRoleByUserId(company_id, ROLE_COMPANY);
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+      }
+
 
       const existingRating = await RatingModel.findOne({
-        where: {
-          author_id: req.user.id,
-          company_id: company_id
-        }
+        where: { author_id: userId, company_id }
       });
 
       if (existingRating) {
         return res.status(409).json({ message: 'Ya has calificado a esta empresa anteriormente' });
       }
 
-    } else if (roleId === 2) { // company
+      author_role = 'Developer';
+
+    } else if (roleId === ROLE_COMPANY) {
+
       if (!developer_id || company_id) {
-        return res.status(400).json({ message: 'Company solo puede calificar a un developer' });
+        return res.status(400).json({ message: 'Una company solo puede calificar a un developer' });
       }
-      author_role = 'Company';
+
+
+      const validation = await validateUserRoleByUserId(developer_id, ROLE_DEVELOPER);
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message });
+      }
 
       const existingRating = await RatingModel.findOne({
-        where: {
-          author_id: req.user.id,
-          developer_id: developer_id
-        }
+        where: { author_id: userId, developer_id }
       });
 
       if (existingRating) {
         return res.status(409).json({ message: 'Ya has calificado a este developer anteriormente' });
       }
 
+      author_role = 'Company';
+
     } else {
       return res.status(403).json({ message: 'No autorizado para crear este rating' });
     }
 
     const rating = await RatingModel.create({
-      developer_id,
-      company_id,
+      developer_id: developer_id || null,
+      company_id: company_id || null,
       score,
       comment,
       isVisible,
-      author_id: req.user.id,
+      author_id: userId,
       author_role,
     });
 
@@ -260,6 +280,11 @@ export const createRatings = async (req, res) => {
     res.status(500).json({ message: 'Error al crear rating', error });
   }
 };
+
+
+
+
+
 
 
 export const updateRatings = async (req, res) => {

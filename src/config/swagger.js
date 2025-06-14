@@ -33,10 +33,16 @@ const options = {
                 bearerAuth: {
                     type: "http",
                     scheme: "bearer",
-                    bearerFormat: "JWT"
+                    bearerFormat: "JWT",
+                    description: "Introduce el toke JWT para autenticarse"
                 }
             }
-        }
+        },
+        security: [
+            {
+                bearerAuth: []
+            }
+        ],
     },
     apis: [
         path.join(__dirname, "../routes/*.js")
@@ -53,8 +59,22 @@ export const swaggerUiOptions = {
         validatorUrl: false,
         docExpansion: "list",
         showCommonExtensions: true,
+        persistAuthorization: true,  // Mantiene el token al refrescar la página
+        authAction: {
+            JWT: {
+                name: "JWT",
+                schema: {
+                    type: "apiKey",
+                    in: "header",
+                    name: "Authorization",
+                    description: "Introduce tu token JWT precedido por 'Bearer '"
+                },
+                value: "Bearer <your_jwt_token_here>"  // Placeholder para el token
+            }
+        }
     },
-    customSiteTitle: "auction API",
-}
+    customSiteTitle: "Auction API - Documentation",
+    customCss: '.swagger-ui .topbar { display: none }',  // Opcional: elimina la barra superior
+};
 
 export const swaggerSpec = swaggerJsDoc(options)

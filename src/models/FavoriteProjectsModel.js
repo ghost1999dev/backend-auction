@@ -1,7 +1,7 @@
 import sequelize from "../config/connection.js"
 import ProjectsModel from "./ProjectsModel.js";
 import DevelopersModel from "./DevelopersModel.js"
-import { time, timeStamp } from "console";
+import { DataTypes } from "sequelize"
 
 /**
  * @typedef {Object} FavoriteProjectsModel
@@ -11,10 +11,16 @@ import { time, timeStamp } from "console";
  */
 
 const FavoriteProjectsModel = sequelize.define('favorite_projects',{
-    timestams: true
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    }
+},{
+    timestamps: true
 })
 
 FavoriteProjectsModel.belongsTo(ProjectsModel, { foreignKey: 'project_id', as: 'project' })
-FavoriteProjectsModel.belongsTo(DevelopersModel, { foreignKey: 'user_id', as: 'developer' })
+FavoriteProjectsModel.belongsTo(DevelopersModel, { foreignKey: 'developer_id', as: 'developer' })
 
 export default FavoriteProjectsModel

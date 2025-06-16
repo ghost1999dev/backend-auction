@@ -46,7 +46,6 @@ export const createApplication = async (req, res, next) => {
         message: "Proyecto no encontrado",
         error: "project_not_found",
         status: 400
-        
       });
     }
 
@@ -75,7 +74,7 @@ export const createApplication = async (req, res, next) => {
     const applications = await ProjectApplicationsModel.count({
       where: { 
         developer_id,
-        status: 1 
+        status: 0
       },
       include: [{
         model: ProjectsModel,
@@ -329,7 +328,7 @@ export const applicationsCounterByDeveloper = async (req, res) => {
     const applications = await ProjectApplicationsModel.count({
       where: { 
         developer_id,
-        status: 1 
+        status: 0
       },
       include: [{
         model: ProjectsModel,

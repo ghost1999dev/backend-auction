@@ -34,7 +34,7 @@ export const createApplication = async (req, res, next) => {
         }
       })
 
-    const developer = await DevelopersModel.findOne({
+    const developer = await UsersModel.findOne({
         where: {
           id: developer_id
         }

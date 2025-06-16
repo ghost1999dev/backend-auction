@@ -442,6 +442,13 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
   }
 }
 
+/**
+ * @desc    Actualizar el estado de una aplicación
+ * @route   PUT /applications/update-status/:id
+ * @param   {string} req.params.id - ID de la aplicación
+ * @param   {number} req.body.newStatus - Estado de la aplicación (0=pending, 1=accepted, 2=rejected)
+ * @returns {Object} Estado actualizado
+ */
 export const updateStatusApplication = async (req, res) => {
   const { id } = req.params
   const { newStatus } = req.body
@@ -498,5 +505,71 @@ export const updateStatusApplication = async (req, res) => {
       error: error.message,
       status: 500
     })
+  }
+}
+
+export const getApplicationsByProject = async (req, res) => {
+  const { project_id } = req.params
+
+  if (!project_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Falta el ID del proyecto",
+      error: "missing_fields",
+      status: 400
+    })
+  }
+
+  try {
+    const applications = await ProjectApplicationsModel.findAll({
+      where: {
+        project_id
+      },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {                      
+          model: UsersModel,
+          as: "developer",
+          attributes: {
+            exclude: ['password']
+          }
+        },
+        {                   
+          model: ProjectsModel,
+          as: "project",
+          include: [
+            {
+              model: CompaniesModel,
+              as: 'company_profile'
+            },
+            {
+              model: CategoriesModel,
+              as: 'category',
+            }
+          ]
+        }
+      ]
+    });
+
+    if (applications.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontraron aplicaciones para este proyecto",
+        error: "applications_not_found",
+        status: 404
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Aplicaciones obtenidas exitosamente",
+      applications
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las aplicaciones",
+      error: error.message,
+      status: 500
+    });
   }
 }

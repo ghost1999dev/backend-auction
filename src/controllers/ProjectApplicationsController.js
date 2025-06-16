@@ -133,7 +133,10 @@ export const listApplications = async (req, res, next) => {
           as: "developer",
           attributes: {
             exclude: ['password']
-          }
+          },
+          include: [{
+            model: DevelopersModel
+          }]
         },
         {                   
           model: ProjectsModel,
@@ -399,6 +402,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       where: {
         developer_id 
       },
+      order: [["createdAt", "DESC"]],
       include: [{
         model: ProjectsModel,
         as: 'project',

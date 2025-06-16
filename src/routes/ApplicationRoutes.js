@@ -99,7 +99,7 @@ router.get("/show/all", listApplications);
  *       500:
  *         description: Error del servidor
  */
-router.get("/:id", getApplication);
+router.get("/show/:id", getApplication);
 
 /**
  * @swagger

@@ -327,7 +327,8 @@ export const applicationsCounterByDeveloper = async (req, res) => {
     
     const applications = await ProjectApplicationsModel.count({
       where: { 
-        developer_id
+        developer_id,
+        status: 0
       },
       include: [{
         model: ProjectsModel,

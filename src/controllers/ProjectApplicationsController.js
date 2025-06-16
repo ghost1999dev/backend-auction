@@ -381,7 +381,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       });
     }
 
-    const developer = await DevelopersModel.findOne({
+    const developer = await UsersModel.findOne({
       where: { 
         id: developer_id
       }

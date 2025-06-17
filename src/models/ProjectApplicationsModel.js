@@ -10,7 +10,6 @@ import DevelopersModel from "./DevelopersModel.js";
  * @property {number} developer_id - ID del desarrollador que aplica
  * @property {number} status - Estado de la aplicación (0=pending, 1=accepted, 2=rejected)
  */
-
 const ProjectApplicationsModel = sequelize.define(
   "project_applications",
   {
@@ -31,7 +30,7 @@ const ProjectApplicationsModel = sequelize.define(
       type: DataTypes.INTEGER, 
       allowNull: false,
       references: {
-        model: UsersModel,
+        model: DevelopersModel,
         key: 'id'
       }
     },
@@ -45,9 +44,7 @@ const ProjectApplicationsModel = sequelize.define(
     }
   },
   { 
-    timestamps: true,
-    createdAt: "createdAt",
-    updatedAt: "updatedAt"
+    timestamps: true
   }
 );
 

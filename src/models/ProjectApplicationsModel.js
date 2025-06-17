@@ -1,7 +1,7 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import ProjectsModel from "./ProjectsModel.js";
-import UsersModel from "./UsersModel.js";
+import DevelopersModel from "./DevelopersModel.js";
 
 /**
  * @typedef {Object} ProjectApplicationsModel
@@ -56,7 +56,7 @@ ProjectApplicationsModel.belongsTo(ProjectsModel, {
   as: "project" 
 });
 
-ProjectApplicationsModel.belongsTo(UsersModel, { 
+ProjectApplicationsModel.belongsTo(DevelopersModel, { 
   foreignKey: "developer_id", 
   as: "developer" 
 });

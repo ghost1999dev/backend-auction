@@ -402,6 +402,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       where: {
         developer_id 
       },
+      order: [["createdAt", "DESC"]],
       include: [{
         model: ProjectsModel,
         as: 'project',
@@ -539,21 +540,21 @@ export const getApplicationsByProject = async (req, res) => {
         {                      
           model: DevelopersModel,
           as: "developer",
-          attributes: {
-            exclude: ['password']
-          }
+          include: [{
+            model: UsersModel,
+            attributes: {
+              exclude: ['password']
+            }
+          }]
         },
         {                   
           model: ProjectsModel,
           as: "project",
           include: [
             {
-              model: CompaniesModel,
-              as: 'company_profile'
-            },
-            {
               model: CategoriesModel,
               as: 'category',
+              attributes: ['id', 'name']
             }
           ]
         }

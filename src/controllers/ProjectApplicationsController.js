@@ -34,7 +34,7 @@ export const createApplication = async (req, res, next) => {
         }
       })
 
-    const developer = await UsersModel.findOne({
+    const developer = await DevelopersModel.findOne({
         where: {
           id: developer_id
         }
@@ -59,7 +59,10 @@ export const createApplication = async (req, res, next) => {
     }
 
     const alreadyExists = await ProjectApplicationsModel.findOne({
-      where: { project_id, developer_id }
+      where: { 
+        project_id, 
+        developer_id 
+      }
     });
 
     if (alreadyExists) {
@@ -129,7 +132,7 @@ export const listApplications = async (req, res, next) => {
       order: [["createdAt", "DESC"]],
       include: [
         {                      
-          model: UsersModel,
+          model: DevelopersModel,
           as: "developer",
           attributes: {
             exclude: ['password']
@@ -213,7 +216,7 @@ export const getApplication = async (req, res, next) => {
           }]
         },
         { 
-          model: UsersModel,
+          model: DevelopersModel,
           as: 'developer'
         }
       ]
@@ -315,7 +318,7 @@ export const applicationsCounterByDeveloper = async (req, res) => {
       })
     }
 
-    const developer = await UsersModel.findByPk(developer_id)
+    const developer = await DevelopersModel.findByPk(developer_id)
 
     if (!developer) {
       return res.status(404).json({
@@ -381,7 +384,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       });
     }
 
-    const developer = await UsersModel.findOne({
+    const developer = await DevelopersModel.findOne({
       where: { 
         id: developer_id
       }
@@ -508,6 +511,12 @@ export const updateStatusApplication = async (req, res) => {
   }
 }
 
+/**
+ * @desc    Obtener las aplicaciones de un proyecto
+ * @route   GET /applications/by-project/:project_id
+ * @param   {string} req.params.project_id - ID del proyecto
+ * @returns {Object} Aplicaciones del proyecto
+ */
 export const getApplicationsByProject = async (req, res) => {
   const { project_id } = req.params
 
@@ -528,7 +537,7 @@ export const getApplicationsByProject = async (req, res) => {
       order: [["createdAt", "DESC"]],
       include: [
         {                      
-          model: UsersModel,
+          model: DevelopersModel,
           as: "developer",
           attributes: {
             exclude: ['password']

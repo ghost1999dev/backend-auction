@@ -345,13 +345,13 @@ export const applicationsCounterByDeveloper = async (req, res) => {
       }]
     })
 
-    if (applications <= 0) {
+   /* if (applications <= 0) {
       return res.status(404).json({
         status: 404,
         message: "No se encontraron aplicaciones para este desarrollador",
         applications
       })
-    }
+    }*/
 
     res.status(200).json({
       status: 200,
@@ -427,13 +427,13 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
       }]
     })
 
-    if (applications.length === 0) {
+   /* if (applications.length === 0) {
       return res.status(404).json({
         status: 404,
         message: 'No se encontraron aplicaciones para este desarrollador',
         error: 'applications_not_found'
       });
-    }
+    }*/
 
     res.status(200).json({
       status: 200,

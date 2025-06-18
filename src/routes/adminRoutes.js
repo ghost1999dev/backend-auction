@@ -16,7 +16,8 @@ import { createAdmin,
     resetPassword,
     getAllUserReportsForAdmin,
     respondToReport,
-    getReportByIdAdmin
+    getReportByIdAdmin,
+    resendVerificationCode
 
 } from '../controllers/AdminsController.js';
 import { validateAdmin } from '../middlewares/authAdmin.js';
@@ -512,6 +513,8 @@ router.put('/respond-to-report/:id', respondToReport);
  */ 
 
 router.get('/get-report/:id', getReportByIdAdmin);
+
+router.post('/resendCode', resendVerificationCode);
 
 export default router;
 /**

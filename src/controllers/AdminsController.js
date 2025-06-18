@@ -235,6 +235,59 @@ try {
     });
   }
 };
+export const resendVerificationCode = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        error: true,
+        message: 'Token de autorización no proporcionado',
+        status: 401
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({
+        error: true,
+        message: 'Token inválido o expirado',
+        status: 401
+      });
+    }
+
+    const { email } = payload;
+
+    const admin = await AdminsModel.findOne({ where: { email } });
+
+    if (!admin) {
+      return res.status(404).json({
+        error: true,
+        message: 'Administrador no encontrado',
+        status: 404
+      });
+    }
+
+    await emailVerificationService(email); 
+
+    return res.status(200).json({
+      error: false,
+      message: 'Nuevo código de verificación enviado',
+      status: 200
+    });
+  } catch (error) {
+    console.error('Error al reenviar código de verificación:', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Error interno del servidor',
+      status: 500
+    });
+  }
+};
 
 /**
  * get all admins

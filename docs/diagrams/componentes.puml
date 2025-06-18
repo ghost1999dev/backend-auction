@@ -1,0 +1,13 @@
+@startuml componentes
+package "backend-auction" {
+  [app.js] --> [Routes]
+  [Routes] --> [Controllers]
+  [Controllers] --> [Services]
+  [Controllers] --> [Models]
+  [Routes] --> [Middlewares]
+  [Services] --> [Helpers]
+  [Services] --> [Utils]
+  [Middlewares] --> [Validations]
+  [Services] --> [External Services]
+}
+@enduml

@@ -1,0 +1,17 @@
+@startuml er-diagram
+entity "USERS" as USERS
+entity "COMPANIES" as COMPANIES
+entity "PROJECTS" as PROJECTS
+entity "AUCTIONS" as AUCTIONS
+entity "BIDS" as BIDS
+entity "CATEGORIES" as CATEGORIES
+entity "ADMINS" as ADMINS
+entity "ROLES" as ROLES
+
+USERS ||--o{ PROJECTS : tiene
+COMPANIES ||--o{ PROJECTS : posee
+PROJECTS ||--|| AUCTIONS : genera
+AUCTIONS ||--o{ BIDS : recibe
+CATEGORIES ||--o{ PROJECTS : clasifica
+ADMINS }o--|| ROLES : pertenece
+@enduml

@@ -1,0 +1,20 @@
+@startuml flujo-autenticacion
+actor Usuario
+participant Frontend
+participant Backend
+participant DB
+Usuario -> Frontend : Ingresa email/password
+Frontend -> Backend : POST /auth/login
+Backend -> DB : Verifica usuario/password
+DB --> Backend : Usuario válido/Inválido
+alt Credenciales válidas
+    Backend -> Backend : Genera JWT
+    Backend --> Frontend : Retorna JWT
+    Frontend -> Usuario : Almacena token
+else Credenciales inválidas
+    Backend --> Frontend : Error de autenticación
+end
+Frontend -> Backend : Solicitud protegida (con JWT)
+Backend -> Backend : Valida JWT y rol
+Backend --> Frontend : Respuesta autorizada o error
+@enduml

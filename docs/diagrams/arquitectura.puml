@@ -1,0 +1,9 @@
+@startuml arquitectura
+actor Cliente
+Cliente -> Backend : HTTP/REST
+Backend -> PostgreSQL : ORM Sequelize
+Backend -> S3 : AWS SDK
+Backend -> EmailService : SMTP/NodeMailer
+Backend -> JWT : Autenticación
+Backend -> Swagger : Documentación API
+@enduml

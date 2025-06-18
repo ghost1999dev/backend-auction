@@ -1,0 +1,20 @@
+@startuml flujo-errores
+start
+:Request del Cliente;
+:Middleware de Validación;
+if (Error de validación?) then (sí)
+  :Respuesta 400;
+  stop
+else (no)
+  :Controller;
+  if (Error lógica/DB?) then (sí)
+    :Middleware de Errores;
+    :Log de error;
+    :Respuesta 4xx/5xx;
+    stop
+  else (no)
+    :Respuesta 2xx;
+    stop
+  endif
+endif
+@enduml

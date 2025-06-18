@@ -1,0 +1,15 @@
+@startuml secuencia-crear-subasta
+participant Frontend
+participant Backend
+participant DB
+Frontend -> Backend : POST /auctions/create
+Backend -> DB : Verifica proyecto y subasta
+DB --> Backend : Respuesta
+alt Subasta no existe
+    Backend -> DB : Crea subasta
+    DB --> Backend : Subasta creada
+    Backend --> Frontend : 201 Created + datos
+else Subasta ya existe
+    Backend --> Frontend : 409 Conflict + error
+end
+@enduml

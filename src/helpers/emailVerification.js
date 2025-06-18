@@ -71,6 +71,14 @@ export const emailVerificationService = async (email) => {
   if (!email) {
     return { error: "El correo es requerido.", status: 400 };
   }
+  const blockExpiry = blockedEmails.get(email);
+  if (blockExpiry && Date.now() < blockExpiry) {
+    const minutesLeft = Math.ceil((blockExpiry - Date.now()) / 60000);
+    return {
+      error: `Este correo está temporalmente bloqueado. Inténtalo de nuevo en ${minutesLeft} minuto(s).`,
+      status: 429,
+    };
+  }
 
   const verificationCode = uuidv4().substring(0, 6);
 

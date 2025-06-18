@@ -977,6 +977,19 @@ export const forgotPassword = async (req, res) => {
         status: 400
       });
     }
+    const status = await AdminsModel.findOne({ 
+        where: {
+        email: email,
+        status: 'active',
+      },
+    });
+
+    if (!status) {
+      return res.status(404).json({
+        error: "Este correo no está registrado o su cuenta no está activa.",
+        status: 404
+      });
+    }
 
     const response = await requestPasswordRecovery(email, url_base);
 

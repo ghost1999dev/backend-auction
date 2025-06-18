@@ -211,6 +211,18 @@ export const updateProjectId = async (req, res) => {
       case 0:
         statusText = "Pendiente";
         break;
+      case 1:
+        statusText = "Activo";
+        break;
+      case 2:
+        statusText = "Inactivo";
+        break;
+      case 3:
+        statusText = "Rechazado";
+        break;
+      case 4:
+        statusText = "Finalizado";
+        break;
       default:
         statusText = "Desconocido";
     }

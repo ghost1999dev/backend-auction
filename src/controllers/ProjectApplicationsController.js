@@ -99,7 +99,8 @@ export const createApplication = async (req, res, next) => {
 
     const app = await ProjectApplicationsModel.create({
       project_id,
-      developer_id
+      developer_id,
+      status:project.status
     });
 
     return res.status(201).json({

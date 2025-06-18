@@ -986,7 +986,7 @@ export const forgotPassword = async (req, res) => {
 
     if (!status) {
       return res.status(404).json({
-        error: "Este correo no está registrado o su cuenta no está activa.",
+        message: "Su cuenta no está activa, comuniquese con su superior.",
         status: 404
       });
     }

@@ -10,6 +10,11 @@ export const requestPasswordRecovery = async (email) => {
         message: "Código de recuperación enviado.",
         code: response.code 
       };
+    } if (response.status === 429) {
+        return {
+        status: 429,
+        message: "Correo bloqueado momentaneamente, intente de nuevo en un par de minutos"
+      };
     } else {
       return {
         status: response.status,

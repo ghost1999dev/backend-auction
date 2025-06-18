@@ -34,26 +34,27 @@ const transporter = nodemailer.createTransport({
  */
 async function sendVerificationEmail(email, code) {
   const mailOptions = {
-    from: `${process.env.SENDEMAIL}`,
-    to: email,
-    subject: "Verificación de tu correo electrónico",
-    text: `
-          Hola,
+  from: `${process.env.SENDEMAIL}`,
+  to: email,
+  subject: " Verificación de tu correo electrónico - Bluepixel",
+  html: `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+      <div style="text-align: center;">
+        <h2 style="color: #2a7de1;">Verificación de Correo Electrónico</h2>
+        <p style="font-size: 16px; color: #333;">Hola,</p>
+        <p style="font-size: 16px; color: #333;">Para continuar, por favor ingresa el siguiente código de verificación:</p>
+        <div style="font-size: 28px; font-weight: bold; margin: 20px 0; background: #e6f0ff; padding: 15px; border-radius: 8px; display: inline-block; color: #2a7de1;">
+          ${code}
+        </div>
+        <p style="font-size: 14px; color: #666;">Este código es válido por <strong>10 minutos</strong>.</p>
+        <p style="font-size: 14px; color: #999;">Si no solicitaste este código, simplemente ignora este correo.</p>
+        <hr style="margin: 30px 0;">
+        <p style="font-size: 13px; color: #aaa;">© ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  `
+};
 
-          Para continuar, por favor usa el siguiente código de verificación:
-
-          Código: ${code}
-
-          Este código es válido solo por 10 minutos.
-
-          Si no solicitaste este código, puedes ignorar este mensaje.
-
-          Saludos cordiales,  
-          El equipo de soporte.
-          ----------------------------------------
-          © ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.
-              `.trim(),
-  };
 
   await transporter.sendMail(mailOptions);
 }

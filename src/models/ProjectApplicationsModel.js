@@ -1,7 +1,7 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import ProjectsModel from "./ProjectsModel.js";
-import UsersModel from "./UsersModel.js";
+import DevelopersModel from "./DevelopersModel.js";
 
 /**
  * @typedef {Object} ProjectApplicationsModel
@@ -10,7 +10,6 @@ import UsersModel from "./UsersModel.js";
  * @property {number} developer_id - ID del desarrollador que aplica
  * @property {number} status - Estado de la aplicación (0=pending, 1=accepted, 2=rejected)
  */
-
 const ProjectApplicationsModel = sequelize.define(
   "project_applications",
   {
@@ -31,7 +30,7 @@ const ProjectApplicationsModel = sequelize.define(
       type: DataTypes.INTEGER, 
       allowNull: false,
       references: {
-        model: UsersModel,
+        model: DevelopersModel,
         key: 'id'
       }
     },
@@ -45,9 +44,7 @@ const ProjectApplicationsModel = sequelize.define(
     }
   },
   { 
-    timestamps: true,
-    createdAt: "createdAt",
-    updatedAt: "updatedAt"
+    timestamps: true
   }
 );
 
@@ -56,7 +53,7 @@ ProjectApplicationsModel.belongsTo(ProjectsModel, {
   as: "project" 
 });
 
-ProjectApplicationsModel.belongsTo(UsersModel, { 
+ProjectApplicationsModel.belongsTo(DevelopersModel, { 
   foreignKey: "developer_id", 
   as: "developer" 
 });

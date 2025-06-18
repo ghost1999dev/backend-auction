@@ -1,17 +1,232 @@
-@startuml er-diagram
-entity "USERS" as USERS
-entity "COMPANIES" as COMPANIES
-entity "PROJECTS" as PROJECTS
-entity "AUCTIONS" as AUCTIONS
-entity "BIDS" as BIDS
-entity "CATEGORIES" as CATEGORIES
-entity "ADMINS" as ADMINS
-entity "ROLES" as ROLES
+@startuml
+!theme plain
+skinparam linetype ortho
 
-USERS ||--o{ PROJECTS : tiene
-COMPANIES ||--o{ PROJECTS : posee
-PROJECTS ||--|| AUCTIONS : genera
-AUCTIONS ||--o{ BIDS : recibe
-CATEGORIES ||--o{ PROJECTS : clasifica
-ADMINS }o--|| ROLES : pertenece
+entity "admins" {
+  * id : integer
+  --
+  full_name : character varying(100)
+  phone : character varying(100)
+  email : character varying(100)
+  username : character varying(100)
+  password : character varying(100)
+  image : character varying(100)
+  status : character varying(50)
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+  role_id : integer
+}
+
+entity "auctions" {
+  * id : integer
+  --
+  project_id : integer
+  bidding_started_at : timestamp without time zone
+  bidding_deadline : timestamp without time zone
+  status : character varying(50)
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+}
+
+entity "audit_logs" {
+  * id : integer
+  --
+  admin_id : integer
+  project_id : integer
+  status : integer
+  comments : text
+  old_values : json
+  new_values : json
+  error_message : text
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+}
+
+entity "bids" {
+  * id : integer
+  --
+  auction_id : integer
+  developer_id : integer
+  amount : numeric(12,2)
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+}
+
+entity "categories" {
+  * id : integer
+  --
+  name : character varying(255)
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "company_profiles" {
+  * id : integer
+  --
+  user_id : integer
+  nrc_number : character varying(255)
+  business_type : character varying(255)
+  web_site : character varying(255)
+  nit_number : character varying(255)
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "dev_profiles" {
+  * id : integer
+  --
+  bio : text
+  user_id : integer
+  linkedin : character varying(255)
+  occupation : character varying(255)
+  portfolio : character varying(255)
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "external_accounts" {
+  * id : integer
+  --
+  user_id : integer
+  provider_id : character varying(255)
+  provider : character varying(255)
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "favorite_projects" {
+  * id : integer
+  --
+  project_id : integer
+  developer_id : integer
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "notifications" {
+  * id : integer
+  --
+  user_id : integer
+  title : character varying(255)
+  body : text
+  context : json
+  sent_at : timestamp with time zone
+  status : character varying(255)
+  error_message : text
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "project_applications" {
+  * id : integer
+  --
+  project_id : integer
+  developer_id : integer
+  status : integer
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "projects" {
+  * id : integer
+  --
+  company_id : integer
+  category_id : integer
+  project_name : character varying(255)
+  description : text
+  budget : double precision
+  days_available : integer
+  status : integer
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+  long_description : text
+}
+
+entity "ratings" {
+  * id : integer
+  --
+  developer_id : integer
+  company_id : integer
+  score : integer
+  comment : text
+  isVisible : boolean
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+  author_id : integer
+  author_role : character varying(50)
+}
+
+entity "reports" {
+  * id : integer
+  --
+  reporter_id : integer
+  user_id : integer
+  user_role : character varying(50)
+  project_id : integer
+  reason : character varying(255)
+  comment : text
+  status : character varying(50)
+  createdAt : timestamp without time zone
+  updatedAt : timestamp without time zone
+  admin_response : text
+}
+
+entity "roles" {
+  * id : integer
+  --
+  role_name : character varying(255)
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+entity "status" {
+  * id : integer
+  --
+  status_name : character varying(100)
+}
+
+entity "users" {
+  * id : integer
+  --
+  role_id : integer
+  name : character varying(255)
+  email : character varying(255)
+  password : character varying(255)
+  address : character varying(255)
+  phone : character varying(255)
+  image : character varying(255)
+  account_type : integer
+  status : integer
+  last_login : timestamp with time zone
+  createdAt : timestamp with time zone
+  updatedAt : timestamp with time zone
+}
+
+' Relaciones
+users }o--|| roles : role_id
+admins }o--|| roles : role_id
+company_profiles }o--|| users : user_id
+dev_profiles }o--|| users : user_id
+external_accounts }o--|| users : user_id
+notifications }o--|| users : user_id
+projects }o--|| users : company_id
+projects }o--|| categories : category_id
+projects }o--|| status : status
+ratings }o--|| users : developer_id
+ratings }o--|| users : company_id
+ratings }o--|| users : author_id
+reports }o--|| users : reporter_id
+reports }o--|| users : user_id
+reports }o--|| projects : project_id
+auctions }o--|| projects : project_id
+bids }o--|| auctions : auction_id
+bids }o--|| users : developer_id
+project_applications }o--|| projects : project_id
+project_applications }o--|| users : developer_id
+favorite_projects }o--|| projects : project_id
+favorite_projects }o--|| users : developer_id
+audit_logs }o--|| admins : admin_id
+audit_logs }o--|| projects : project_id
+audit_logs }o--|| status : status
+
 @enduml

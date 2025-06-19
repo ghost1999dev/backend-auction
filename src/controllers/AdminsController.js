@@ -182,7 +182,7 @@ try {
       username,
       password: hashedPassword,
       image: image,
-      status: 'active',
+      status: 'inactive',
       role_id: roleId,
       url_base
     });
@@ -1101,6 +1101,7 @@ export const resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         admin.password = hashedPassword
+        admin.status="active"
 
         await admin.save()
         res.status(200).json({

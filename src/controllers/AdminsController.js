@@ -235,32 +235,43 @@ try {
     });
   }
 };
+/**
+ * resend verification code
+ *
+ * function to resend verification code
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} resend verification code
+ */
 export const resendVerificationCode = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
+    let email;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        error: true,
-        message: 'Token de autorización no proporcionado',
-        status: 401
-      });
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+       const token = authHeader.split(' ')[1];
+
+      try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        email = payload.email;
+      } catch (err) {
+        return res.status(401).json({
+          error: true,
+          message: 'Token inválido o expirado',
+          status: 401
+        });
+      }
+    } else {
+      email = req.query.email;
+
+      if (!email) {
+        return res.status(400).json({
+          error: true,
+          message: 'Email no proporcionado',
+          status: 400
+        });
+      }
     }
-
-    const token = authHeader.split(' ')[1];
-
-    let payload;
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-      return res.status(401).json({
-        error: true,
-        message: 'Token inválido o expirado',
-        status: 401
-      });
-    }
-
-    const { email } = payload;
 
     const admin = await AdminsModel.findOne({ where: { email } });
 
@@ -272,13 +283,22 @@ export const resendVerificationCode = async (req, res) => {
       });
     }
 
-    await emailVerificationService(email); 
+  if (admin.status !== 'active') {
+        return res.status(403).json({
+          error: true,
+          message: 'Su cuenta no está activa, comuníquese con su superior.',
+          status: 403
+        });
+      }
+
+    await emailVerificationService(email);
 
     return res.status(200).json({
       error: false,
       message: 'Nuevo código de verificación enviado',
       status: 200
     });
+
   } catch (error) {
     console.error('Error al reenviar código de verificación:', error);
     return res.status(500).json({
@@ -288,6 +308,7 @@ export const resendVerificationCode = async (req, res) => {
     });
   }
 };
+
 
 /**
  * get all admins

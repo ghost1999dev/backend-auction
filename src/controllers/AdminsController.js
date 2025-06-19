@@ -182,7 +182,7 @@ try {
       username,
       password: hashedPassword,
       image: image,
-      status: 'inactive',
+      status: 'active',
       role_id: roleId,
       url_base
     });

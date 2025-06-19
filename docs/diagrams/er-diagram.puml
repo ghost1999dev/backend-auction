@@ -1,4 +1,4 @@
-@startuml
+@startuml er-diagram
 !theme plain
 skinparam linetype ortho
 

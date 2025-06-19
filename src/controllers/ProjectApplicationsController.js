@@ -277,9 +277,20 @@ export const getApplication = async (req, res, next) => {
  * @route   DELETE /applications/:id
  * @param   {string} req.params.id - ID de la aplicación
  */
-export const deleteApplication = async (req, res, next) => {
+export const deleteApplication = async (req, res) => {
+  const { id } = req.params
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Falta el ID de la aplicación",
+      error: "missing_fields",
+      status: 400
+    })
+  }
+  
   try {
-    const app = await ProjectApplicationsModel.findByPk(req.params.id);
+    const app = await ProjectApplicationsModel.findByPk(id);
     if (!app) {
       return res.status(404).json({ 
         success: false,
@@ -288,8 +299,11 @@ export const deleteApplication = async (req, res, next) => {
       });
     }
 
-    await app.destroy();
-    res.json({
+    app.status = 3
+    await app.save()
+
+    res.status(200)
+    .json({
       success: true,
       message: "Aplicación eliminada exitosamente",
       status: 200

@@ -116,8 +116,10 @@ router.get("/show/:id", getApplication);
  *         required: true
  *         description: ID de la aplicación
  *     responses:
- *       204:
+ *       200:
  *         description: Eliminada con éxito
+ *       400:
+ *         description: Falta el ID de la aplicación
  *       404:
  *         description: Aplicación no encontrada
  *       500:

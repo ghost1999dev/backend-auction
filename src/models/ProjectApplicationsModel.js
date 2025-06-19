@@ -39,7 +39,7 @@ const ProjectApplicationsModel = sequelize.define(
       allowNull: false,
       defaultValue: 0,
       validate: {
-        isIn: [[0, 1, 2]] // 0=activo, 1=ganador, 2=rechazado
+        isIn: [[0, 1, 2, 3]] // 0=activo, 1=ganador, 2=rechazado, 3=inactivo
       }
     }
   },

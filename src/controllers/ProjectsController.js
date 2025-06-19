@@ -678,7 +678,7 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
     }
 
     const projects = await ProjectApplicationsModel.findAll({
-      attributes: [],
+      attributes: ['createdAt'],
       include: [{
         model: ProjectsModel,
         as: 'project',

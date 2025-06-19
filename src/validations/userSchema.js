@@ -36,15 +36,15 @@ export const updateUserSchema = Joi.object({
 
 export const passwordUserchema = Joi.object({
     currentPassword: Joi.string().optional().allow('',null),
-  Newpassword: Joi.string()
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])[A-Za-z\d[^A-Za-z\d]]{6,20}$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'La nueva contraseña debe tener al menos una mayúscula, una minúscula, un número, un símbolo y mínimo 6 caracteres.',
-      'string.empty': 'La nueva contraseña no puede estar vacía.',
-      'any.required': 'La nueva contraseña es obligatoria.'
-    })
-  });
+    newPassword: Joi.string()
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{6,20}$/)
+      .required()
+      .messages({
+        'string.pattern.base': 'La nueva contraseña debe tener al menos una mayúscula, una minúscula, un número, un símbolo y mínimo 6 caracteres.',
+        'string.empty': 'La nueva contraseña no puede estar vacía.',
+        'any.required': 'La nueva contraseña es obligatoria.'
+      })
+    });
 
 export const resetPasswordSchema = Joi.object({
   email: Joi.string().email()

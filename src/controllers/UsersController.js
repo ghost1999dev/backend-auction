@@ -304,47 +304,58 @@ export const updateUser = async (req, res) => {
  * @returns {Object} user updated
  */
 export const updatePassword = async (req, res) => {
+  const { id } = req.params;
+  const { error, value } = passwordUserchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Error de validación',
+      details: error.details.map(d => d.message),
+      status: 400
+    });
+  }
+
+  const { currentPassword, newPassword } = value;
+  
   try {
-    const { id } = req.params;
-    const { currentPassword, Newpassword } = req.body;
-    
-    const { error } = passwordUserchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: 'Error de validación',
-        details: error.details.map(d => d.message),
-        status: 400
-      });
-    }
-
     const user = await UsersModel.findByPk(id);
-    if (user) {
-      if (user.password === hashPassword(currentPassword)) {
-        user.password = hashPassword(Newpassword);
-        await user.save();
-        res
-          .status(200)
-          .json({
-            status: 200,
-            message: "Password updated successfully", user 
-          });
-      }
-      else {
-        res
-          .status(400)
-          .json({ 
-            status: 400,
-            message: "Current password is incorrect" 
-          });
-      }
-    } else {
-      res
+    if (!user) {
+      return res
         .status(404)
         .json({ 
           status: 404,
-          message: "User not found" 
+          message: "Usuario no encontrado" 
+        });
+    }
+
+    if (user.status === 5) {
+      return res
+        .status(403)
+        .json({ 
+          status: 403,
+          message: "Usuario bloqueado" 
+        });
+    }
+
+    if (user.password !== null && user.password === hashPassword(currentPassword)) {
+      user.password = hashPassword(newPassword);
+      
+      await user.save();
+      
+      res
+        .status(200)
+        .json({
+          status: 200,
+          message: "Contraseña actualizada correctamente.",
+        });
+    }
+    else {
+      return res
+        .status(400)
+        .json({ 
+          status: 400,
+          message: "La contraseña actual es incorrecta"
         });
     }
   } catch (error) {
@@ -352,7 +363,8 @@ export const updatePassword = async (req, res) => {
       .status(500)
       .json({ 
         status: 500,
-        message: "Error updating password", error 
+        message: "Error al actualizar la contraseña", 
+        error: error.message
       });
   }
 };

@@ -36,7 +36,9 @@ const router = Router();
  *            $ref: '#/components/schemas/AuctionCreate'
  *    responses:
  *      201: { description: Subasta creada }
- *      422: { description: Datos inválidos }
+ *      400: { description: Datos inválidos }
+ *      403: { description: No puedes realizar ninguna accion mientras estas bloqueado }
+ *      409: { description: Ya existe una subasta para este proyecto }
  *      500: { description: Error del servidor }
  */
 router.post("/create", createAuction);
@@ -201,8 +203,7 @@ export default router;
  *        project_id:         { type: integer }
  *        bidding_started_at: { type: string, format: date-time }
  *        bidding_deadline:   { type: string, format: date-time }
- *        status:             { type: string }
- *      required: [id, project_id, bidding_started_at, bidding_deadline, status]
+ *      required: [id, project_id, bidding_started_at, bidding_deadline]
  *
  *    AuctionCreate:
  *      type: object
@@ -210,6 +211,5 @@ export default router;
  *        project_id:         { type: integer }
  *        bidding_started_at: { type: string, format: date-time }
  *        bidding_deadline:   { type: string, format: date-time }
- *        status:             { type: string }
- *      required: [project_id, bidding_started_at, bidding_deadline, status]
+ *      required: [project_id, bidding_started_at, bidding_deadline]
  */

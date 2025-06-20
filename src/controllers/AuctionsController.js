@@ -46,7 +46,7 @@ export const createAuction = async (req, res) => {
         return res.status(400).json({
             success: false,
             status: 400,
-            message: "Error de validación del JSON",
+            message: "Error de validación de datos",
             error: error.details[0].message
         });
     }

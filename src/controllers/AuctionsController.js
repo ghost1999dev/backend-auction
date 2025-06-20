@@ -96,6 +96,7 @@ export const createAuction = async (req, res) => {
         }
 
         const auction = await AuctionsModel.create({
+            project_id,
             bidding_started_at,
             bidding_deadline,
             status: AUCTION_STATUS.PENDING

@@ -36,14 +36,12 @@ const AuctionsModel = sequelize.define(
       allowNull: false,
     },
     status: { 
-      type: DataTypes.STRING(50), 
+      type: DataTypes.INTEGER, 
       allowNull: false,
     }
   },
   { 
-    timestamps: true, 
-    createdAt: "createdAt", 
-    updatedAt: "updatedAt" 
+    timestamps: true
   }
 );
 

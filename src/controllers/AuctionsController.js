@@ -4,6 +4,8 @@ import CompaniesModel from "../models/CompaniesModel.js";
 import UsersModel from "../models/UsersModel.js";
 import { Op } from "sequelize";
 
+import { createAuctionSchema } from "../validations/auctionSchema.js";
+
 const AUCTION_STATUS = {
   PENDING: 0,
   ACTIVE: 1, 
@@ -38,10 +40,20 @@ const isValidTransition = (currentStatus, newStatus) => {
  * @param   {Date} req.body.bidding_deadline - Fecha fin
  * @returns {Object} Nueva subasta creada o error
  */
-export const createAuction = async (req, res, next) => {
-    try {
-        const { project_id } = req.body;
+export const createAuction = async (req, res) => {
+    const { error, value } = createAuctionSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            status: 400,
+            message: "Error de validación de datos",
+            error: error.details[0].message
+        });
+    }
 
+    const { project_id, bidding_started_at, bidding_deadline } = value;
+    
+    try {
         const project = await ProjectsModel.findByPk(project_id);
 
         const company = await CompaniesModel.findOne({
@@ -56,14 +68,15 @@ export const createAuction = async (req, res, next) => {
         if (company.user.status === 5){
             return res.status(403).json({
                 success: false,
-                message: "No puedes realizar ninguna accion mientras estas bloqueado",
                 status: 403,
+                message: "No puedes realizar ninguna accion mientras estas bloqueado",
             })
         }
 
         if (!project) {
             return res.status(404).json({
                 success: false,
+                status: 404,
                 message: "Proyecto no encontrado",
                 error: "project_not_found"
             });
@@ -76,18 +89,22 @@ export const createAuction = async (req, res, next) => {
         if (existingAuction) {
             return res.status(409).json({
                 success: false,
+                status: 409,
                 message: "Ya existe una subasta para este proyecto",
                 error: "auction_exists"
             });
         }
 
         const auction = await AuctionsModel.create({
-            ...req.body,
+            project_id,
+            bidding_started_at,
+            bidding_deadline,
             status: AUCTION_STATUS.PENDING
         });
 
         return res.status(201).json({
             success: true,
+            status: 201,
             message: "Subasta creada exitosamente",
             data: auction
         });
@@ -95,6 +112,7 @@ export const createAuction = async (req, res, next) => {
     } catch (error) {
         res.status(500).json({
             success: false,
+            status: 500,
             message: "Error al crear la subasta",
             error: error.message
         });

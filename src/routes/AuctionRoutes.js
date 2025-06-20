@@ -1,7 +1,6 @@
 // routes/subastas.js
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
-import auctionSchema from "../validations/auctionSchema.js";
 import {
   createAuction,
   listAuctions,
@@ -40,7 +39,7 @@ const router = Router();
  *      422: { description: Datos inválidos }
  *      500: { description: Error del servidor }
  */
-router.post("/create", validate(auctionSchema), createAuction);
+router.post("/create", createAuction);
 
 /* ---------- Listar ---------- */
 /**
@@ -128,7 +127,7 @@ router.get("/show/id/:id", getAuction);
  *      404: { description: Subasta no encontrada }
  *      500: { description: Error del servidor }
  */
-router.put("/update/:id", validate(auctionSchema), updateAuction);
+router.put("/update/:id", updateAuction);
 
 /* ---------- Actualizar fecha final ---------- */
 /**

@@ -17,16 +17,16 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: Subastas
+ *   name: Auctions
  *   description: Operaciones sobre subastas
  */
 
 /* ---------- Crear ---------- */
 /**
  * @swagger
- * /subastas/create:
+ * /auctions/create:
  *  post:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Crear una nueva subasta
  *    requestBody:
  *      required: true
@@ -44,9 +44,9 @@ router.post("/create", createAuction);
 /* ---------- Listar ---------- */
 /**
  * @swagger
- * /subastas/show/all:
+ * /auctions/show/all:
  *  get:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Listar subastas (filtros via query)
  *    parameters:
  *      - in: query
@@ -81,9 +81,9 @@ router.get("/show/all", listAuctions);
 /* ---------- Detalle ---------- */
 /**
  * @swagger
- * /subastas/show/id/{id}:
+ * /auctions/show/id/{id}:
  *  get:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Obtener una subasta por ID
  *    parameters:
  *      - in: path
@@ -106,9 +106,9 @@ router.get("/show/id/:id", getAuction);
 /* ---------- Actualizar ---------- */
 /**
  * @swagger
- * /subastas/update/{id}:
+ * /auctions/update/{id}:
  *  put:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Actualizar una subasta
  *    parameters:
  *      - in: path
@@ -132,9 +132,9 @@ router.put("/update/:id", updateAuction);
 /* ---------- Actualizar fecha final ---------- */
 /**
  * @swagger
- * /subastas/update-deadline/{id}:
+ * /auctions/update-deadline/{id}:
  *  put:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Actualizar solo la fecha final de una subasta
  *    parameters:
  *      - in: path
@@ -170,9 +170,9 @@ router.put("/update-deadline/:id", updateAuctionDeadline);
 /* ---------- Eliminar ---------- */
 /**
  * @swagger
- * /subastas/delete/{id}:
+ * /auctions/delete/{id}:
  *  delete:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Eliminar una subasta
  *    parameters:
  *      - in: path

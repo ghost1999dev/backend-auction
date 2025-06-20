@@ -1,7 +1,6 @@
 // routes/subastas.js
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
-import auctionSchema from "../validations/auctionSchema.js";
 import {
   createAuction,
   listAuctions,
@@ -18,16 +17,16 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: Subastas
+ *   name: Auctions
  *   description: Operaciones sobre subastas
  */
 
 /* ---------- Crear ---------- */
 /**
  * @swagger
- * /subastas/create:
+ * /auctions/create:
  *  post:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Crear una nueva subasta
  *    requestBody:
  *      required: true
@@ -37,17 +36,19 @@ const router = Router();
  *            $ref: '#/components/schemas/AuctionCreate'
  *    responses:
  *      201: { description: Subasta creada }
- *      422: { description: Datos inválidos }
+ *      400: { description: Datos inválidos }
+ *      403: { description: No puedes realizar ninguna accion mientras estas bloqueado }
+ *      409: { description: Ya existe una subasta para este proyecto }
  *      500: { description: Error del servidor }
  */
-router.post("/create", validate(auctionSchema), createAuction);
+router.post("/create", createAuction);
 
 /* ---------- Listar ---------- */
 /**
  * @swagger
- * /subastas/show/all:
+ * /auctions/show/all:
  *  get:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Listar subastas (filtros via query)
  *    parameters:
  *      - in: query
@@ -82,9 +83,9 @@ router.get("/show/all", listAuctions);
 /* ---------- Detalle ---------- */
 /**
  * @swagger
- * /subastas/show/id/{id}:
+ * /auctions/show/id/{id}:
  *  get:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Obtener una subasta por ID
  *    parameters:
  *      - in: path
@@ -107,9 +108,9 @@ router.get("/show/id/:id", getAuction);
 /* ---------- Actualizar ---------- */
 /**
  * @swagger
- * /subastas/update/{id}:
+ * /auctions/update/{id}:
  *  put:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Actualizar una subasta
  *    parameters:
  *      - in: path
@@ -128,14 +129,14 @@ router.get("/show/id/:id", getAuction);
  *      404: { description: Subasta no encontrada }
  *      500: { description: Error del servidor }
  */
-router.put("/update/:id", validate(auctionSchema), updateAuction);
+router.put("/update/:id", updateAuction);
 
 /* ---------- Actualizar fecha final ---------- */
 /**
  * @swagger
- * /subastas/update-deadline/{id}:
+ * /auctions/update-deadline/{id}:
  *  put:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Actualizar solo la fecha final de una subasta
  *    parameters:
  *      - in: path
@@ -171,9 +172,9 @@ router.put("/update-deadline/:id", updateAuctionDeadline);
 /* ---------- Eliminar ---------- */
 /**
  * @swagger
- * /subastas/delete/{id}:
+ * /auctions/delete/{id}:
  *  delete:
- *    tags: [Subastas]
+ *    tags: [Auctions]
  *    summary: Eliminar una subasta
  *    parameters:
  *      - in: path
@@ -202,8 +203,7 @@ export default router;
  *        project_id:         { type: integer }
  *        bidding_started_at: { type: string, format: date-time }
  *        bidding_deadline:   { type: string, format: date-time }
- *        status:             { type: string }
- *      required: [id, project_id, bidding_started_at, bidding_deadline, status]
+ *      required: [id, project_id, bidding_started_at, bidding_deadline]
  *
  *    AuctionCreate:
  *      type: object
@@ -211,6 +211,5 @@ export default router;
  *        project_id:         { type: integer }
  *        bidding_started_at: { type: string, format: date-time }
  *        bidding_deadline:   { type: string, format: date-time }
- *        status:             { type: string }
- *      required: [project_id, bidding_started_at, bidding_deadline, status]
+ *      required: [project_id, bidding_started_at, bidding_deadline]
  */

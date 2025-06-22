@@ -209,7 +209,7 @@ export const sendFinalizationEmail = async ({ email, company_name, project_name,
   return info;
 };
 
-export const sendBlockedUserEmail = async ({ email, name, project_name, project_link }) => {
+export const sendBlockedUserEmail = async ({ email, name, project_name }) => {
   const htmlTemplate = `
     <!DOCTYPE html>
     <html lang="es">
@@ -275,7 +275,7 @@ export const sendBlockedUserEmail = async ({ email, name, project_name, project_
   `;
 
   const mailOptions = {
-    from: `"CodeBin" <${process.env.SENDEMAIL}>`,
+    from: `"CodeBid" <${process.env.SENDEMAIL}>`,
     to: email,
     subject: `Tu usuario ha sido bloqueado`,
     html: htmlTemplate,

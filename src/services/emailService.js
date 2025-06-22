@@ -209,7 +209,7 @@ export const sendFinalizationEmail = async ({ email, company_name, project_name,
   return info;
 };
 
-export const sendBlockedUserEmail = async ({ email, name, project_name, days_available, project_link }) => {
+export const sendBlockedUserEmail = async ({ email, name, project_name, project_link }) => {
   const htmlTemplate = `
     <!DOCTYPE html>
     <html lang="es">
@@ -262,7 +262,7 @@ export const sendBlockedUserEmail = async ({ email, name, project_name, days_ava
         <h2>Usuario Bloqueado</h2>
         <p>Hola <strong>${company_name}</strong>,</p>
         <p>
-          Te informamos que tu usuario ha sido bloqueado por incumplimiento de politicas, tras no haber programado la subasta del proyecto <strong>"${project_name}"</strong> en el tiempo disponible.
+          Te informamos que tu usuario ${name} ha sido bloqueado por incumplimiento de politicas, tras no haber programado la subasta del proyecto <strong>"${project_name}"</strong> en el tiempo disponible.
         </p>
 
         <p>Gracias por confiar en nuestra plataforma.</p>

@@ -6,6 +6,8 @@ import UsersModel from '../models/UsersModel.js'
 import NotificationsModel from '../models/NotificationsModel.js'
 import sequelize from '../config/connection'
 
+import { sendBlockedUserEmail } from './emailService.js'
+
 cron.schedule('0 0 * * *', async () => {
     try {
         const finishedProjects = await ProjectsModel.findAll({
@@ -47,6 +49,13 @@ cron.schedule('0 0 * * *', async () => {
                 sent_at: new Date(),
                 status: 'Enviado',
                 error_message: null
+            })
+
+            await sendBlockedUserEmail({
+                email: project.company.email,
+                name: project.company.name,
+                project_name: project.project_name,
+                project_link: `https://sitio/nombre-proyecto/${project.id}`
             })
         }
     } catch (error) {

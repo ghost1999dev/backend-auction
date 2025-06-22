@@ -68,7 +68,7 @@ cron.schedule('0 0 * * *', async () => {
                     project_name: project.project_name
                 })
             } catch (error) {
-                
+                console.error("Error en la verificación diaria de proyectos:", error);
             }
         }
     } catch (error) {

@@ -232,6 +232,7 @@ export const ListAllCompany = async (req, res) => {
       include: [
         {
           model: UsersModel,
+          as: 'user',
           attributes: [
             "id",
             "role_id",

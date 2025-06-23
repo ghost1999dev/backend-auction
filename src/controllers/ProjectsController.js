@@ -425,45 +425,92 @@ export const DesactivateProjectId = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} project data
  */
-  export const DetailsProjectId = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID", status: 400 });
-      }
-  
-      const project = await ProjectsModel.findByPk(id, {
-        include: [
-          { model: CategoriesModel, as: 'category' },
-          { model: UsersModel, as: 'company' }
-        ]
-      });
-  
-      if (!project) {
-        return res.status(404).json({ message: "Project not found", status: 404 });
-      }
-  
-      
-      let daysRemaining = null;
-      if (project.status === 1 && project.updatedAt) { 
-        const activatedAt = new Date(project.updatedAt);
-        const today = new Date();
-        const daysPassed = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
-        daysRemaining = project.days_available - daysPassed;
-        if (daysRemaining < 0) daysRemaining = 0;
-      }
-  
-      res.status(200).json({
-        message: "Project retrieved successfully",
-        project,
-        days_remaining: daysRemaining
-      });
-    } catch (error) {
-      console.error('Error retrieving project:', error);
-      res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
+export const DetailsProjectId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid project ID", status: 400 });
     }
-  };
+
+    const project = await ProjectsModel.findByPk(id, {
+      include: [
+        { model: CategoriesModel, as: 'category' },
+        {
+          model: CompaniesModel,
+          as: 'company_profile',
+          include: [
+            {
+              model: UsersModel,
+              as: 'user',
+              attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found", status: 404 });
+    }
+
+    let daysRemaining = null;
+    if (project.status === 1 && project.updatedAt) {
+      const activatedAt = new Date(project.updatedAt);
+      const today = new Date();
+      const daysPassed = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+      daysRemaining = project.days_available - daysPassed;
+      if (daysRemaining < 0) daysRemaining = 0;
+    }
+
+    res.status(200).json({
+      message: "Project retrieved successfully",
+      project: {
+        id: project.id,
+        company_id: project.company_id,
+        category_id: project.category_id,
+        project_name: project.project_name,
+        description: project.description,
+        budget: project.budget,
+        days_available: project.days_available,
+        status: project.status,
+        long_description: project.long_description,
+        createProject: project.createdAt,
+        updateProject: project.updatedAt,
+        category: {
+          id: project.category?.id,
+          name : project.category?.name || null,
+          createProject: project.category?.createdAt || null,
+          updateProject: project.category?.updatedAt || null,
+
+        },
+        company: {
+          id: project.company_profile?.id,
+          name: project.company_profile?.user?.name || null,
+          email: project.company_profile?.user?.email || null,
+          nrc_number: project.company_profile?.nrc_number || null,
+          business_type: project.company_profile?.business_type || null,
+          address: project.company_profile?.user?.address || null,
+          phone: project.company_profile?.user?.phone || null,
+          account_type: project.company_profile?.user?.account_type || null,
+          status: project.company_profile?.user?.status || null,
+          last_login: project.company_profile?.user?.last_login || null,
+          createProject: project.company_profile?.createdAt || null,
+          updateProject: project.company_profile?.updatedAt || null,
+
+        },
+        days_remaining: daysRemaining
+          
+        
+        
+      }
+      
+    });
+  } catch (error) {
+    console.error('Error retrieving project:', error);
+    res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
+  }
+};
    
   
 /**

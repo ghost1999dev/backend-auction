@@ -158,7 +158,7 @@ export const DetailsCompanyIdUser = async (req, res) => {
     const company = await CompaniesModel.findOne({
       include: [
         {
-          model: UsersModel,
+          model: UsersModel, as: 'user',
           attributes: [
             "id",
             "role_id",
@@ -232,6 +232,7 @@ export const ListAllCompany = async (req, res) => {
       include: [
         {
           model: UsersModel,
+          as: 'user',
           attributes: [
             "id",
             "role_id",

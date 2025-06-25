@@ -414,7 +414,7 @@ export const getPromRatingByCompany = async (req, res) => {
   try {
 
     const company = await CompaniesModel.findByPk(companyId, {
-      include: [{ model: UsersModel, attributes: ['name'] }],
+      include: [{ model: UsersModel, as: 'user', attributes: ['name'] }],
     });
 
     if (!company) return res.status(404).json({ message: 'Empresa no encontrada' });

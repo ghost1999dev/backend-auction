@@ -1,6 +1,6 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
-import UsersModel from "./UsersModel.js";
+
 
 
 /**
@@ -40,6 +40,8 @@ const CompaniesModel = sequelize.define(
   },
 );
 
-CompaniesModel.belongsTo(UsersModel, { foreignKey: "user_id" });
-
 export default CompaniesModel;
+import("./UsersModel.js").then((module) => {
+  const UsersModel = module.default;
+  CompaniesModel.belongsTo(UsersModel, { foreignKey: 'user_id', as: 'user' });
+});

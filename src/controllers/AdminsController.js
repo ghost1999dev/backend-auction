@@ -690,6 +690,7 @@ export const searchProjects = async (req, res) => {
         include: [
           {
             model: UsersModel,
+            as: 'user',
             attributes: ['id', 'name'], 
           }
         ]
@@ -774,6 +775,7 @@ export const getProjectById = async (req, res) => {
           include: [
             {
               model: UsersModel,
+              as: 'user',
               attributes: ['id', 'name'], 
             }
           ]
@@ -830,6 +832,7 @@ export const updateProjectStatus = async (req, res) => {
         as: 'company_profile',
         include: {
           model: UsersModel,
+          as: 'user',
           attributes: ['id', 'name', 'email']
         }
       }

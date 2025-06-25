@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://backend-auction-5zdm.onrender.com/passport/auth/google/callback",
+      callbackURL: "http://localhost:4000/passport/auth/google/callback",//"https://backend-auction-5zdm.onrender.com/passport/auth/google/callback",
       scope: ['profile', 'email']
     },
     async function (accessToken, refreshToken, profile, done) {

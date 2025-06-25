@@ -32,6 +32,7 @@ export const createProject = async (req, res) => {
       const company = await CompaniesModel.findOne({
         include: [{
           model: UsersModel,
+          as: 'user',
           attributes: ['id', 'status'],
         }],
         where: { id: company_id },
@@ -147,6 +148,7 @@ export const updateProjectId = async (req, res) => {
     const company = await CompaniesModel.findOne({
       include: [{
         model: UsersModel,
+        as: 'user',
         attributes: ['id', 'status'],
       }],
       where: { id: company_id },
@@ -279,6 +281,7 @@ export const DesactivateProjectId = async (req, res) => {
     const status = await CompaniesModel.findOne({
       include: [{
         model: UsersModel,
+        as: 'user',
         attributes: ['id', 'status'],
       }],
       where: { id: company.company_id },
@@ -366,56 +369,98 @@ export const DesactivateProjectId = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Array} array of projects
  */
-  export const getAllProjects = async (req, res) => {
-    try {
-      const { status } = req.query;
-      let whereCondition = {};
-      
-      if (status !== undefined) {
-        whereCondition.status = parseInt(status);
+export const getAllProjects = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const whereCondition = {};
+
+    if (status !== undefined) {
+      whereCondition.status = parseInt(status);
+    }
+
+    const projects = await ProjectsModel.findAll({
+      where: whereCondition,
+      include: [
+        { model: CategoriesModel, as: 'category' },
+        {
+          model: CompaniesModel,
+          as: 'company_profile',
+          include: [
+            {
+              model: UsersModel,
+              as: 'user',
+              attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+            }
+          ]
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const projectsWithRemainingDays = projects.map(project => {
+      let daysRemaining = null;
+
+      if (project.status === 1 && project.updatedAt) {
+        const activatedAt = new Date(project.updatedAt);
+        const today = new Date();
+        const elapsedDays = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+        daysRemaining = project.days_available - elapsedDays;
+        if (daysRemaining < 0) daysRemaining = 0;
       }
 
-      const projects = await ProjectsModel.findAll({
-        where: whereCondition,
-        include: [
-          { model: CategoriesModel, as: 'category' },
-          { model: UsersModel, as: 'company' }
-        ],
-        order: [['createdAt', 'DESC']]
-      });
+      return {
+        id: project.id,
+        project_name: project.project_name,
+        description: project.description,
+        budget: project.budget,
+        days_available: project.days_available,
+        days_remaining: daysRemaining,
+        status: project.status,
+        long_description: project.long_description,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        category: project.category ? {
+          id: project.category.id,
+          name: project.category.name,
+          createdAt: project.category.createdAt,
+          updatedAt: project.category.updatedAt
+        } : null,
+        company: project.company_profile ? {
+          id: project.company_profile.id,
+          nrc_number: project.company_profile.nrc_number,
+          business_type: project.company_profile.business_type,
+          createdAt: project.company_profile.createdAt,
+          updatedAt: project.company_profile.updatedAt,
+          user: project.company_profile.user ? {
+            id: project.company_profile.user.id,
+            name: project.company_profile.user.name,
+            email: project.company_profile.user.email,
+            address: project.company_profile.user.address,
+            phone: project.company_profile.user.phone,
+            account_type: project.company_profile.user.account_type,
+            status: project.company_profile.user.status,
+            last_login: project.company_profile.user.last_login
+          } : null
+        } : null
+      };
+    });
 
-      const projectsWithRemainingDays = projects.map(project => {
-        let daysRemaining = null;
-  
-        if (project.status === 1) { 
-          const  activatedAt = new Date(project.updatedAt);
-          const today = new Date();
-  
-          const msInDay = 24 * 60 * 60 * 1000;
-          const elapsedDays = Math.floor((today -  activatedAt) / msInDay);
-          daysRemaining = project.days_available - elapsedDays;
-  
-          if (daysRemaining < 0) daysRemaining = 0;
-        }
-  
-        return {
-          ...project.toJSON(),
-          days_remaining: daysRemaining
-        };
-      });
-      
-      res.status(200).json({
-        message: "Projects retrieved successfully", 
-        status: 200,
-        projects: projectsWithRemainingDays
-      });
-    } catch (error) {
-      console.error('Error retrieving projects:', error);
-      res.status(500).json({ message: "Error retrieving projects", 
-        error: error.message, 
-        status: 500 });
-    }
-  };
+    res.status(200).json({
+      message: "Projects retrieved successfully",
+      status: 200,
+      projects: projectsWithRemainingDays
+    });
+
+  } catch (error) {
+    console.error('Error retrieving projects:', error);
+    res.status(500).json({
+      message: "Error retrieving projects",
+      error: error.message,
+      status: 500
+    });
+  }
+};
+
 
   /**
  * Get project by ID
@@ -425,45 +470,92 @@ export const DesactivateProjectId = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} project data
  */
-  export const DetailsProjectId = async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID", status: 400 });
-      }
-  
-      const project = await ProjectsModel.findByPk(id, {
-        include: [
-          { model: CategoriesModel, as: 'category' },
-          { model: UsersModel, as: 'company' }
-        ]
-      });
-  
-      if (!project) {
-        return res.status(404).json({ message: "Project not found", status: 404 });
-      }
-  
-      
-      let daysRemaining = null;
-      if (project.status === 1 && project.updatedAt) { 
-        const activatedAt = new Date(project.updatedAt);
-        const today = new Date();
-        const daysPassed = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
-        daysRemaining = project.days_available - daysPassed;
-        if (daysRemaining < 0) daysRemaining = 0;
-      }
-  
-      res.status(200).json({
-        message: "Project retrieved successfully",
-        project,
-        days_remaining: daysRemaining
-      });
-    } catch (error) {
-      console.error('Error retrieving project:', error);
-      res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
+export const DetailsProjectId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid project ID", status: 400 });
     }
-  };
+
+    const project = await ProjectsModel.findByPk(id, {
+      include: [
+        { model: CategoriesModel, as: 'category' },
+        {
+          model: CompaniesModel,
+          as: 'company_profile',
+          include: [
+            {
+              model: UsersModel,
+              as: 'user',
+              attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found", status: 404 });
+    }
+
+    let daysRemaining = null;
+    if (project.status === 1 && project.updatedAt) {
+      const activatedAt = new Date(project.updatedAt);
+      const today = new Date();
+      const daysPassed = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+      daysRemaining = project.days_available - daysPassed;
+      if (daysRemaining < 0) daysRemaining = 0;
+    }
+
+    res.status(200).json({
+      message: "Project retrieved successfully",
+      project: {
+        id: project.id,
+        company_id: project.company_id,
+        category_id: project.category_id,
+        project_name: project.project_name,
+        description: project.description,
+        budget: project.budget,
+        days_available: project.days_available,
+        status: project.status,
+        long_description: project.long_description,
+        createProject: project.createdAt,
+        updateProject: project.updatedAt,
+        category: {
+          id: project.category?.id,
+          name : project.category?.name || null,
+          createProject: project.category?.createdAt || null,
+          updateProject: project.category?.updatedAt || null,
+
+        },
+        company: {
+          id: project.company_profile?.id,
+          name: project.company_profile?.user?.name || null,
+          email: project.company_profile?.user?.email || null,
+          nrc_number: project.company_profile?.nrc_number || null,
+          business_type: project.company_profile?.business_type || null,
+          address: project.company_profile?.user?.address || null,
+          phone: project.company_profile?.user?.phone || null,
+          account_type: project.company_profile?.user?.account_type || null,
+          status: project.company_profile?.user?.status || null,
+          last_login: project.company_profile?.user?.last_login || null,
+          createProject: project.company_profile?.createdAt || null,
+          updateProject: project.company_profile?.updatedAt || null,
+
+        },
+        days_remaining: daysRemaining
+          
+        
+        
+      }
+      
+    });
+  } catch (error) {
+    console.error('Error retrieving project:', error);
+    res.status(500).json({ message: "Error retrieving project", error: error.message, status: 500 });
+  }
+};
    
   
 /**
@@ -689,6 +781,7 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
           attributes: ['id'],
           include: [{
             model: UsersModel,
+            as: 'user',
             attributes: ['id', 'name', 'email']
           }],
         },{

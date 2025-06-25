@@ -209,6 +209,83 @@ export const sendFinalizationEmail = async ({ email, company_name, project_name,
   return info;
 };
 
+export const sendBlockedUserEmail = async ({ email, name, project_name }) => {
+  const htmlTemplate = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Proyecto Finalizado</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f4f4f4;
+          margin: 0;
+          padding: 0;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: #ffffff;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        h2 {
+          color: #2c3e50;
+        }
+        p {
+          color: #34495e;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .button {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 12px 20px;
+          background-color: #3498db;
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 30px;
+          font-size: 13px;
+          color: #999;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <h2>Usuario Bloqueado</h2>
+        <p>Hola <strong>${company_name}</strong>,</p>
+        <p>
+          Te informamos que tu usuario ${name} ha sido bloqueado por incumplimiento de politicas, tras no haber programado la subasta del proyecto <strong>"${project_name}"</strong> en el tiempo disponible.
+        </p>
+
+        <p>Gracias por confiar en nuestra plataforma.</p>
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} CodeBin. Todos los derechos reservados.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"CodeBid" <${process.env.SENDEMAIL}>`,
+    to: email,
+    subject: `Tu usuario ha sido bloqueado`,
+    html: htmlTemplate,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`Correo de bloqueo enviado a ${email}: ${info.messageId}`);
+  return info;
+}
+
 // Cron job: ejecuta todos los días a las 00:00
 cron.schedule('0 0 * * *', async () => {
   console.log('Ejecutando verificación diaria de proyectos activos...');

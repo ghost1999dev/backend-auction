@@ -432,6 +432,7 @@ export const getProjectsApplicationsByDeveloper = async (req, res) => {
           as: 'company_profile',
           include: [{
             model: UsersModel,
+            as: 'user',
             attributes: ['id', 'name', 'email', 'phone']
           }] 
         },{

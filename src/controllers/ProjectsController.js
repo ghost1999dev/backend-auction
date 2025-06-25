@@ -32,6 +32,7 @@ export const createProject = async (req, res) => {
       const company = await CompaniesModel.findOne({
         include: [{
           model: UsersModel,
+          as: 'user',
           attributes: ['id', 'status'],
         }],
         where: { id: company_id },
@@ -147,6 +148,7 @@ export const updateProjectId = async (req, res) => {
     const company = await CompaniesModel.findOne({
       include: [{
         model: UsersModel,
+        as: 'user',
         attributes: ['id', 'status'],
       }],
       where: { id: company_id },
@@ -279,6 +281,7 @@ export const DesactivateProjectId = async (req, res) => {
     const status = await CompaniesModel.findOne({
       include: [{
         model: UsersModel,
+        as: 'user',
         attributes: ['id', 'status'],
       }],
       where: { id: company.company_id },

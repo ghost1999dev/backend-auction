@@ -152,6 +152,29 @@ router.get("/count/reportsByStatus", countReportsByStatus);
  *        description: Server error
  */   
 router.get("/count/totalCategories", countTotalCategories);
+/**
+ * @swagger
+ * /dashboard/count/adminsByStatus:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the number of admins by status
+ *    responses:
+ *      200:
+ *        description: Returns the number of admins by status
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */ 
 router.get("/count/adminsByStatus", countAdminsByStatus);
 
 

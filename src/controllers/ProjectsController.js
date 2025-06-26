@@ -303,7 +303,7 @@ export const DesactivateProjectId = async (req, res) => {
       }
     });
     if (!project) {
-      return res.status(404).json({ message: "Project not found", status: 404 });
+      return res.status(404).json({ message: "Proyecto no encontrado", status: 404 });
     }
 
     const applications = await ProjectApplicationsModel.count({

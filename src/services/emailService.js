@@ -42,9 +42,10 @@ const transporter = nodemailer.createTransport({
  * @param {string} params.projectName
  * @param {string} params.statusName 
  * @param {number} params.status 
+ * @param {string} params.reason
  * @returns {Promise} 
  */
-export const sendProjectStatusEmail = async ({ email, name, projectName, statusName, status }) => {
+export const sendProjectStatusEmail = async ({ email, name, projectName, statusName, status, reason }) => {
 
   let subject = `Actualización de estado de tu proyecto: ${projectName}`;
   let bodyContent = '';
@@ -63,6 +64,9 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
     case 3:
       bodyContent = `<p>Hola ${name},</p>
                      <p>Lamentamos informarte que tu proyecto <strong>${projectName}</strong> ha sido <strong>Rechazado</strong>.</p>
+                      <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #f44336; margin-bottom: 20px;">
+                      <em>${reason}</em>
+                      </div>
                      <p>Por favor, contacta con nuestro equipo para obtener más información y discutir los próximos pasos.</p>`;
       break;
     case 4:

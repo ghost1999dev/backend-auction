@@ -7,6 +7,8 @@ import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import { createProjectSchema } from "../validations/projectSchema.js"
 
+import { Op } from "sequelize";
+
 /**
  * create project
  *
@@ -374,31 +376,54 @@ export const DesactivateProjectId = async (req, res) => {
  */
 export const getAllProjects = async (req, res) => {
   try {
-    const { status } = req.query;
-    const whereCondition = {};
+    const { developer_id } = req.params;
 
-    if (status !== undefined) {
-      whereCondition.status = parseInt(status);
-    }
-
-    const projects = await ProjectsModel.findAll({
-      where: whereCondition,
-      include: [
-        { model: CategoriesModel, as: 'category' },
-        {
-          model: CompaniesModel,
-          as: 'company_profile',
-          include: [
-            {
+    let projects 
+    
+    if (developer_id) {
+      projects = await ProjectApplicationsModel.findAll({
+        attributes: [],
+        where: {
+          developer_id,
+          status: {
+            [Op.notIn]: [0, 3]
+          }
+        },
+        include: [{
+          model: ProjectsModel,
+          as: 'project',
+          include: [{
+            model: CompaniesModel,
+            as: 'company_profile',
+            include: [{
               model: UsersModel,
               as: 'user',
               attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
-            }
-          ]
-        }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
+            }]
+          }]
+        }],
+        order: [['createdAt', 'DESC']]
+      })
+    }
+    else {
+      projects = await ProjectsModel.findAll({
+        include: [
+          { model: CategoriesModel, as: 'category' },
+          {
+            model: CompaniesModel,
+            as: 'company_profile',
+            include: [
+              {
+                model: UsersModel,
+                as: 'user',
+                attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+              }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      });
+    }
 
     const projectsWithRemainingDays = projects.map(project => {
       let daysRemaining = null;

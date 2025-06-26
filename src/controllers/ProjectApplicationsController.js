@@ -68,7 +68,7 @@ export const createApplication = async (req, res, next) => {
     if (alreadyExists) {
       return res.status(409).json({
         success: false,
-        message: "Ya existe una aplicación para este proyecto",
+        message: "No puedes aplicar a este proyecto nuevamente",
         error: "application_exists",
         status: 400
       });
@@ -99,8 +99,7 @@ export const createApplication = async (req, res, next) => {
 
     const app = await ProjectApplicationsModel.create({
       project_id,
-      developer_id,
-      //status:project.status
+      developer_id
     });
 
     return res.status(201).json({

@@ -124,6 +124,32 @@ router.get("/count/projectsByStatus", countProjectsByStatus);
  *        description: Server error
  */
 router.get("/count/reportsByStatus", countReportsByStatus);
+/**
+ * @swagger
+ * /dashboard/count/totalCategories:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the total number of categories
+ *    responses:
+ *      200:
+ *        description: Returns the total number of categories
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                total:
+ *                  type: number
+ *                  description: Total number of categories
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */   
 router.get("/count/totalCategories", countTotalCategories);
 
 

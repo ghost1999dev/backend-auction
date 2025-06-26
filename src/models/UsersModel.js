@@ -3,6 +3,7 @@ import { DataTypes } from "sequelize";
 import RolesModel from "./RolesModel.js";
 import ExternalAccountsModel from "./ExternalAccountsModel.js";
 import CompaniesModel from "./CompaniesModel.js";
+import DevelopersModel from "./DevelopersModel.js";
 
 /**
  * Users model.
@@ -70,5 +71,6 @@ const UsersModel = sequelize.define(
   UsersModel.hasMany(ExternalAccountsModel, { foreignKey: "user_id" });
   UsersModel.belongsTo(RolesModel, { foreignKey: "role_id" });
   UsersModel.hasOne(CompaniesModel, { foreignKey: 'user_id', as: 'company_profile' });
+  UsersModel.hasOne(DevelopersModel, { foreignKey: 'user_id', as: 'dev_profile' });
 
   export default UsersModel;

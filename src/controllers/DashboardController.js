@@ -27,17 +27,17 @@ export const countActiveCompanies = async (req, res) => {
 
 export const countActiveDevelopers = async (req, res) => {
   try {
-    const developersCount = await DevelopersModel.count({
+    const developersCount = await UsersModel.count({
       where: { status: 1 },
       include: [{
-        model: UsersModel,
-        as: 'user',
+        model: DevelopersModel,
+        as: 'dev_profile',  // usa el alias que hayas definido en la asociación
         required: true
       }]
     })
     return res.status(200).json({
       developersCount,
-      message: 'Conteo de desarrolladores activas exitosamente',
+      message: 'Conteo de developers activos exitosamente',
       status: 200
     })
   } catch (error) {

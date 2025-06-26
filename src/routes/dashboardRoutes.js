@@ -4,7 +4,8 @@ import {
   countActiveDevelopers,
   countProjectsByStatus,
   countReportsByStatus,
-  countTotalCategories
+  countTotalCategories,
+  countAdminsByStatus
 
 } from "../controllers/DashboardController.js";
 
@@ -151,6 +152,7 @@ router.get("/count/reportsByStatus", countReportsByStatus);
  *        description: Server error
  */   
 router.get("/count/totalCategories", countTotalCategories);
+router.get("/count/adminsByStatus", countAdminsByStatus);
 
 
 

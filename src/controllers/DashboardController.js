@@ -5,6 +5,7 @@ import ProjectsModel from "../models/ProjectsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import ReportsModel from "../models/ReportsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
+import AdminsModel from "../models/AdminsModel.js";
 
 /**
  * Count active companies
@@ -42,7 +43,6 @@ export const countActiveCompanies = async (req, res) => {
  * @param {Object} res - response object
  * @returns {Object} count of active developers  
  */
-
 export const countActiveDevelopers = async (req, res) => {
   try {
     const developersCount = await UsersModel.count({
@@ -182,3 +182,44 @@ export const countTotalCategories = async (req, res) => {
     });
   }
 };
+/**
+ * Count admins by status
+ * 
+ * Function to count the number of admins by status
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of admins by status  
+ */
+export const countAdminsByStatus = async (req, res) => {
+  try {
+    const admins = await AdminsModel.findAll({
+      attributes: [
+        'status',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['status']
+    });
+
+    const statusLabels = ['active', 'inactive'];
+    const result = {};
+    statusLabels.forEach(status => result[status] = 0);
+
+    admins.forEach(admin => {
+      const status = admin.getDataValue('status');
+      const count = parseInt(admin.getDataValue('count'), 10);
+      result[status] = count;
+    });
+
+    return res.status(200).json({
+      statusCounts: result,
+      message: "Conteo de administradores por estado exitoso",
+      status: 200
+    });
+  } catch (error) {
+    console.error("Error al obtener conteo de administradores:", error);
+    return res.status(500).json({
+      error: "Error al obtener conteo de administradores"
+    });
+  }
+};
+

@@ -1,7 +1,8 @@
 import express from "express";
 import {
   countActiveCompanies,
-  countActiveDevelopers
+  countActiveDevelopers,
+  countProjectsByStatus
 } from "../controllers/DashboardController.js";
 
 /**
@@ -72,6 +73,8 @@ router.get("/count/activeCompanies", countActiveCompanies);
  *        description: Server error
  */
 router.get("/count/activeDevelopers", countActiveDevelopers);
+
+router.get("/count/projectsByStatus", countProjectsByStatus);
 
 
 export default router;

@@ -1,8 +1,9 @@
+import { Op } from 'sequelize'
+import sequelize from "../config/connection.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
-import { Op } from 'sequelize'
 
 export const countActiveCompanies = async (req, res) => {
   try {
@@ -45,3 +46,47 @@ export const countActiveDevelopers = async (req, res) => {
     return res.status(500).json({ error: 'Error al obtener conteos' })
   }
 }
+
+export const countProjectsByStatus = async (req, res) => {
+  try {
+    const projects = await ProjectsModel.findAll({
+      attributes: [
+        'status',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['status']
+    });
+
+    const statusMap = {
+      0: "Pendiente",
+      1: "Activo",
+      2: "Inactivo",
+      3: "Rechazado",
+      4: "Finalizado"
+    };
+
+    const result = {};
+    Object.values(statusMap).forEach(statusText => {
+      result[statusText] = 0;
+    });
+
+    projects.forEach(project => {
+      const status = project.getDataValue('status');
+      const count = parseInt(project.getDataValue('count'), 10);
+      const label = statusMap[status] || `Desconocido (${status})`;
+      result[label] = count;
+    });
+
+    return res.status(200).json({
+      statusCounts: result,
+      message: 'Conteo de proyectos por estado exitoso',
+      status: 200
+    });
+
+  } catch (error) {
+    console.error('Error al obtener conteo de proyectos:', error);
+    return res.status(500).json({
+      error: 'Error al obtener conteo de proyectos'
+    });
+  }
+};

@@ -4,7 +4,16 @@ import CompaniesModel from "../models/CompaniesModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import ReportsModel from "../models/ReportsModel.js";
+import CategoriesModel from "../models/CategoriesModel.js";
 
+/**
+ * Count active companies
+ * 
+ * Function to count the number of active companies
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of active companies  
+ */
 export const countActiveCompanies = async (req, res) => {
   try {
     const companiesCount = await UsersModel.count({
@@ -25,6 +34,14 @@ export const countActiveCompanies = async (req, res) => {
     return res.status(500).json({ error: 'Error al obtener conteos' })
   }
 }
+/**
+ * Count active developers
+ * 
+ * Function to count the number of active developers
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of active developers  
+ */
 
 export const countActiveDevelopers = async (req, res) => {
   try {
@@ -46,7 +63,14 @@ export const countActiveDevelopers = async (req, res) => {
     return res.status(500).json({ error: 'Error al obtener conteos' })
   }
 }
-
+/**
+ * Count projects by status
+ * 
+ * Function to count the number of projects by status
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of projects by status  
+ */ 
 export const countProjectsByStatus = async (req, res) => {
   try {
     const projects = await ProjectsModel.findAll({
@@ -90,7 +114,14 @@ export const countProjectsByStatus = async (req, res) => {
     });
   }
 };
-
+/**
+ * Count reports by status
+ * 
+ * Function to count the number of reports by status
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of reports by status  
+ */
 export const countReportsByStatus = async (req, res) => {
   try {
     const reports = await ReportsModel.findAll({
@@ -124,6 +155,30 @@ export const countReportsByStatus = async (req, res) => {
     console.error("Error al obtener conteo de reportes:", error);
     return res.status(500).json({
       error: "Error al obtener conteo de reportes"
+    });
+  }
+};
+/**
+ * Count total categories
+ * 
+ * Function to count the total number of categories
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} count of total categories  
+ */
+export const countTotalCategories = async (req, res) => {
+  try {
+    const totalCategories = await CategoriesModel.count();
+
+    return res.status(200).json({
+      total: totalCategories,
+      message: "Total de categorías obtenido exitosamente",
+      status: 200
+    });
+  } catch (error) {
+    console.error("Error al obtener total de categorías:", error);
+    return res.status(500).json({
+      error: "Error al obtener total de categorías"
     });
   }
 };

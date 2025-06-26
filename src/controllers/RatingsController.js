@@ -53,7 +53,7 @@ export const getAllRatings = async (req, res) => {
           attributes: ['id'],
           include: [
             {
-              model: UsersModel,
+              model: UsersModel,as :'user',
               attributes: ['id', 'name'],
             },
           ],
@@ -64,7 +64,7 @@ export const getAllRatings = async (req, res) => {
           attributes: ['id'],
           include: [
             {
-              model: UsersModel,
+              model: UsersModel, as :'user',
               attributes: ['id', 'name'],
             },
           ],
@@ -129,13 +129,13 @@ export const getByIdRating = async (req, res) => {
           model: DevelopersModel,
           as: 'developer',
           attributes: ['id'],
-          include: [{ model: UsersModel, attributes: ['id', 'name'] }],
+          include: [{ model: UsersModel, as :'user', attributes: ['id', 'name'] }],
         },
         {
           model: CompaniesModel,
           as: 'company',
           attributes: ['id'],
-          include: [{ model: UsersModel, attributes: ['id', 'name'] }],
+          include: [{ model: UsersModel, as :'user', attributes: ['id', 'name'] }],
         },
       ],
     });
@@ -354,7 +354,7 @@ export const getPromRatingByDeveloper = async (req, res) => {
   try {
 
     const developer = await DevelopersModel.findByPk(developerId, {
-      include: [{ model: UsersModel, attributes: ['name'] }],
+      include: [{ model: UsersModel,as :'user', attributes: ['name'] }]
     });
 
     if (!developer) {
@@ -464,14 +464,14 @@ export const getPublicProfile = async (req, res) => {
   try {
 
     let user = await DevelopersModel.findByPk(userId, {
-      include: [{ model: UsersModel, attributes: ['name', 'email'] }]
+      include: [{ model: UsersModel, as :'user', attributes: ['name', 'email'] }]
     });
 
     let profileType = 'Developer';
 
     if (!user) {
       user = await CompaniesModel.findByPk(userId, {
-        include: [{ model: UsersModel, attributes: ['name', 'email'] }]
+        include: [{ model: UsersModel, as :'user', attributes: ['name', 'email'] }]
       });
       profileType = 'Company';
     }

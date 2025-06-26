@@ -4,7 +4,7 @@ import {
   countActiveDevelopers,
   countProjectsByStatus,
   countReportsByStatus
-  
+
 } from "../controllers/DashboardController.js";
 
 /**
@@ -99,7 +99,29 @@ router.get("/count/activeDevelopers", countActiveDevelopers);
  *        description: Server error
  */ 
 router.get("/count/projectsByStatus", countProjectsByStatus);
-
+/**
+ * @swagger
+ * /dashboard/count/reportsByStatus:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the number of reports by status
+ *    responses:
+ *      200:
+ *        description: Returns the number of reports by status
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */
 router.get("/count/reportsByStatus", countReportsByStatus);
 
 

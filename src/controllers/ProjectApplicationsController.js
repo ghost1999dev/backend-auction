@@ -138,7 +138,8 @@ export const listApplications = async (req, res, next) => {
             exclude: ['password']
           },
           include: [{
-            model: UsersModel
+            model: UsersModel,
+            as: 'user'
           }]
         },
         {                   

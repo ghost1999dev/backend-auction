@@ -67,7 +67,7 @@ export const DetailsDeveloperId = async (req, res) => {
 
         const developer = await DevelopersModel.findOne({
             include: [{
-                model: UsersModel,
+                model: UsersModel, as: 'user',
                 attributes: [
                     "id",
                     "role_id",
@@ -148,7 +148,7 @@ export const getDevelopersByIdUser = async (req, res) => {
 
         const developer = await DevelopersModel.findOne({
             include: [{
-                model: UsersModel,
+                model: UsersModel, as: 'user',
                 attributes: [
                     "role_id",
                     "name",
@@ -223,7 +223,7 @@ export const ListAllDevelopers = async (req, res) => {
     try {
         const developers = await DevelopersModel.findAll({
             include: [{
-                model: UsersModel,
+                model: UsersModel,as: 'user',
                 attributes: [
                     "id",
                     "role_id",

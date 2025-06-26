@@ -269,6 +269,7 @@ export const updateProjectId = async (req, res) => {
 export const DesactivateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -322,9 +323,10 @@ export const DesactivateProjectId = async (req, res) => {
 
     const currentStatus = project.status;
     
-    await ProjectsModel.update({ status: 2 }, {
-      where: { id }
-    });
+    await ProjectsModel.update(
+      { status: 2, deactivation_reason: reason || null },
+      { where: { id } }
+    );
 
     let statusText;
     switch (currentStatus) {
@@ -339,11 +341,12 @@ export const DesactivateProjectId = async (req, res) => {
       await NotificationsModel.create({
         user_id: project.company_id,
         title: 'Proyecto Desactivado',
-        body: `El proyecto "${project.project_name}" ha sido desactivado`,
+        body: `El proyecto "${project.project_name}" ha sido desactivado.Motivo: ${reason || 'No especificado'}.`,
         context: JSON.stringify({ 
           action: 'project_deactivation', 
           project_id: id,
-          status: statusText
+          status: statusText,
+          reason
          }),
         sent_at: new Date(),
         status: statusText,
@@ -354,11 +357,11 @@ export const DesactivateProjectId = async (req, res) => {
     }
     
     res.status(200).json({
-      message: "Project deactivated successfully", status: 200
+      message: "Proyecto desactivado exitosamente.!!", status: 200
     });
   } catch (error) {
-    console.error('Error deactivating project:', error);
-    res.status(500).json({ message: "Error deactivating project", error: error.message, status: 500 });
+    console.error('Error al desactivar el proyecto:', error);
+    res.status(500).json({ message: "Error al desactivar el proyecto:", error: error.message, status: 500 });
   }
 };
   /**

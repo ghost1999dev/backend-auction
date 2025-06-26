@@ -1,9 +1,9 @@
-import { Op } from 'sequelize'
 import sequelize from "../config/connection.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
+import ReportsModel from "../models/ReportsModel.js";
 
 export const countActiveCompanies = async (req, res) => {
   try {
@@ -87,6 +87,43 @@ export const countProjectsByStatus = async (req, res) => {
     console.error('Error al obtener conteo de proyectos:', error);
     return res.status(500).json({
       error: 'Error al obtener conteo de proyectos'
+    });
+  }
+};
+
+export const countReportsByStatus = async (req, res) => {
+  try {
+    const reports = await ReportsModel.findAll({
+      attributes: [
+        'status',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      group: ['status']
+    });
+
+    const statusLabels = ["Pendiente", "Resuelto", "Rechazado"];
+
+    const result = {};
+    statusLabels.forEach(label => {
+      result[label] = 0;
+    });
+
+    reports.forEach(report => {
+      const status = report.getDataValue('status');
+      const count = parseInt(report.getDataValue('count'), 10);
+      result[status] = count;
+    });
+
+    return res.status(200).json({
+      statusCounts: result,
+      message: "Conteo de reportes por estado exitoso",
+      status: 200
+    });
+
+  } catch (error) {
+    console.error("Error al obtener conteo de reportes:", error);
+    return res.status(500).json({
+      error: "Error al obtener conteo de reportes"
     });
   }
 };

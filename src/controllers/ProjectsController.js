@@ -376,34 +376,44 @@ export const DesactivateProjectId = async (req, res) => {
  */
 export const getAllProjects = async (req, res) => {
   try {
-    const { developer_id } = req.params;
+    const { developer_id } = req.query;
 
-    let projects 
+    let projects = []
     
     if (developer_id) {
-      projects = await ProjectApplicationsModel.findAll({
-        attributes: [],
+      const appliedProjects = await ProjectApplicationsModel.findAll({
+        attributes: ['project_id'],
         where: {
-          developer_id,
-          status: {
-            [Op.notIn]: [0, 3]
+          developer_id
+        },
+        raw: true
+      })
+
+      const appliedProjectIds = appliedProjects.map(p => p.project_id)
+
+      projects = await ProjectsModel.findAll({
+        where: {
+          status: 1,
+          id: {
+            [Op.notIn]: appliedProjectIds
           }
         },
-        include: [{
-          model: ProjectsModel,
-          as: 'project',
-          include: [{
+        include: [
+          { model: CategoriesModel, as: 'category' },
+          {
             model: CompaniesModel,
             as: 'company_profile',
-            include: [{
-              model: UsersModel,
-              as: 'user',
-              attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
-            }]
-          }]
-        }],
-        order: [['createdAt', 'DESC']]
+            include: [
+              {
+                model: UsersModel,
+                as: 'user',
+                attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+              }
+            ]
+          }
+        ]
       })
+
     }
     else {
       projects = await ProjectsModel.findAll({

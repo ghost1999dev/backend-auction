@@ -51,11 +51,11 @@ router.post("/create", authRoutes, createProject);
  *    summary: Get all projects
  *    parameters:
  *      - in: query
- *        name: status
+ *        name: developer_id
  *        schema:
  *          type: integer
  *        required: false
- *        description: Filter projects by status
+ *        description: obtener proyectos filtrados donde no haya aplicaciones
  *    responses:
  *      200:
  *        description: Returns all projects

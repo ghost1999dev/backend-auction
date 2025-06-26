@@ -73,7 +73,29 @@ router.get("/count/activeCompanies", countActiveCompanies);
  *        description: Server error
  */
 router.get("/count/activeDevelopers", countActiveDevelopers);
-
+/**
+ * @swagger
+ * /projects/count/projectsByStatus:
+ *  get:
+ *    tags: [Projects]
+ *    summary: Get the number of projects by status
+ *    responses:
+ *      200:
+ *        description: Returns the number of projects by status
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */ 
 router.get("/count/projectsByStatus", countProjectsByStatus);
 
 

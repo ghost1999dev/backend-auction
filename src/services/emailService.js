@@ -7,7 +7,7 @@ import NotificationsModel from '../models/NotificationsModel.js';
 import signImage from '../helpers/signImage.js';
 
 //logo para enviar en los correos 
-const logoUrl = await signImage('logo-white.svg'); 
+const logoUrl = "https://i.imgur.com/qC2uF4a.jpeg"; 
 //console.log('URL firmada del logo:', logoUrl);
 
 
@@ -81,36 +81,43 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
   }
 
 
-  const htmlTemplate = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #f8f9fa; padding: 15px; text-align: center; }
-        .content { padding: 20px; background-color: #ffffff; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-        <img src="${logoUrl}" alt="Logo de Bluepixel" class="logo" />
-          <h2>Actualización de Proyecto</h2>
-        </div>
-        <div class="content">
-          ${bodyContent}
-        </div>
-        <div class="footer">
-          <p>Este es un mensaje automático, por favor no responda a este correo.</p>
-          <p>© ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.</p>
-        </div>
+const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.6;color:#333;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="position:relative;text-align:center;">
+      <!-- Imagen del logo pequeña -->
+      <img src="${logoUrl}" alt="Imagen del proyecto" style="width:150px;height:auto;display:block;margin:0 auto;" />
+      <!-- Texto superpuesto al centro -->
+      <div style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+        font-size:14px;
+        font-weight:bold;
+        color:#800080;
+        padding:0 10px;
+      ">
+        Actualización de Proyecto
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+    <div style="background-color:#ffffff;padding:20px;margin-top:10px;">
+      ${bodyContent}
+    </div>
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:#666;">
+      <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+      <p>© ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 
   const mailOptions = {
     from: `"Sistema de Proyectos" <${emailConfig.user}>`,

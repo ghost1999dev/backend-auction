@@ -471,9 +471,11 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink) => 
     to: email,
     subject: 'Bienvenido a la plataforma de administración',
     html: `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
-        <h2 style="color: #0d6efd;">Bienvenido/a, ${fullName}</h2>
-        <p>Nos complace darte la bienvenida al sistema de administración de Subastas.</p>
+       <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
+         <img src="${logoUrl}" alt="Logo Bluepixel" style="width: 100px; height: auto; margin-bottom: 10px;" />
+
+         <h2 style="color: #0d6efd; font-size: 22px; margin-top: 10px;">¡Bienvenido/a, ${fullName}!</h2>
+         <p style="font-size: 16px;">Nos complace darte la bienvenida al sistema de administración de Subastas.</p>
 
         <p><strong>Tus credenciales de acceso son:</strong></p>
         <ul>

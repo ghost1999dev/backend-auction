@@ -52,7 +52,8 @@ const ProjectsModel = sequelize.define(
       type: DataTypes.TEXT
     },
         deactivation_reason: {
-      type: DataTypes.TEXT
+      type: DataTypes.TEXT,
+      allowNull: true,
     }
   },
    {

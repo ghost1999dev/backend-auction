@@ -455,6 +455,7 @@ export const getAllProjects = async (req, res) => {
         days_remaining: daysRemaining,
         status: project.status,
         long_description: project.long_description,
+        deactivation_reason: project.deactivation_reason ?? null,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         category: project.category ? {
@@ -546,6 +547,7 @@ export const DetailsProjectId = async (req, res) => {
       if (daysRemaining < 0) daysRemaining = 0;
     }
 
+
     res.status(200).json({
       message: "Project retrieved successfully",
       project: {
@@ -558,6 +560,7 @@ export const DetailsProjectId = async (req, res) => {
         days_available: project.days_available,
         status: project.status,
         long_description: project.long_description,
+        deactivation_reason: project.deactivation_reason ?? null,
         createProject: project.createdAt,
         updateProject: project.updatedAt,
         category: {

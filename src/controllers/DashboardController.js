@@ -31,7 +31,7 @@ export const countActiveDevelopers = async (req, res) => {
       where: { status: 1 },
       include: [{
         model: DevelopersModel,
-        as: 'dev_profile',  // usa el alias que hayas definido en la asociación
+        as: 'dev_profile',
         required: true
       }]
     })

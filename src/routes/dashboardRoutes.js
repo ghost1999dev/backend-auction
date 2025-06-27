@@ -177,6 +177,29 @@ router.get("/count/totalCategories", countTotalCategories);
  *        description: Server error
  */ 
 router.get("/count/adminsByStatus", countAdminsByStatus);
+/**
+ * @swagger
+ * /dashboard/ratings/distribution:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the ratings distribution
+ *    responses:
+ *      200:
+ *        description: Returns the ratings distribution
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */
 router.get("/ratings/distribution", getRatingsDistribution);
 
 

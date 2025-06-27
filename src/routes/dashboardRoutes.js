@@ -5,7 +5,8 @@ import {
   countProjectsByStatus,
   countReportsByStatus,
   countTotalCategories,
-  countAdminsByStatus
+  countAdminsByStatus,
+  getRatingsDistribution
 
 } from "../controllers/DashboardController.js";
 
@@ -176,6 +177,7 @@ router.get("/count/totalCategories", countTotalCategories);
  *        description: Server error
  */ 
 router.get("/count/adminsByStatus", countAdminsByStatus);
+router.get("/ratings/distribution", getRatingsDistribution);
 
 
 

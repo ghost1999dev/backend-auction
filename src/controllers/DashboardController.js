@@ -1,3 +1,4 @@
+import Sequelize from "sequelize";
 import sequelize from "../config/connection.js";
 import UsersModel from "../models/UsersModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
@@ -6,6 +7,7 @@ import DevelopersModel from "../models/DevelopersModel.js";
 import ReportsModel from "../models/ReportsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import AdminsModel from "../models/AdminsModel.js";
+import RatingModel from "../models/RatingModel.js";
 
 /**
  * Count active companies
@@ -220,6 +222,28 @@ export const countAdminsByStatus = async (req, res) => {
     return res.status(500).json({
       error: "Error al obtener conteo de administradores"
     });
+  }
+};
+/**
+ * Get ratings distribution
+ * 
+ * Function to get the ratings distribution
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} ratings distribution
+ */
+export const getRatingsDistribution = async (req, res) => {
+  try {
+    const ratingsDistribution = await RatingModel.findAll({
+      attributes: ['score', [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']],
+      group: ['score'],
+      order: [['score', 'ASC']],
+      raw: true,
+    });
+    res.json(ratingsDistribution);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener distribución de ratings' });
   }
 };
 

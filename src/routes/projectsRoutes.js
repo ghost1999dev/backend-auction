@@ -8,7 +8,8 @@ import {
     getProjectsByCompany,
     getProjectsByCategory,
     projectsCounterByCompany,
-    getProjectsHistoryByDeveloper
+    getProjectsHistoryByDeveloper,
+    uploadProjectDocuments
 
 } from "../controllers/ProjectsController.js";
 
@@ -249,6 +250,41 @@ router.get("/counter/:id", authRoutes, projectsCounterByCompany);
  *        description: Server error
  */
 router.get("/developer-history/:id", authRoutes, getProjectsHistoryByDeveloper);
+
+/**
+ * @swagger
+ * /projects/upload-documents/{id}:
+ *  put:
+ *    tags: [projects]
+ *    summary: Upload documents to project
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Project id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              files:
+ *                type: array
+ *                items:
+ *                  type: string
+ *                  format: binary
+ *    responses:
+ *      200:
+ *        description: Returns uploaded documents
+ *      404:
+ *        description: Project not found
+ *      500:
+ *        description: Server error 
+ */
+router.put("/upload-documents/:id", authRoutes, uploadProjectDocuments);
  
 export default router;
 /**

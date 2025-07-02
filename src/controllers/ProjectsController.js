@@ -9,6 +9,7 @@ import { createProjectSchema } from "../validations/projectSchema.js"
 
 import { Op } from "sequelize";
 import uploadDocuments from "../services/multerService.js"
+import sigDocument from "../helpers/signDocuments.js";
 
 /**
  * create project
@@ -436,59 +437,78 @@ export const getAllProjects = async (req, res) => {
       });
     }
 
-    const projectsWithRemainingDays = projects.map(project => {
-      let daysRemaining = null;
+    const projectsWithRemainingDaysAndSignedUrls = await Promise.all(
+      projects.map(async (project) => {
+        let daysRemaining = null;
 
-      if (project.status === 1 && project.updatedAt) {
-        const activatedAt = new Date(project.updatedAt);
-        const today = new Date();
-        const elapsedDays = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
-        daysRemaining = project.days_available - elapsedDays;
-        if (daysRemaining < 0) daysRemaining = 0;
-      }
+        if (project.status === 1 && project.updatedAt) {
+          const activatedAt = new Date(project.updatedAt);
+          const today = new Date();
+          const elapsedDays = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+          daysRemaining = project.days_available - elapsedDays;
+          if (daysRemaining < 0) daysRemaining = 0;
+        }
 
-      return {
-        id: project.id,
-        project_name: project.project_name,
-        description: project.description,
-        budget: project.budget,
-        days_available: project.days_available,
-        days_remaining: daysRemaining,
-        status: project.status,
-        long_description: project.long_description,
-        deactivation_reason: project.deactivation_reason ?? null,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-        category: project.category ? {
-          id: project.category.id,
-          name: project.category.name,
-          createdAt: project.category.createdAt,
-          updatedAt: project.category.updatedAt
-        } : null,
-        company: project.company_profile ? {
-          id: project.company_profile.id,
-          nrc_number: project.company_profile.nrc_number,
-          business_type: project.company_profile.business_type,
-          createdAt: project.company_profile.createdAt,
-          updatedAt: project.company_profile.updatedAt,
-          user: project.company_profile.user ? {
-            id: project.company_profile.user.id,
-            name: project.company_profile.user.name,
-            email: project.company_profile.user.email,
-            address: project.company_profile.user.address,
-            phone: project.company_profile.user.phone,
-            account_type: project.company_profile.user.account_type,
-            status: project.company_profile.user.status,
-            last_login: project.company_profile.user.last_login
+        let documentsWithSignedUrls = [];
+        if (project.documents && project.documents.length > 0) {
+          documentsWithSignedUrls = await Promise.all(
+            project.documents.map(async (doc) => {
+
+              const signedUrl = await sigDocument(doc)
+              
+              return {
+                ...doc,
+                signedUrl,
+                url: undefined,
+              };
+            })
+          );
+        }
+
+        return {
+          id: project.id,
+          project_name: project.project_name,
+          description: project.description,
+          budget: project.budget,
+          days_available: project.days_available,
+          days_remaining: daysRemaining,
+          status: project.status,
+          long_description: project.long_description,
+          deactivation_reason: project.deactivation_reason ?? null,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+          documents: documentsWithSignedUrls, 
+          category: project.category ? {
+            id: project.category.id,
+            name: project.category.name,
+            createdAt: project.category.createdAt,
+            updatedAt: project.category.updatedAt
+          } : null,
+          company: project.company_profile ? {
+            id: project.company_profile.id,
+            nrc_number: project.company_profile.nrc_number,
+            business_type: project.company_profile.business_type,
+            createdAt: project.company_profile.createdAt,
+            updatedAt: project.company_profile.updatedAt,
+            user: project.company_profile.user ? {
+              id: project.company_profile.user.id,
+              name: project.company_profile.user.name,
+              email: project.company_profile.user.email,
+              address: project.company_profile.user.address,
+              phone: project.company_profile.user.phone,
+              account_type: project.company_profile.user.account_type,
+              status: project.company_profile.user.status,
+              last_login: project.company_profile.user.last_login
+            } : null
           } : null
-        } : null
-      };
-    });
+        };
+      })
+    );
 
     res.status(200).json({
       message: "Projects retrieved successfully",
       status: 200,
-      projects: projectsWithRemainingDays
+      projects: projectsWithRemainingDaysAndSignedUrls
     });
 
   } catch (error) {

@@ -8,6 +8,7 @@ import DevelopersModel from "../models/DevelopersModel.js";
 import { createProjectSchema } from "../validations/projectSchema.js"
 
 import { Op } from "sequelize";
+import uploadDocuments from "../services/multerService.js"
 
 /**
  * create project
@@ -845,6 +846,61 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
     res.status(500).json({
       status: 500,
       message: "Error retrieving projects history",
+      error: error.message
+    })
+  }
+}
+
+export const uploadProjectDocuments = async (req, res) => {
+  const { id } = req.params
+
+  if (!id) {
+    return res.status(400).json({
+      status: 400,
+      message: "Falta el ID del proyecto",
+      error: "missing_fields"
+    })
+  }
+
+  try {
+    const project = await ProjectsModel.findByPk(id)
+
+    if (!project) {
+      return res.status(404).json({
+        status: 404,
+        message: "Proyecto no encontrado",
+      })
+    }
+
+    uploadDocuments(req, res, async (err) => {
+      if (err) {
+        return res.status(500).json({
+          status: 500,
+          message: "Error al subir los documentos",
+          error: err.message
+        })
+      }
+
+      const newDocuments = req.files.map(file => ({
+        name: file.originalname,
+        s3Key: file.key,
+        url: file.location,
+        size: file.size,
+      }))
+
+      project.documents = [...(project.documents || []), ...newDocuments]
+      await project.save()
+
+      res.status(200).json({
+        status: 200,
+        message: "Documentos subidos exitosamente",
+        documents: project.documents
+      })
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al subir los documentos",
       error: error.message
     })
   }

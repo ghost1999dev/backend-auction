@@ -17,6 +17,6 @@ const uploadDocuments = multer({
     limits: {
         fileSize: 1024 * 1024 * 30,
     },
-}).array('documents', 10)
+}).array('files', 10)
 
 export default uploadDocuments

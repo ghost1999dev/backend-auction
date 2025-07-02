@@ -56,7 +56,7 @@ const ProjectsModel = sequelize.define(
       allowNull: true,
     },
     documents: {
-      type: DataTypes.ARRAY(DataTypes.JSONB),
+      type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: []
     }

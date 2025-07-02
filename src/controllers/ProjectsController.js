@@ -877,7 +877,7 @@ export const uploadProjectDocuments = async (req, res) => {
         return res.status(500).json({
           status: 500,
           message: "Error al subir los documentos",
-          error: err.message
+          error: err.message || "Error al subir los documentos"
         })
       }
 

@@ -202,7 +202,24 @@ router.get("/count/adminsByStatus", countAdminsByStatus);
  *        description: Server error
  */
 router.get("/ratings/distribution", getRatingsDistribution);
-
+/**
+ * @swagger
+ * /dashboard/applications/total:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the total number of applications
+ *    responses:
+ *      200:
+ *        description: Returns the total number of applications
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                total:
+ *                  type: number
+ *                  description: Total number of applications   
+ */
 router.get("/ApplicationsDeveloper", getTotalProjectApplicationsDeveloper);
 
 

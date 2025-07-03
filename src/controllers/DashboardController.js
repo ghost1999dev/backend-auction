@@ -10,7 +10,6 @@ import AdminsModel from "../models/AdminsModel.js";
 import RatingModel from "../models/RatingModel.js";
 import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import FavoriteProjectsModel from "../models/FavoriteProjectsModel.js";
-
 const ROLE_MAP = {
   1: 'Company',
   2: 'Developer'
@@ -443,5 +442,82 @@ export const getMyProjectsByStatus = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener proyectos por estado:", error);
     res.status(500).json({ message: "Error al obtener los proyectos" });
+  }
+};
+
+/*export const getMyProjectsWithApplicantCount = async (req, res) => {
+  try {
+    const { id, role } = req.user;
+    if (role !== 1) {
+      return res.status(400).json({ message: "Rol no autorizado para consultar proyectos" });
+    }
+
+    const projects = await ProjectsModel.findAll({
+      where: { company_id: id },
+      attributes: [
+        "id",
+        "project_name",
+        [sequelize.fn("COUNT", sequelize.col("applications.id")), "total_applicants"]
+      ],
+      include: [
+        {
+          model: ProjectApplicationsModel,
+          as: "applications",
+          attributes: []
+        }
+      ],
+      group: ["ProjectsModel.id", "ProjectsModel.project_name"],
+      raw: true
+    });
+
+    res.json(projects);
+  } catch (error) {
+    console.error("Error al obtener proyectos con cantidad de aplicantes:", error);
+    res.status(500).json({ message: "Error al obtener los proyectos" });
+  }
+};*/
+
+export const getMyProjectsWithApplicantCount = async (req, res) => {
+  try {
+    const { id, role } = req.user;
+    if (role !== 1) {
+      return res.status(400).json({ message: "Rol no autorizado para consultar proyectos" });
+    }
+
+    const query = `
+      SELECT 
+        p.id AS project_id,
+        p.project_name,
+        p.budget,
+        p.days_available,
+        COUNT(pa.id) AS total_applicants
+      FROM 
+        projects p
+      LEFT JOIN 
+        project_applications pa ON pa.project_id = p.id
+      WHERE 
+        p.company_id = :companyId
+      GROUP BY 
+        p.id, p.project_name;
+    `;
+
+    const projects = await sequelize.query(query, {
+      replacements: { companyId: id },
+      type: sequelize.QueryTypes.SELECT,
+      logging: false
+    });
+
+    res.json({ 
+      success: true,
+      message: "Proyectos obtenidos exitosamente",
+      data:projects
+    });
+
+  } catch (error) {
+    console.error("Error al obtener proyectos con cantidad de aplicantes:", error);
+    res.status(500).json({ 
+      message: "Error al obtener los proyectos", 
+      error: error.message , 
+      status: 500 });
   }
 };

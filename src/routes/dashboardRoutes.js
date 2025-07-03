@@ -292,6 +292,38 @@ router.get("/Myratings/distribution", getMyRatingsDistribution);
  */
 
 router.get("/Myaveragerating", getMyAverageRating);
+/**
+ * @swagger
+ * /dashboard/projects/status:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get my projects by status
+ *    responses:
+ *      200:
+ *        description: Returns my projects by status
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                Pendiente:
+ *                  type: number
+ *                  description: Pendiente
+ *                Activo:
+ *                  type: number
+ *                  description: Activo
+ *                Inactivo:
+ *                  type: number
+ *                  description: Inactivo
+ *                Rechazado:
+ *                  type: number
+ *                  description: Rechazado
+ *                Finalizado:
+ *                  type: number
+ *                  description: Finalizado
+ *      500:
+ *        description: Server error      
+ */
 router.get("/Myprojectsbystatus", getMyProjectsByStatus);
 
 

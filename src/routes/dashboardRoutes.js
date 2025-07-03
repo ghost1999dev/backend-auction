@@ -222,6 +222,26 @@ router.get("/ratings/distribution", getRatingsDistribution);
  *                  description: Total number of applications   
  */
 router.get("/ApplicationsDeveloper", getTotalProjectApplicationsDeveloper);
+/**
+ * @swagger
+ * /dashboard/favorites/developer:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the total number of favorite projects
+ *    responses:
+ *      200:
+ *        description: Returns the total number of favorite projects
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                total:
+ *                  type: number
+ *                  description: Total number of favorite projects
+ *      500:
+ *        description: Server error
+ */
 router.get("/Totalfavorites/developer", getFavoriteProjectsDeveloper);
 
 

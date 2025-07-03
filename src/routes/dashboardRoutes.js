@@ -244,6 +244,29 @@ router.get("/ApplicationsDeveloper", getTotalProjectApplicationsDeveloper);
  *        description: Server error
  */
 router.get("/Totalfavorites/developer", getFavoriteProjectsDeveloper);
+/**
+ * @swagger
+ * /dashboard/ratings/distribution:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get the ratings distribution
+ *    responses:
+ *      200:
+ *        description: Returns the ratings distribution
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                status:
+ *                  type: number
+ *                  description: Status
+ *      500:
+ *        description: Server error
+ */
 
 router.get("/Myratings/distribution", getMyRatingsDistribution);
 

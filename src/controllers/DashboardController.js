@@ -8,6 +8,7 @@ import ReportsModel from "../models/ReportsModel.js";
 import CategoriesModel from "../models/CategoriesModel.js";
 import AdminsModel from "../models/AdminsModel.js";
 import RatingModel from "../models/RatingModel.js";
+import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 
 /**
  * Count active companies
@@ -247,3 +248,17 @@ export const getRatingsDistribution = async (req, res) => {
   }
 };
 
+export const getTotalProjectApplicationsDeveloper = async (req, res) => {
+  try {
+    const developerId = req.user.id;
+
+    const totalApplications = await ProjectApplicationsModel.count({
+      where: { developer_id: developerId }
+    });
+
+    res.json({ total: totalApplications });
+  } catch (error) {
+    console.error('Error al obtener total de aplicaciones:', error);
+    res.status(500).json({ message: 'Error al obtener total de aplicaciones' });
+  }
+};

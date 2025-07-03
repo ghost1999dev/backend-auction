@@ -326,6 +326,32 @@ router.get("/Myaveragerating", getMyAverageRating);
  *        description: Server error      
  */
 router.get("/Myprojectsbystatus", getMyProjectsByStatus);
+/**
+ * @swagger
+ * /dashboard/projects/applicants:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get my projects with applicant count
+ *    responses:
+ *      200:
+ *        description: Returns my projects with applicant count
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                success:
+ *                  type: boolean
+ *                  description: Success
+ *                message:
+ *                  type: string
+ *                  description: Message
+ *                data: 
+ *                  type: array
+ *                  description: Array of projects
+ *      500:
+ *        description: Server error  
+ */
 
 router.get("/Myprojectswithapplicantcount", getMyProjectsWithApplicantCount);
 

@@ -392,3 +392,56 @@ export const getMyAverageRating = async (req, res) => {
     res.status(500).json({ message: "Error al obtener el promedio de ratings" });
   }
 };
+
+export const getMyProjectsByStatus = async (req, res) => {
+  try {
+    const { id, role } = req.user;
+    if (role !== 1) {
+      return res.status(400).json({ message: "Rol no autorizado para consultar proyectos" });
+    }
+
+    const projects = await ProjectsModel.findAll({
+      where: { company_id: id },
+      attributes: [
+        "status",
+        [sequelize.fn("COUNT", sequelize.col("id")), "total"]
+      ],
+      group: ["status"],
+      raw: true
+    });
+
+    const result = {
+      Pendiente: 0,
+      Activo: 0,
+      Inactivo: 0,
+      Rechazado: 0,
+      Finalizado: 0
+    };
+
+    projects.forEach(p => {
+      switch (p.status) {
+        case 0:
+          result.Pendiente = Number(p.total);
+          break;
+        case 1:
+          result.Activo = Number(p.total);
+          break;
+        case 2:
+          result.Inactivo = Number(p.total);
+          break;
+        case 3:
+          result.Rechazado = Number(p.total);
+          break;
+        case 4:
+          result.Finalizado = Number(p.total);
+        default:
+          break;
+      }
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error al obtener proyectos por estado:", error);
+    res.status(500).json({ message: "Error al obtener los proyectos" });
+  }
+};

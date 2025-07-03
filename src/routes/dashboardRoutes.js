@@ -10,7 +10,8 @@ import {
   getTotalProjectApplicationsDeveloper,
   getFavoriteProjectsDeveloper,
   getMyRatingsDistribution,
-  getMyAverageRating
+  getMyAverageRating,
+  getMyProjectsByStatus
 
 } from "../controllers/DashboardController.js";
 
@@ -291,6 +292,7 @@ router.get("/Myratings/distribution", getMyRatingsDistribution);
  */
 
 router.get("/Myaveragerating", getMyAverageRating);
+router.get("/Myprojectsbystatus", getMyProjectsByStatus);
 
 
 

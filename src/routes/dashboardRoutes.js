@@ -7,7 +7,8 @@ import {
   countTotalCategories,
   countAdminsByStatus,
   getRatingsDistribution,
-  getTotalProjectApplicationsDeveloper
+  getTotalProjectApplicationsDeveloper,
+  getFavoriteProjectsDeveloper
 
 } from "../controllers/DashboardController.js";
 
@@ -221,6 +222,7 @@ router.get("/ratings/distribution", getRatingsDistribution);
  *                  description: Total number of applications   
  */
 router.get("/ApplicationsDeveloper", getTotalProjectApplicationsDeveloper);
+router.get("/Totalfavorites/developer", getFavoriteProjectsDeveloper);
 
 
 

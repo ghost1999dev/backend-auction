@@ -9,6 +9,7 @@ import CategoriesModel from "../models/CategoriesModel.js";
 import AdminsModel from "../models/AdminsModel.js";
 import RatingModel from "../models/RatingModel.js";
 import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
+import FavoriteProjectsModel from "../models/FavoriteProjectsModel.js";
 
 /**
  * Count active companies
@@ -247,7 +248,14 @@ export const getRatingsDistribution = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener distribución de ratings' });
   }
 };
-
+/**
+ * Get total number of applications
+ * 
+ * Function to get the total number of applications
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} total number of applications
+ */
 export const getTotalProjectApplicationsDeveloper = async (req, res) => {
   try {
     const developerId = req.user.id;
@@ -260,5 +268,27 @@ export const getTotalProjectApplicationsDeveloper = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener total de aplicaciones:', error);
     res.status(500).json({ message: 'Error al obtener total de aplicaciones' });
+  }
+};
+/**
+ * Get total number of favorite projects
+ * 
+ * Function to get the total number of favorite projects
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} total number of favorite projects
+ */
+export const getFavoriteProjectsDeveloper = async (req, res) => {
+  try {
+    const developerId = req.user.id;
+
+    const totalFavorites = await FavoriteProjectsModel.count({
+      where: { developer_id: developerId }
+    });
+
+    res.json({ total: totalFavorites });
+  } catch (error) {
+    console.error('Error al obtener total de favoritos:', error);
+    res.status(500).json({ message: 'Error al obtener total de favoritos' });
   }
 };

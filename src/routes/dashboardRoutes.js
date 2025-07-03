@@ -356,3 +356,100 @@ router.get("/Myprojectsbystatus", getMyProjectsByStatus);
 router.get("/Myprojectswithapplicantcount", getMyProjectsWithApplicantCount);
 
 export default router;
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    Project:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32
+ *        project_name:
+ *          type: string
+ *        description:
+ *          type: string
+ *        budget:
+ *          type: number
+ *        days_available:
+ *          type: integer
+ *          format: int32
+ *        status:
+ *          type: integer
+ *          format: int32
+ *        long_description:
+ *          type: string
+ *        deactivation_reason:
+ *          type: string
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ *        category:
+ *          $ref: '#/components/schemas/Category'
+ *        company:
+ *          $ref: '#/components/schemas/Company'
+ *    Category:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32 
+ *        name:
+ *          type: string
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ *    Company:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32
+ *        nrc_number:
+ *          type: string
+ *        business_type:
+ *          type: string
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ *        user:
+ *          $ref: '#/components/schemas/User'
+ *    User:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          format: int32
+ *        name:
+ *          type: string
+ *        email:
+ *          type: string
+ *        address:
+ *          type: string
+ *        phone:
+ *          type: string
+ *        account_type:
+ *          type: string
+ *        status:
+ *          type: integer
+ *          format: int32
+ *        last_login:
+ *          type: string
+ *          format: date-time
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ */   

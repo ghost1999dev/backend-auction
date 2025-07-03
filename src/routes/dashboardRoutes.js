@@ -9,7 +9,8 @@ import {
   getRatingsDistribution,
   getTotalProjectApplicationsDeveloper,
   getFavoriteProjectsDeveloper,
-  getMyRatingsDistribution
+  getMyRatingsDistribution,
+  getMyAverageRating
 
 } from "../controllers/DashboardController.js";
 
@@ -267,8 +268,9 @@ router.get("/Totalfavorites/developer", getFavoriteProjectsDeveloper);
  *      500:
  *        description: Server error
  */
-
 router.get("/Myratings/distribution", getMyRatingsDistribution);
+
+router.get("/Myaveragerating", getMyAverageRating);
 
 
 

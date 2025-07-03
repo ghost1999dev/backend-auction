@@ -350,4 +350,45 @@ export const getMyRatingsDistribution = async (req, res) => {
     res.status(500).json({ message: "Error al obtener la distribución de ratings" });
   }
 };
+/**
+ * Get my average rating
+ * 
+ * Function to get my average rating
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} my average rating  
+ */
+export const getMyAverageRating = async (req, res) => {
+  try {
+    const { id, role } = req.user;
+    const roleName = ROLE_MAP[role];
 
+    if (!roleName || !['Developer', 'Company'].includes(roleName)) {
+      return res.status(400).json({ message: "Rol no válido para obtener promedio de ratings" });
+    }
+
+    let whereClause = {};
+    if (roleName === 'Developer') {
+      whereClause.developer_id = id;
+    } else if (roleName === 'Company') {
+      whereClause.company_id = id;
+    }
+
+    whereClause.isVisible = true;
+
+    const result = await RatingModel.findOne({
+      where: whereClause,
+      attributes: [
+        [sequelize.fn('AVG', sequelize.col('score')), 'average']
+      ],
+      raw: true
+    });
+
+    const average = result.average ? parseFloat(result.average).toFixed(2) : null;
+
+    res.json({ average: average ? Number(average) : 0 });
+  } catch (error) {
+    console.error("Error al obtener el promedio de ratings:", error);
+    res.status(500).json({ message: "Error al obtener el promedio de ratings" });
+  }
+};

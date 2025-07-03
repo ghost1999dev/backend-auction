@@ -269,6 +269,26 @@ router.get("/Totalfavorites/developer", getFavoriteProjectsDeveloper);
  *        description: Server error
  */
 router.get("/Myratings/distribution", getMyRatingsDistribution);
+/**
+ * @swagger
+ * /dashboard/ratings/average:
+ *  get:
+ *    tags: [Dashboard]
+ *    summary: Get my average rating
+ *    responses:
+ *      200:
+ *        description: Returns my average rating
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                average:
+ *                  type: number
+ *                  description: My average rating
+ *      500:
+ *        description: Server error
+ */
 
 router.get("/Myaveragerating", getMyAverageRating);
 

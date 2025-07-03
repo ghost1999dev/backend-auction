@@ -11,6 +11,12 @@ import RatingModel from "../models/RatingModel.js";
 import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import FavoriteProjectsModel from "../models/FavoriteProjectsModel.js";
 
+const ROLE_MAP = {
+  1: 'Company',
+  2: 'Developer'
+};
+
+
 /**
  * Count active companies
  * 
@@ -292,3 +298,56 @@ export const getFavoriteProjectsDeveloper = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener total de favoritos' });
   }
 };
+/**
+ * Get ratings distribution
+ * 
+ * Function to get the ratings distribution
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} ratings distribution
+ */
+export const getMyRatingsDistribution = async (req, res) => {
+  try {
+    const { id, role } = req.user;
+    const roleName = ROLE_MAP[role];
+
+    if (!roleName || !['Developer', 'Company'].includes(roleName)) {
+      return res.status(400).json({ message: "Rol no válido para obtener ratings" });
+    }
+
+    let whereClause = {};
+    if (roleName === 'Developer') {
+      whereClause.developer_id = id;
+    } else if (roleName === 'Company') {
+      whereClause.company_id = id;
+    }
+
+    const ratings = await RatingModel.findAll({
+      where: {
+        ...whereClause,
+        isVisible: true
+      },
+      attributes: ['score', [sequelize.fn('COUNT', sequelize.col('score')), 'total']],
+      group: ['score'],
+      order: [['score', 'ASC']]
+    });
+
+    const distribution = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0
+    };
+
+    ratings.forEach(r => {
+      distribution[r.score] = parseInt(r.dataValues.total);
+    });
+
+    res.json({ distribution });
+  } catch (error) {
+    console.error("Error al obtener distribución de ratings:", error);
+    res.status(500).json({ message: "Error al obtener la distribución de ratings" });
+  }
+};
+

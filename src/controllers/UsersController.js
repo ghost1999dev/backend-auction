@@ -5,6 +5,8 @@ import { emailVerificationService } from "../helpers/emailVerification.js";
 import { confirmEmailService } from "../helpers/emailVerification.js";
 import { generateToken } from "../utils/generateToken.js";
 import signImage from "../helpers/signImage.js";
+import CompaniesModel from "../models/CompaniesModel.js";
+import DevelopersModel from "../models/DevelopersModel.js";
 import dotenv from "dotenv";
 import { 
 createUserSchema, 
@@ -475,59 +477,71 @@ export const AuthUser = async (req, res) => {
     const user = await UsersModel.findOne({ where: { email } });
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ 
-          status: 401,
-          message: "Correo o contraseña incorrectos" 
-        });
+      return res.status(401).json({
+        status: 401,
+        message: "Correo o contraseña incorrectos"
+      });
     }
 
     if (user.status !== 1) {
-      return res
-        .status(403)
-        .json({ 
-          status: 403,
-          message: "La cuenta está desactivada" 
-        });
+      return res.status(403).json({
+        status: 403,
+        message: "La cuenta está desactivada"
+      });
     }
 
     const isPasswordValid = user.password === hashPassword(password);
 
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ 
-          status: 401,
-          message: "Correo o contraseña incorrectos" 
-        });
+      return res.status(401).json({
+        status: 401,
+        message: "Correo o contraseña incorrectos"
+      });
     }
 
-    const token = generateToken(user);
+    let profileId = null;
+    let profileType = null;
+
+    const company = await CompaniesModel.findOne({ where: { user_id: user.id } });
+    if (company) {
+      profileId = company.id;
+      profileType = "company";
+    } else {
+      const developer = await DevelopersModel.findOne({ where: { user_id: user.id } });
+      if (developer) {
+        profileId = developer.id;
+        profileType = "developer";
+      }
+    }
+
+    const token = generateToken(user, profileId, profileType);
+
 
     user.last_login = new Date();
     await user.save();
 
     const { password: _, ...userData } = user.toJSON();
 
-    res
-      .status(200)
-      .json({ 
-        status: 200,
-        message: "Usuario autenticado correctamente", 
-        token, 
-        user: userData 
-      });
+    res.status(200).json({
+      status: 200,
+      message: "Usuario autenticado correctamente",
+      token,
+      user: {
+        ...userData,
+        profile_id: profileId,
+        profile_type: profileType
+      }
+    });
 
   } catch (error) {
-    res
-      .status(500)
-      .json({ 
-        status: 500,
-        message: "Error al autenticar al usuario", error: error.message 
-      });
+    res.status(500).json({
+      status: 500,
+      message: "Error al autenticar al usuario",
+      error: error.message
+    });
   }
 };
+
 
 /**
  * forgot password

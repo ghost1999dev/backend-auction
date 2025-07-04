@@ -394,13 +394,14 @@ export const getMyAverageRating = async (req, res) => {
 
 export const getMyProjectsByStatus = async (req, res) => {
   try {
-    const { id, role } = req.user;
+    const { role, profile_id } = req.user;
+
     if (role !== 1) {
       return res.status(400).json({ message: "Rol no autorizado para consultar proyectos" });
     }
 
     const projects = await ProjectsModel.findAll({
-      where: { company_id: id },
+      where: { company_id: profile_id },  
       attributes: [
         "status",
         [sequelize.fn("COUNT", sequelize.col("id")), "total"]
@@ -433,7 +434,6 @@ export const getMyProjectsByStatus = async (req, res) => {
           break;
         case 4:
           result.Finalizado = Number(p.total);
-        default:
           break;
       }
     });
@@ -444,6 +444,7 @@ export const getMyProjectsByStatus = async (req, res) => {
     res.status(500).json({ message: "Error al obtener los proyectos" });
   }
 };
+
 
 /*export const getMyProjectsWithApplicantCount = async (req, res) => {
   try {

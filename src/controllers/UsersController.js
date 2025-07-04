@@ -505,12 +505,12 @@ export const AuthUser = async (req, res) => {
     const company = await CompaniesModel.findOne({ where: { user_id: user.id } });
     if (company) {
       profileId = company.id;
-      profileType = "company";
+      profileType = "Company";
     } else {
       const developer = await DevelopersModel.findOne({ where: { user_id: user.id } });
       if (developer) {
         profileId = developer.id;
-        profileType = "developer";
+        profileType = "Developer";
       }
     }
 

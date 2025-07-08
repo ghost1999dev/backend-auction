@@ -263,18 +263,29 @@ export const getRatingsDistribution = async (req, res) => {
  */
 export const getTotalProjectApplicationsDeveloper = async (req, res) => {
   try {
-    const developerId = req.user.id;
+    const { role, profile_id, profile_type } = req.user;
+
+    if (role !== 2 || profile_type !== "Developer") {
+      return res.status(403).json({
+        status: 403,
+        message: "No autorizado para consultar aplicaciones"
+      });
+    }
 
     const totalApplications = await ProjectApplicationsModel.count({
-      where: { developer_id: developerId }
+      where: { developer_id: profile_id }
     });
 
     res.json({ total: totalApplications });
   } catch (error) {
-    console.error('Error al obtener total de aplicaciones:', error);
-    res.status(500).json({ message: 'Error al obtener total de aplicaciones' });
+    console.error("Error al obtener total de aplicaciones:", error);
+    res.status(500).json({
+      status: 500,
+      message: "Error al obtener total de aplicaciones"
+    });
   }
 };
+
 /**
  * Get total number of favorite projects
  * 
@@ -285,18 +296,29 @@ export const getTotalProjectApplicationsDeveloper = async (req, res) => {
  */
 export const getFavoriteProjectsDeveloper = async (req, res) => {
   try {
-    const developerId = req.user.id;
+    const { role, profile_id, profile_type } = req.user;
+
+    if (role !== 2 || profile_type !== "Developer") {
+      return res.status(403).json({
+        status: 403,
+        message: "No autorizado para consultar favoritos"
+      });
+    }
 
     const totalFavorites = await FavoriteProjectsModel.count({
-      where: { developer_id: developerId }
+      where: { developer_id: profile_id }
     });
 
     res.json({ total: totalFavorites });
   } catch (error) {
     console.error('Error al obtener total de favoritos:', error);
-    res.status(500).json({ message: 'Error al obtener total de favoritos' });
+    res.status(500).json({
+      status: 500,
+      message: 'Error al obtener total de favoritos'
+    });
   }
 };
+
 /**
  * Get ratings distribution
  * 
@@ -307,25 +329,36 @@ export const getFavoriteProjectsDeveloper = async (req, res) => {
  */
 export const getMyRatingsDistribution = async (req, res) => {
   try {
-    const { id, role } = req.user;
-    const roleName = ROLE_MAP[role];
+    const { id: userId, profile_id, profile_type } = req.user;
 
-    if (!roleName || !['Developer', 'Company'].includes(roleName)) {
-      return res.status(400).json({ message: "Rol no válido para obtener ratings" });
+    if (!['Company', 'Developer'].includes(profile_type)) {
+      return res.status(400).json({ message: "Tipo de perfil no válido para obtener ratings" });
     }
 
-    let whereClause = {};
-    if (roleName === 'Developer') {
-      whereClause.developer_id = id;
-    } else if (roleName === 'Company') {
-      whereClause.company_id = id;
+    if (profile_type === 'Developer') {
+      const developer = await DevelopersModel.findOne({ where: { id: profile_id, user_id: userId } });
+      if (!developer) {
+        return res.status(403).json({ message: "No autorizado: el perfil de desarrollador no pertenece al usuario" });
+      }
+    } else if (profile_type === 'Company') {
+      const company = await CompaniesModel.findOne({ where: { id: profile_id, user_id: userId } });
+      if (!company) {
+        return res.status(403).json({ message: "No autorizado: el perfil de empresa no pertenece al usuario" });
+      }
+    }
+
+    const whereClause = {
+      isVisible: true,
+    };
+
+    if (profile_type === 'Developer') {
+      whereClause.developer_id = userId;
+    } else if (profile_type === 'Company') {
+      whereClause.company_id = userId;
     }
 
     const ratings = await RatingModel.findAll({
-      where: {
-        ...whereClause,
-        isVisible: true
-      },
+      where: whereClause,
       attributes: ['score', [sequelize.fn('COUNT', sequelize.col('score')), 'total']],
       group: ['score'],
       order: [['score', 'ASC']]
@@ -340,15 +373,19 @@ export const getMyRatingsDistribution = async (req, res) => {
     };
 
     ratings.forEach(r => {
-      distribution[r.score] = parseInt(r.dataValues.total);
+      if (distribution.hasOwnProperty(r.score)) {
+        distribution[r.score] = parseInt(r.dataValues.total);
+      }
     });
 
-    res.json({ distribution });
+    return res.json({ distribution });
+
   } catch (error) {
     console.error("Error al obtener distribución de ratings:", error);
-    res.status(500).json({ message: "Error al obtener la distribución de ratings" });
+    return res.status(500).json({ message: "Error al obtener la distribución de ratings" });
   }
 };
+
 /**
  * Get my average rating
  * 
@@ -359,21 +396,21 @@ export const getMyRatingsDistribution = async (req, res) => {
  */
 export const getMyAverageRating = async (req, res) => {
   try {
-    const { id, role } = req.user;
-    const roleName = ROLE_MAP[role];
+    const { role, profile_id, profile_type } = req.user;
 
-    if (!roleName || !['Developer', 'Company'].includes(roleName)) {
-      return res.status(400).json({ message: "Rol no válido para obtener promedio de ratings" });
+    if (![1, 2].includes(role) || !['Company', 'Developer'].includes(profile_type)) {
+      return res.status(400).json({ message: "Rol o tipo de perfil no válido para obtener promedio de ratings" });
     }
 
-    let whereClause = {};
-    if (roleName === 'Developer') {
-      whereClause.developer_id = id;
-    } else if (roleName === 'Company') {
-      whereClause.company_id = id;
-    }
+    const whereClause = {
+      isVisible: true
+    };
 
-    whereClause.isVisible = true;
+    if (profile_type === 'Company') {
+      whereClause.company_id = profile_id;
+    } else if (profile_type === 'Developer') {
+      whereClause.developer_id = profile_id;
+    }
 
     const result = await RatingModel.findOne({
       where: whereClause,
@@ -383,7 +420,7 @@ export const getMyAverageRating = async (req, res) => {
       raw: true
     });
 
-    const average = result.average ? parseFloat(result.average).toFixed(2) : null;
+    const average = result?.average ? parseFloat(result.average).toFixed(2) : null;
 
     res.json({ average: average ? Number(average) : 0 });
   } catch (error) {
@@ -480,9 +517,13 @@ export const getMyProjectsByStatus = async (req, res) => {
 
 export const getMyProjectsWithApplicantCount = async (req, res) => {
   try {
-    const { id, role } = req.user;
-    if (role !== 1) {
-      return res.status(400).json({ message: "Rol no autorizado para consultar proyectos" });
+    const { role, profile_id, profile_type } = req.user;
+
+    if (role !== 1 || profile_type !== "Company") {
+      return res.status(403).json({
+        status: 403,
+        message: "No autorizado para consultar proyectos"
+      });
     }
 
     const query = `
@@ -491,6 +532,7 @@ export const getMyProjectsWithApplicantCount = async (req, res) => {
         p.project_name,
         p.budget,
         p.days_available,
+        p.status,
         COUNT(pa.id) AS total_applicants
       FROM 
         projects p
@@ -498,27 +540,29 @@ export const getMyProjectsWithApplicantCount = async (req, res) => {
         project_applications pa ON pa.project_id = p.id
       WHERE 
         p.company_id = :companyId
+        AND p.status = 1
       GROUP BY 
-        p.id, p.project_name;
+        p.id, p.project_name,p.budget,p.days_available,p.status;
     `;
 
     const projects = await sequelize.query(query, {
-      replacements: { companyId: id },
+      replacements: { companyId: profile_id },
       type: sequelize.QueryTypes.SELECT,
       logging: false
     });
 
-    res.json({ 
+    res.status(200).json({
       success: true,
       message: "Proyectos obtenidos exitosamente",
-      data:projects
+      data: projects
     });
 
   } catch (error) {
     console.error("Error al obtener proyectos con cantidad de aplicantes:", error);
-    res.status(500).json({ 
-      message: "Error al obtener los proyectos", 
-      error: error.message , 
-      status: 500 });
+    res.status(500).json({
+      status: 500,
+      message: "Error al obtener los proyectos",
+      error: error.message
+    });
   }
 };

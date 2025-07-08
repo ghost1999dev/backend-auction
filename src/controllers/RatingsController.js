@@ -203,7 +203,7 @@ export const createRatings = async (req, res) => {
     if (error) return res.status(400).json({ message: error.details[0].message });
 
     const { developer_id, company_id, score, comment, isVisible } = req.body;
-    const roleId = req.user.role_id;
+    const roleId = Number(req.user.role);
     const userId = req.user.id;
     let author_role;
 

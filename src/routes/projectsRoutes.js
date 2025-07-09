@@ -257,6 +257,8 @@ router.get("/developer-history/:id", authRoutes, getProjectsHistoryByDeveloper);
  *  put:
  *    tags: [projects]
  *    summary: Upload documents to project
+ *    consumes:
+ *      - multipart/form-data
  *    parameters:
  *      - in: path
  *        name: id
@@ -276,15 +278,36 @@ router.get("/developer-history/:id", authRoutes, getProjectsHistoryByDeveloper);
  *                items:
  *                  type: string
  *                  format: binary
+ *                description: Array of files to upload
  *    responses:
  *      200:
  *        description: Returns uploaded documents
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/DocumentList'
+ *      400:
+ *        description: Bad request (missing fields or invalid file types)
  *      404:
  *        description: Project not found
+ *      413:
+ *        description: File too large
  *      500:
- *        description: Server error 
+ *        description: Server error
  */
-router.put("/upload-documents/:id", authRoutes, uploadProjectDocuments);
+router.put("/upload-documents/:id", 
+  (req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+      if (!req.headers['content-type'].includes('boundary')) {
+        const boundary = '----WebKitFormBoundary' + Math.random().toString(16).substr(2);
+        req.headers['content-type'] = `multipart/form-data; boundary=${boundary}`;
+      }
+    }
+    next();
+  },
+  authRoutes,
+  uploadProjectDocuments
+);
  
 export default router;
 /**

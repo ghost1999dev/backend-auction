@@ -59,7 +59,14 @@ export const swaggerUiOptions = {
         validatorUrl: false,
         docExpansion: "list",
         showCommonExtensions: true,
-        persistAuthorization: true,  // Mantiene el token al refrescar la página
+        persistAuthorization: true,
+        requestInterceptor: (req) => {
+            req.headers['Content-Type'] = 'multipart/form-data';
+            if (!req.headers.Authorization) {
+            req.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+            }
+            return req;
+        },
         authAction: {
             JWT: {
                 name: "JWT",
@@ -69,12 +76,12 @@ export const swaggerUiOptions = {
                     name: "Authorization",
                     description: "Introduce tu token JWT precedido por 'Bearer '"
                 },
-                value: "Bearer <your_jwt_token_here>"  // Placeholder para el token
+                value: "Bearer <your_jwt_token_here>"
             }
         }
     },
     customSiteTitle: "Auction API - Documentation",
-    customCss: '.swagger-ui .topbar { display: none }',  // Opcional: elimina la barra superior
+    customCss: '.swagger-ui .topbar { display: none }',
 };
 
 export const swaggerSpec = swaggerJsDoc(options)

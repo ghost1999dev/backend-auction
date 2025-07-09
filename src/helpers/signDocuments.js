@@ -2,7 +2,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "../utils/s3Client.js"
 
-const sigDocument = async (document) => {
+const signDocument = async (document) => {
     let documentUrl = ''
 
     if (!document) {
@@ -21,4 +21,4 @@ const sigDocument = async (document) => {
     return documentUrl
 } 
 
-export default sigDocument
+export default signDocument

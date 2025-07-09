@@ -9,7 +9,7 @@ import { createProjectSchema } from "../validations/projectSchema.js"
 
 import { Op } from "sequelize";
 import uploadDocuments from "../services/multerService.js"
-import sigDocument from "../helpers/signDocuments.js";
+import signDocument from "../helpers/signDocuments.js";
 
 /**
  * create project
@@ -454,7 +454,7 @@ export const getAllProjects = async (req, res) => {
           documentsWithSignedUrls = await Promise.all(
             project.documents.map(async (doc) => {
 
-              const signedUrl = await sigDocument(doc)
+              const signedUrl = await signDocument(doc)
               
               return {
                 ...doc,
@@ -568,6 +568,21 @@ export const DetailsProjectId = async (req, res) => {
       if (daysRemaining < 0) daysRemaining = 0;
     }
 
+    let documentsWithSignedUrls = [];
+    if (project.documents && project.documents.length > 0) {
+      documentsWithSignedUrls = await Promise.all(
+        project.documents.map(async (doc) => {
+
+          const signedUrl = await signDocument(doc)
+          
+          return {
+            ...doc,
+            signedUrl,
+            url: undefined,
+          };
+        })
+      );
+    }
 
     res.status(200).json({
       message: "Project retrieved successfully",
@@ -582,6 +597,7 @@ export const DetailsProjectId = async (req, res) => {
         status: project.status,
         long_description: project.long_description,
         deactivation_reason: project.deactivation_reason ?? null,
+        documents: documentsWithSignedUrls,
         createProject: project.createdAt,
         updateProject: project.updatedAt,
         category: {
@@ -871,34 +887,66 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
   }
 }
 
+/**
+ * Upload documents to AWS S3.
+ * @param {object} req - Request object.
+ * @param {object} res - Response object. 
+ * @returns {object} Uploaded documents.
+ */
 export const uploadProjectDocuments = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params;
 
   if (!id) {
     return res.status(400).json({
       status: 400,
-      message: "Falta el ID del proyecto",
-      error: "missing_fields"
-    })
+      message: "Id de proyecto requerido",
+      error: "missing_project_id"
+    });
   }
 
-  try {
-    const project = await ProjectsModel.findByPk(id)
-
-    if (!project) {
-      return res.status(404).json({
-        status: 404,
-        message: "Proyecto no encontrado",
-      })
-    }
-
-    uploadDocuments(req, res, async (err) => {
+  uploadDocuments(req, res, async (err) => {
+    try {
       if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ 
+            status: 413,
+            message: "Tamaño de archivo excedido"
+          });
+        }
+        if (err.message.includes('Extensión no permitida')) {
+          return res.status(400).json({
+            status: 400,
+            message: err.message
+          });
+        }
         return res.status(500).json({
           status: 500,
-          message: "Error al subir los documentos",
-          error: err.message || "Error al subir los documentos"
-        })
+          message: "Error al subir los archivos",
+          error: err.message
+        });
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          status: 400,
+          message: "Ningún archivo subido"
+        });
+      }
+
+      const project = await ProjectsModel.findByPk(id);
+      if (!project) {
+        // Eliminar archivos subidos si el proyecto no existe
+        await Promise.all(req.files.map(file => {
+          return s3Client.deleteObject({
+            Bucket: process.env.BUCKET_NAME,
+            Key: file.key
+          }).promise();
+        }));
+        
+        return res.status(404).json({
+          status: 404,
+          message: "Proyecto no encontrado"
+        });
       }
 
       const newDocuments = req.files.map(file => ({
@@ -906,22 +954,31 @@ export const uploadProjectDocuments = async (req, res) => {
         s3Key: file.key,
         url: file.location,
         size: file.size,
-      }))
+        type: file.mimetype,
+        uploadedAt: new Date()
+      }));
 
-      project.documents = [...(project.documents || []), ...newDocuments]
-      await project.save()
+      project.documents = [...(project.documents || []), ...newDocuments];
+      await project.save();
 
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
-        message: "Documentos subidos exitosamente",
-        documents: project.documents
-      })
-    })
-  } catch (error) {
-    res.status(500).json({
-      status: 500,
-      message: "Error al subir los documentos",
-      error: error.message
-    })
-  }
-}
+        message: "Archivos subidos exitosamente",
+        count: newDocuments.length,
+        documents: newDocuments.map(doc => ({
+          name: doc.name,
+          url: doc.url,
+          size: doc.size,
+          type: doc.type
+        }))
+      });
+    } catch (error) {
+      console.error("Error al subir los archivos:", error);
+      return res.status(500).json({
+        status: 500,
+        message: "Internal server error",
+        error: error.message
+      });
+    }
+  });
+};

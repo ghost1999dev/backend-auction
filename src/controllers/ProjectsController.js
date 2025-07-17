@@ -10,6 +10,7 @@ import { createProjectSchema } from "../validations/projectSchema.js"
 import { Op } from "sequelize";
 import uploadDocuments from "../services/multerService.js"
 import signDocument from "../helpers/signDocuments.js";
+import { s3Client } from "../utils/s3Client.js";
 
 /**
  * create project
@@ -982,3 +983,70 @@ export const uploadProjectDocuments = async (req, res) => {
     }
   });
 };
+
+export const deleteDocuments = async (req, res) => {
+  const { id } = req.params
+  const { documentKeys } = req.body
+
+  if (!id) {
+    return res.status(400).json({
+      status: 400,
+      message: "Id de proyecto requerido",
+      error: "missing_project_id"
+    });
+  }
+
+  if (!documentKeys || documentKeys.length === 0) {
+    return res.status(400).json({
+      status: 400,
+      message: "Se requiere al menos un archivo"
+    });
+  }
+
+  try {
+    const project = await ProjectsModel.findByPk(id);
+
+    if (!project) {
+      return res.status(404).json({
+        status: 404,
+        message: "Proyecto no encontrado"
+      });
+    }
+
+    const existingDocuments = project.documents.filter(doc => 
+      documentKeys.includes(doc.s3Key)
+    )
+
+    if (existingDocuments.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontraron archivos"
+      });
+    }
+
+    await Promise.all(
+      existingDocuments.map(doc => 
+        s3Client.deleteObject({
+          Bucket: process.env.BUCKET_NAME,
+          Key: doc.s3Key
+        }).promise()
+      )
+    )
+
+    project.documents = project.documents.filter(doc => 
+      !documentKeys.includes(doc.s3Key)
+    )
+    await project.save()
+
+    res.status(200).json({
+      status: 200,
+      message: "Archivos eliminados exitosamente"
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al eliminar los archivos",
+      error: error.message
+    });
+  }
+}

@@ -984,6 +984,14 @@ export const uploadProjectDocuments = async (req, res) => {
   });
 };
 
+/**
+ * Delete documents from project
+ *
+ * function to delete documents from project
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} deleted documents
+ */
 export const deleteDocuments = async (req, res) => {
   const { id } = req.params
   const { documentKeys } = req.body
@@ -996,10 +1004,13 @@ export const deleteDocuments = async (req, res) => {
     });
   }
 
-  if (!documentKeys || documentKeys.length === 0) {
+  if (!documentKeys || !Array.isArray(documentKeys)) {
+    console.log('documentKeys no es array:', documentKeys);
     return res.status(400).json({
       status: 400,
-      message: "Se requiere al menos un archivo"
+      message: "Se requiere un array con al menos un archivo",
+      received: documentKeys,
+      type: typeof documentKeys
     });
   }
 
@@ -1013,27 +1024,29 @@ export const deleteDocuments = async (req, res) => {
       });
     }
 
-    const existingDocuments = project.documents.filter(doc => 
+    const projectDocuments = project.documents || []
+
+    const existingDocuments = projectDocuments.filter(doc => 
       documentKeys.includes(doc.s3Key)
     )
 
     if (existingDocuments.length === 0) {
       return res.status(404).json({
         status: 404,
-        message: "No se encontraron archivos"
+        message: "No se encontraron archivos coincidentes"
       });
     }
 
-    await Promise.all(
-      existingDocuments.map(doc => 
-        s3Client.deleteObject({
-          Bucket: process.env.BUCKET_NAME,
-          Key: doc.s3Key
-        }).promise()
-      )
-    )
+    // await Promise.all(
+    //   existingDocuments.map(doc => 
+    //     s3Client.deleteObject({
+    //       Bucket: process.env.BUCKET_NAME,
+    //       Key: doc.s3Key
+    //     }).promise()
+    //   )
+    // )
 
-    project.documents = project.documents.filter(doc => 
+    project.documents = projectDocuments.filter(doc => 
       !documentKeys.includes(doc.s3Key)
     )
     await project.save()

@@ -9,7 +9,8 @@ import {
     getProjectsByCategory,
     projectsCounterByCompany,
     getProjectsHistoryByDeveloper,
-    uploadProjectDocuments
+    uploadProjectDocuments,
+    deleteDocuments
 
 } from "../controllers/ProjectsController.js";
 
@@ -308,6 +309,54 @@ router.put("/upload-documents/:id",
   authRoutes,
   uploadProjectDocuments
 );
+
+/**
+ * @swagger
+ * /projects/delete-documents/{id}:
+ *   delete:
+ *     tags: [projects]
+ *     summary: Elimina documentos de un proyecto 
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del proyecto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               documentKeys:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Lista de keys de los documentos a eliminar
+ *     responses:
+ *       200:
+ *         description: Documento eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: number
+ *                 message:
+ *                   type: string
+ *                 remainingDocuments:
+ *                   type: number
+ *       400:
+ *         description: Parámetros faltantes
+ *       404:
+ *         description: Proyecto o documento no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.delete("/delete-documents/:id", authRoutes, deleteDocuments);
  
 export default router;
 /**

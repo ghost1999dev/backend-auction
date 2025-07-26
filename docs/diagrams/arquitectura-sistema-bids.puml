@@ -1,0 +1,109 @@
+@startuml "Arquitectura del Sistema de Pujas Dual"
+allowmixing
+left to right direction
+
+skinparam {
+  componentStyle rectangle
+  packageStyle rectangle
+  backgroundColor white
+  shadowing false
+  DefaultFontName Arial
+  ArrowColor #333333
+  ComponentBorderColor #666666
+  DatabaseBorderColor #666666
+  PackageBorderColor #999999
+}
+
+title Arquitectura del Sistema de Pujas Dual
+
+package "Capa de Presentación" {
+  component "API REST" as API
+  component "Validación" as Validation
+  component "Swagger UI" as Swagger
+}
+
+package "Capa de Negocio" {
+  component "BidsController" as BidsCtrl
+  component "BidSourceController" as BidSrcCtrl
+  component "BidSourceService" as BidSrcSvc
+}
+
+package "Capa de Acceso a Datos" {
+  component "BidRepositoryFactory" as Factory
+
+  ' Interfaz modelada como clase con estereotipo para listar operaciones
+  class "IBidRepository" as IRepo <<interface>> {
+    +getBidsByAuction(auctionId)
+    +createBid(bidData)
+    +getLastBid(auctionId)
+    +syncBids(bids)
+  }
+}
+
+package "Fuentes de Datos" {
+  package "PostgreSQL" {
+    component "Sequelize ORM" as ORM
+    database "BD PostgreSQL" as PostgresDB
+  }
+  package "Firebase" {
+    component "Firebase Admin SDK" as FirebaseSDK
+    database "Firestore DB" as FirestoreDB
+  }
+}
+
+component "PostgresBidRepository" as PostgresRepo
+component "FirebaseBidRepository" as FirebaseRepo
+
+API --> BidsCtrl : HTTP Requests
+API --> BidSrcCtrl : HTTP Requests
+API --> Validation : Valida entrada
+Validation --> BidsCtrl : Datos validados
+Validation --> BidSrcCtrl : Datos validados
+Swagger --> API : Documenta
+
+BidsCtrl --> Factory : Solicita repositorio
+BidSrcCtrl --> BidSrcSvc : Utiliza
+BidSrcSvc --> IRepo : Dependencia abstracta
+
+Factory --> PostgresRepo : Crea
+Factory --> FirebaseRepo : Crea
+
+PostgresRepo ..|> IRepo : Implementa
+FirebaseRepo ..|> IRepo : Implementa
+
+PostgresRepo --> ORM : Utiliza
+FirebaseRepo --> FirebaseSDK : Utiliza
+
+ORM --> PostgresDB : Consulta
+FirebaseSDK --> FirestoreDB : Consulta
+
+note right of API
+  **Endpoints**:
+  POST /bids/create
+  GET  /bids/show/all
+  POST /bids/dual
+  GET  /bids/compare/:auctionId
+  GET  /bids/source/:auctionId
+  GET  /bids/repository/:auctionId/:type
+end note
+
+note right of Factory
+  **Factory Method**:
+  Selecciona dinámicamente entre PostgreSQL o Firebase según:
+  - Parámetros de request
+  - Configuración del sistema
+  - Tipo de operación
+end note
+
+note bottom of FirestoreDB
+  **Estrategia Dual**:
+  1. PostgreSQL: Fuente principal
+  2. Firebase: Fuente secundaria
+  3. Mecanismo de comparación:
+     - Verificación de consistencia
+     - Sincronización automática
+     - Registro de discrepancias
+end note
+
+@enduml
+    

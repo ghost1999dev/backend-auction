@@ -1,0 +1,152 @@
+@startuml secuencia-creacion-puja-dual
+
+' Estilos
+skinparam backgroundColor white
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipantBorderThickness 1
+skinparam sequenceLifeLineBorderColor gray
+skinparam sequenceGroupBorderThickness 1
+skinparam sequenceGroupHeaderFontStyle bold
+
+title Proceso de Creación de Puja en Sistema Dual
+
+' Participantes
+actor Cliente
+participant "API REST\n(bidRoutes)" as API
+participant "BidSourceController" as Controller
+participant "bidSourceService" as Service
+participant "BidRepositoryFactory" as Factory
+participant "PostgresBidRepository" as PostgresRepo
+participant "FirebaseBidRepository" as FirebaseRepo
+database "PostgreSQL" as PostgresDB
+database "Firebase\nFirestore" as Firebase
+
+' Flujo principal
+group Creación de Puja Dual
+    Cliente -> API: POST /bids/dual
+    activate API
+    
+    API -> API: Validar datos (middleware)
+    
+    API -> Controller: createBidDual(req, res)
+    activate Controller
+    
+    Controller -> Service: createBidInBothSources(bidData)
+    activate Service
+    
+    Service -> Factory: getBidRepository("postgres")
+    activate Factory
+    Factory --> Service: PostgresBidRepository
+    deactivate Factory
+    
+    Service -> PostgresRepo: create(bidData)
+    activate PostgresRepo
+    PostgresRepo -> PostgresDB: INSERT INTO bids...
+    PostgresDB --> PostgresRepo: ID generado
+    PostgresRepo --> Service: Datos de puja creada
+    deactivate PostgresRepo
+    
+    Service -> Factory: getBidRepository("firebase")
+    activate Factory
+    Factory --> Service: FirebaseBidRepository
+    deactivate Factory
+    
+    Service -> FirebaseRepo: create(bidData)
+    activate FirebaseRepo
+    FirebaseRepo -> Firebase: firestore.collection("bids").add(...)
+    Firebase --> FirebaseRepo: Document reference
+    FirebaseRepo --> Service: Datos de puja creada
+    deactivate FirebaseRepo
+    
+    Service -> Service: Validar consistencia entre resultados
+    
+    Service --> Controller: Resultado combinado
+    deactivate Service
+    
+    Controller --> API: Respuesta con resultado dual
+    deactivate Controller
+    
+    API --> Cliente: 201 Created + Datos
+    deactivate API
+end
+
+' Flujo alternativo: Error en PostgreSQL
+group Error en PostgreSQL (Alternativo)
+    Cliente -> API: POST /bids/dual
+    activate API
+    
+    API -> Controller: createBidDual(req, res)
+    activate Controller
+    
+    Controller -> Service: createBidInBothSources(bidData)
+    activate Service
+    
+    Service -> Factory: getBidRepository("postgres")
+    Factory --> Service: PostgresBidRepository
+    
+    Service -> PostgresRepo: create(bidData)
+    activate PostgresRepo
+    PostgresRepo -> PostgresDB: INSERT INTO bids...
+    PostgresDB --> PostgresRepo: Error (constraint violation)
+    PostgresRepo --> Service: Error
+    deactivate PostgresRepo
+    
+    Service --> Controller: Error
+    deactivate Service
+    
+    Controller --> API: Error
+    deactivate Controller
+    
+    API --> Cliente: 500 Error + Mensaje
+    deactivate API
+end
+
+' Flujo alternativo: Error en Firebase
+group Error en Firebase (Alternativo)
+    Cliente -> API: POST /bids/dual
+    activate API
+    
+    API -> Controller: createBidDual(req, res)
+    activate Controller
+    
+    Controller -> Service: createBidInBothSources(bidData)
+    activate Service
+    
+    Service -> Factory: getBidRepository("postgres")
+    Factory --> Service: PostgresBidRepository
+    
+    Service -> PostgresRepo: create(bidData)
+    activate PostgresRepo
+    PostgresRepo -> PostgresDB: INSERT INTO bids...
+    PostgresDB --> PostgresRepo: ID generado
+    PostgresRepo --> Service: Datos de puja creada
+    deactivate PostgresRepo
+    
+    Service -> Factory: getBidRepository("firebase")
+    Factory --> Service: FirebaseBidRepository
+    
+    Service -> FirebaseRepo: create(bidData)
+    activate FirebaseRepo
+    FirebaseRepo -> Firebase: firestore.collection("bids").add(...)
+    Firebase --> FirebaseRepo: Error
+    FirebaseRepo --> Service: Error
+    deactivate FirebaseRepo
+    
+    Service -> PostgresRepo: delete(bidId)
+    activate PostgresRepo
+    PostgresRepo -> PostgresDB: DELETE FROM bids...
+    PostgresDB --> PostgresRepo: OK
+    PostgresRepo --> Service: OK
+    deactivate PostgresRepo
+    
+    Service --> Controller: Error
+    deactivate Service
+    
+    Controller --> API: Error
+    deactivate Controller
+    
+    API --> Cliente: 500 Error + Mensaje
+    deactivate API
+end
+
+@enduml

@@ -21,16 +21,18 @@ async function ensureLiveAuction(req, res, auctionId) {
   const auction = await AuctionsModel.findByPk(auctionId);
   if (!auction) {
     res.status(404).json({ 
+      success: false, 
       message: "Subasta no encontrada", 
-      status: 404 
+      error: "auction_not_found" 
     });
     return null;
   }
 
   if (auction.status !== AUCTION_STATUS.ACTIVE) {
     res.status(400).json({ 
+      success: false, 
       message: "La subasta no está activa", 
-      status: 400 
+      error: "auction_not_active" 
     });
     return null;
   }
@@ -41,16 +43,18 @@ async function ensureLiveAuction(req, res, auctionId) {
 
   if (start && now < start) {
     res.status(422).json({ 
+      success: false, 
       message: "La subasta aún no ha iniciado", 
-      status: 422 
+      error: "auction_not_started" 
     });
     return null;
   }
 
   if (end && now > end) {
     res.status(422).json({ 
+      success: false, 
       message: "La subasta ya ha finalizado", 
-      status: 422 
+      error: "auction_ended" 
     });
     return null;
   }
@@ -73,15 +77,17 @@ export const createBid = async (req, res, next) => {
 
     if (!auction_id || !developer_id || amount == null) {
       return res.status(400).json({
+        success: false,
         message: "Faltan campos requeridos",
-        status: 400
+        error: "missing_fields"
       });
     }
 
     if (typeof amount !== "number" || amount <= 0) {
       return res.status(400).json({
+        success: false,
         message: "El monto debe ser un número positivo",
-        status: 400
+        error: "invalid_amount"
       });
     }
 
@@ -91,30 +97,33 @@ export const createBid = async (req, res, next) => {
     const developer = await UsersModel.findByPk(developer_id);
     if (!developer) {
       return res.status(404).json({ 
+        success: false, 
         message: "Desarrollador no encontrado", 
-        status: 404 
+        error: "developer_not_found" 
       });
     }
 
     const exists = await BidsModel.findOne({ where:{ auction_id, developer_id } });
     if (exists) {
       return res.status(409).json({ 
+        success: false, 
         message: "Ya existe una puja para esta subasta", 
-        status: 409 
+        error: "bid_exists" 
       });
     }
 
     const bid = await BidsModel.create({ auction_id, developer_id, amount });
     return res.status(201).json({
+      success: true,
       message: "Puja creada exitosamente",
-      status: 201,
       data: bid
     });
 
   } catch (err) {
     res.status(500).json({
+      success: false,
       message: "Error al procesar la solicitud",
-      status: 500
+      error: err.message
     });
   }
 };
@@ -129,37 +138,12 @@ export const createBid = async (req, res, next) => {
  */
 export const listBids = async (req, res, next) => {
   try {
+    const { auction_id, developer_id } = req.query;
     const where = {};
-    
-    // Convertir auction_id a número si está presente
-    if (req.query.auction_id) {
-      const numericAuctionId = parseInt(req.query.auction_id, 10);
-      if (!isNaN(numericAuctionId)) {
-        where.auction_id = numericAuctionId;
-      } else {
-        return res.status(400).json({
-          message: "ID de subasta inválido",
-          status: 400
-        });
-      }
-    }
-    
-    // Convertir developer_id a número si está presente
-    if (req.query.developer_id) {
-      const numericDeveloperId = parseInt(req.query.developer_id, 10);
-      if (!isNaN(numericDeveloperId)) {
-        where.developer_id = numericDeveloperId;
-      } else {
-        return res.status(400).json({
-          message: "ID de desarrollador inválido",
-          status: 400
-        });
-      }
-    }
-    
-    console.log("Buscando pujas con criterios:", where);
+    if (auction_id)   where.auction_id   = auction_id;
+    if (developer_id) where.developer_id = developer_id;
 
-    const bids = await BidsModel.findAll({
+    const bids = await BidModel.findAll({
       where,
       order: [["createdAt", "DESC"]],
       include: [
@@ -168,12 +152,9 @@ export const listBids = async (req, res, next) => {
       ]
     });
 
-    return res.json({ message: "Pujas obtenidas exitosamente", status: 200, count: bids.length, data: bids });
+    return res.json({ success: true, count: bids.length, data: bids });
   } catch (err) {
-    res.status(500).json({
-      message: "Error al obtener las pujas",
-      status: 500
-    });
+    next(err);
   }
 };
 
@@ -182,30 +163,18 @@ export const listBids = async (req, res, next) => {
  */
 export const getBid = async (req, res, next) => {
   try {
-    const bidId = parseInt(req.params.id, 10);
-    
-    if (isNaN(bidId)) {
-      return res.status(400).json({
-        message: "ID de puja inválido",
-        status: 400
-      });
-    }
-    
-    const bid = await BidsModel.findByPk(bidId, {
+    const bid = await BidsModel.findByPk(req.params.id, {
       include: [
         { model: AuctionsModel, as: "auction",   attributes: ["id","status"] },
         { model: UsersModel,   as: "developer", attributes: ["id","name","email"] }
       ]
     });
     if (!bid) {
-      return res.status(404).json({ message: "Puja no encontrada", status: 404 });
+      return res.status(404).json({ success: false, message: "Puja no encontrada", error: "bid_not_found" });
     }
-    return res.json({ message: "Puja encontrada", status: 200, data: bid });
+    return res.json({ success: true, data: bid });
   } catch (err) {
-    res.status(500).json({
-      message: "Error al obtener la puja",
-      status: 500
-    });
+    next(err);
   }
 };
 
@@ -225,23 +194,26 @@ export const updateBid = async (req, res, next) => {
 
     if (!bid) {
       return res.status(404).json({ 
+        success: false, 
         message: "Puja no encontrada", 
-        status: 404 
+        error: "bid_not_found" 
       });
     }
 
     if (req.user && bid.developer_id !== req.user.id) {
       return res.status(403).json({ 
+        success: false, 
         message: "Sin permiso", 
-        status: 403 
+        error: "permission_denied" 
       });
     }
 
     const { amount } = req.body;
     if (typeof amount !== "number" || amount <= 0) {
       return res.status(400).json({ 
+        success: false, 
         message: "Monto inválido", 
-        status: 400 
+        error: "invalid_amount" 
       });
     }
 
@@ -251,23 +223,25 @@ export const updateBid = async (req, res, next) => {
 
     if (!auction || auction.status !== AUCTION_STATUS.ACTIVE) {
       return res.status(400).json({
+        success: false,
         message: "La subasta no está activa",
-        status: 400
+        error: "auction_not_active"
       });
     }
 
     await bid.update({ amount });
 
     return res.status(200).json({ 
+      success: true, 
       message: "Puja actualizada exitosamente",
-      status: 200,
       data: bid 
     });
 
   } catch (err) {
     res.status(500).json({
+      success: false,
       message: "Error al actualizar la puja",
-      status: 500
+      error: err.message
     });
   }
 };
@@ -279,18 +253,18 @@ export const deleteBid = async (req, res, next) => {
   try {
     const bid = await BidsModel.findByPk(req.params.id);
     if (!bid) {
-      return res.status(404).json({ message: "Puja no encontrada", status: 404 });
+      return res.status(404).json({ success: false, message: "Puja no encontrada", error: "bid_not_found" });
     }
 
     if (req.user && bid.developer_id !== req.user.id) {
-      return res.status(403).json({ message: "Sin permiso", status: 403 });
+      return res.status(403).json({ success: false, message: "Sin permiso", error: "permission_denied" });
     }
 
     const auction = await ensureLiveAuction(req, res, bid.auction_id);
     if (!auction) return;
 
     await bid.destroy();
-    return res.json({ message: "Puja eliminada exitosamente", status: 200 });
+    return res.json({ success: true, message: "Puja eliminada exitosamente" });
   } catch (err) {
     next(err);
   }

@@ -11,12 +11,6 @@ import {
   updateBid,
   deleteBid
 } from "../controllers/BidsController.js";
-import {
-  getBidsFromSource,
-  compareSourceBids,
-  createBidDual,
-  getBidsFromRepository
-} from "../controllers/BidSourceController.js";
 
 const router = Router();
 
@@ -39,87 +33,13 @@ const router = Router();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/BidCreate'
- *           example:
- *             auction_id: 1
- *             developer_id: 2
- *             amount: 500
  *     responses:
  *       201:
- *         description: Puja creada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Puja creada exitosamente"
- *                 status:
- *                   type: integer
- *                   example: 201
- *                 data:
- *                   $ref: '#/components/schemas/Bid'
- *       400:
- *         description: Datos inválidos o faltantes
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Faltan campos requeridos"
- *                 status:
- *                   type: integer
- *                   example: 400
- *       409:
- *         description: Conflicto, ya existe una puja
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Ya existe una puja para esta subasta"
- *                 status:
- *                   type: integer
- *                   example: 409
+ *         description: Puj​a creada
  *       422:
- *         description: Error de validación
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error de validación"
- *                 status:
- *                   type: integer
- *                   example: 422
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       field:
- *                         type: string
- *                       message:
- *                         type: string
+ *         description: Datos inválidos
  *       500:
  *         description: Error del servidor
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error al procesar la solicitud"
- *                 status:
- *                   type: integer
- *                   example: 500
  */
 router.post("/create", validate(createBidSchema), createBid);
 
@@ -148,83 +68,6 @@ router.get("/show/all", listBids);
 
 /**
  * @swagger
- * /bids/compare/{auctionId}:
- *   get:
- *     tags: [Bids]
- *     summary: Compara pujas entre PostgreSQL y Firebase
- *     parameters:
- *       - in: path
- *         name: auctionId
- *         schema:
- *           type: integer
- *         required: true
- *     responses:
- *       200:
- *         description: Comparación exitosa
- *       500:
- *         description: Error del servidor
- */
-router.get("/compare/:auctionId", compareSourceBids);
-
-/**
- * @swagger
- * /bids/source/{auctionId}:
- *   get:
- *     tags: [Bids]
- *     summary: Obtiene pujas de la fuente de datos especificada
- *     parameters:
- *       - in: path
- *         name: auctionId
- *         schema:
- *           type: integer
- *         required: true
- *       - in: query
- *         name: source
- *         schema:
- *           type: string
- *           enum: [postgres, firebase]
- *         description: Fuente de datos (postgres o firebase)
- *     responses:
- *       200:
- *         description: Lista de pujas procesadas
- *       400:
- *         description: Fuente de datos no válida
- *       500:
- *         description: Error del servidor
- */
-router.get("/source/:auctionId", getBidsFromSource);
-
-/**
- * @swagger
- * /bids/repository/{auctionId}/{repositoryType}:
- *   get:
- *     tags: [Bids]
- *     summary: Obtiene pujas directamente del repositorio especificado
- *     parameters:
- *       - in: path
- *         name: auctionId
- *         schema:
- *           type: integer
- *         required: true
- *       - in: path
- *         name: repositoryType
- *         schema:
- *           type: string
- *           enum: [postgres, firebase]
- *         required: true
- *         description: Tipo de repositorio (postgres o firebase)
- *     responses:
- *       200:
- *         description: Lista de pujas directamente del repositorio
- *       400:
- *         description: Tipo de repositorio no válido
- *       500:
- *         description: Error del servidor
- */
-router.get("/repository/:auctionId/:repositoryType", getBidsFromRepository);
-
-/**
- * @swagger
  * /bids/{id}:
  *   get:
  *     tags: [Bids]
@@ -237,9 +80,9 @@ router.get("/repository/:auctionId/:repositoryType", getBidsFromRepository);
  *         required: true
  *     responses:
  *       200:
- *         description: Puja encontrada
+ *         description: Puj​a encontrada
  *       404:
- *         description: Puja no encontrada
+ *         description: Puj​a no encontrada
  *       500:
  *         description: Error del servidor
  */
@@ -292,26 +135,6 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteBid);
-
-/**
- * @swagger
- * /bids/dual:
- *   post:
- *     tags: [Bids]
- *     summary: Crea una puja en ambas fuentes (PostgreSQL y Firebase)
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/BidCreate'
- *     responses:
- *       201:
- *         description: Puja creada en ambas fuentes
- *       500:
- *         description: Error del servidor
- */
-router.post("/dual", validate(createBidSchema), createBidDual);
 
 export default router;
 

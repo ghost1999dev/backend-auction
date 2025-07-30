@@ -167,6 +167,7 @@ export const DetailsCompanyIdUser = async (req, res) => {
             "address",
             "phone",
             "image",
+            "account_type"
           ],
           where: { status: 1 },
           required: true,

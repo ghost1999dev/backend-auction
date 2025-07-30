@@ -312,7 +312,7 @@ router.get('/show/:id',authenticateToken, getByIdRating);
  *               required:  
  *                 - message                 
  */ 
-router.post('/create',authenticateToken, createRatings);
+router.post('/create', createRatings);
 /**
  * @swagger
  * /ratings/update/{id}:

@@ -8,7 +8,9 @@ import {
     getProjectsByCompany,
     getProjectsByCategory,
     projectsCounterByCompany,
-    getProjectsHistoryByDeveloper
+    getProjectsHistoryByDeveloper,
+    uploadProjectDocuments,
+    deleteDocuments
 
 } from "../controllers/ProjectsController.js";
 
@@ -51,11 +53,11 @@ router.post("/create", authRoutes, createProject);
  *    summary: Get all projects
  *    parameters:
  *      - in: query
- *        name: status
+ *        name: developer_id
  *        schema:
  *          type: integer
  *        required: false
- *        description: Filter projects by status
+ *        description: obtener proyectos filtrados donde no haya aplicaciones
  *    responses:
  *      200:
  *        description: Returns all projects
@@ -249,6 +251,112 @@ router.get("/counter/:id", authRoutes, projectsCounterByCompany);
  *        description: Server error
  */
 router.get("/developer-history/:id", authRoutes, getProjectsHistoryByDeveloper);
+
+/**
+ * @swagger
+ * /projects/upload-documents/{id}:
+ *  put:
+ *    tags: [projects]
+ *    summary: Upload documents to project
+ *    consumes:
+ *      - multipart/form-data
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: Project id
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              files:
+ *                type: array
+ *                items:
+ *                  type: string
+ *                  format: binary
+ *                description: Array of files to upload
+ *    responses:
+ *      200:
+ *        description: Returns uploaded documents
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/DocumentList'
+ *      400:
+ *        description: Bad request (missing fields or invalid file types)
+ *      404:
+ *        description: Project not found
+ *      413:
+ *        description: File too large
+ *      500:
+ *        description: Server error
+ */
+router.put("/upload-documents/:id", 
+  (req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+      if (!req.headers['content-type'].includes('boundary')) {
+        const boundary = '----WebKitFormBoundary' + Math.random().toString(16).substr(2);
+        req.headers['content-type'] = `multipart/form-data; boundary=${boundary}`;
+      }
+    }
+    next();
+  },
+  authRoutes,
+  uploadProjectDocuments
+);
+
+/**
+ * @swagger
+ * /projects/delete-documents/{id}:
+ *   delete:
+ *     tags: [projects]
+ *     summary: Elimina documentos de un proyecto 
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del proyecto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               documentKeys:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Lista de keys de los documentos a eliminar
+ *     responses:
+ *       200:
+ *         description: Documento eliminado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: number
+ *                 message:
+ *                   type: string
+ *                 remainingDocuments:
+ *                   type: number
+ *       400:
+ *         description: Parámetros faltantes
+ *       404:
+ *         description: Proyecto o documento no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.delete("/delete-documents/:id", authRoutes, deleteDocuments);
  
 export default router;
 /**

@@ -810,7 +810,7 @@ export const getProjectById = async (req, res) => {
 export const updateProjectStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { newStatus } = req.body;
+    const { newStatus, reason } = req.body;
 
     const validateParams = schemaParams.validate(req.params);
     const validateBody = schemaBody.validate(req.body);
@@ -852,8 +852,10 @@ export const updateProjectStatus = async (req, res) => {
         status: 403
       });
     }
-
     project.status = newStatus;
+    if (newStatus === 3) {
+      project.deactivation_reason = reason;
+    }
     await project.save();
 
     const estados = {
@@ -866,19 +868,19 @@ export const updateProjectStatus = async (req, res) => {
     const user = project.company_profile?.user;
 
     if (user) {
-      console.log('Enviando notificación con:', {
-        user_id: user.id,
-        title: 'Actualización del estado de tu proyecto',
-        body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`
-      });
+          let notificationBody = `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`;
+          if (newStatus === 3 && reason) {
+            notificationBody += ` Motivo del rechazo: ${reason}`;
+          }
 
       await NotificationsModel.create({
         user_id: user.id,
         title: 'Actualización del estado de tu proyecto',
-        body: `Tu proyecto "${project.project_name}" ha sido marcado como "${estados[newStatus]}".`,
+        body: notificationBody,
         context: {
           projectId: project.id,
-          status: newStatus
+          status: newStatus,
+          reason: newStatus === 3 ? reason : null,
         },
         sent_at: new Date(),
         status: estados[newStatus]
@@ -890,7 +892,8 @@ export const updateProjectStatus = async (req, res) => {
           name: user.name,
           projectName: project.project_name,
           statusName: estados[newStatus],
-          status: newStatus
+          status: newStatus,
+          reason: newStatus === 3 ? reason : null
         });
         console.log(`Correo electrónico enviado a ${user.email}`);
       }

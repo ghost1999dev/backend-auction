@@ -33,6 +33,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import ratingRoutes from "./routes/ratingsRoutes.js";
 import reportRoutes from "./routes/reportsRoutes.js";
 import favoriteProjectsRoutes from "./routes/favoriteProjectsRoute.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 import authRoutes from "./middlewares/authRoutes.js";
 
@@ -111,6 +112,7 @@ class Server {
     this.app.use("/ratings", authRoutes, ratingRoutes);
     this.app.use("/reports", authRoutes, reportRoutes);
     this.app.use("/favorite-projects", authRoutes, favoriteProjectsRoutes);
+    this.app.use("/dashboard", authRoutes, dashboardRoutes);
     //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

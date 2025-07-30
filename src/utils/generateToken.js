@@ -5,17 +5,20 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_segura';
 
-export const generateToken = (user) => {
+export const generateToken = (user, profileId, profileType) => {
   return jwt.sign(
     {
       id: user.id,
       email: user.email,
       role: user.role_id,
+      profile_id: profileId,
+      profile_type: profileType,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 };
+
 export const handleJWTLogin = async (req, res) => {
     try {
       if (!req.user) return res.status(401).json({ message: "No autenticado" });

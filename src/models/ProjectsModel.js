@@ -50,6 +50,15 @@ const ProjectsModel = sequelize.define(
     },
     long_description: {
       type: DataTypes.TEXT
+    },
+    deactivation_reason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    documents: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: []
     }
   },
    {

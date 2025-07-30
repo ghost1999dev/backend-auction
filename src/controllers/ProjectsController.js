@@ -7,6 +7,11 @@ import ProjectApplicationsModel from "../models/ProjectApplicationsModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import { createProjectSchema } from "../validations/projectSchema.js"
 
+import { Op } from "sequelize";
+import uploadDocuments from "../services/multerService.js"
+import signDocument from "../helpers/signDocuments.js";
+import { s3Client } from "../utils/s3Client.js";
+
 /**
  * create project
  *
@@ -269,6 +274,7 @@ export const updateProjectId = async (req, res) => {
 export const DesactivateProjectId = async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
     
     if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid project ID", status: 400 });
@@ -302,7 +308,7 @@ export const DesactivateProjectId = async (req, res) => {
       }
     });
     if (!project) {
-      return res.status(404).json({ message: "Project not found", status: 404 });
+      return res.status(404).json({ message: "Proyecto no encontrado", status: 404 });
     }
 
     const applications = await ProjectApplicationsModel.count({
@@ -322,9 +328,10 @@ export const DesactivateProjectId = async (req, res) => {
 
     const currentStatus = project.status;
     
-    await ProjectsModel.update({ status: 2 }, {
-      where: { id }
-    });
+    await ProjectsModel.update(
+      { status: 2, deactivation_reason: reason || null },
+      { where: { id } }
+    );
 
     let statusText;
     switch (currentStatus) {
@@ -339,11 +346,12 @@ export const DesactivateProjectId = async (req, res) => {
       await NotificationsModel.create({
         user_id: project.company_id,
         title: 'Proyecto Desactivado',
-        body: `El proyecto "${project.project_name}" ha sido desactivado`,
+        body: `El proyecto "${project.project_name}" ha sido desactivado.Motivo: ${reason || 'No especificado'}.`,
         context: JSON.stringify({ 
           action: 'project_deactivation', 
           project_id: id,
-          status: statusText
+          status: statusText,
+          reason
          }),
         sent_at: new Date(),
         status: statusText,
@@ -354,11 +362,11 @@ export const DesactivateProjectId = async (req, res) => {
     }
     
     res.status(200).json({
-      message: "Project deactivated successfully", status: 200
+      message: "Proyecto desactivado exitosamente.!!", status: 200
     });
   } catch (error) {
-    console.error('Error deactivating project:', error);
-    res.status(500).json({ message: "Error deactivating project", error: error.message, status: 500 });
+    console.error('Error al desactivar el proyecto:', error);
+    res.status(500).json({ message: "Error al desactivar el proyecto:", error: error.message, status: 500 });
   }
 };
   /**
@@ -371,84 +379,137 @@ export const DesactivateProjectId = async (req, res) => {
  */
 export const getAllProjects = async (req, res) => {
   try {
-    const { status } = req.query;
-    const whereCondition = {};
+    const { developer_id } = req.query;
 
-    if (status !== undefined) {
-      whereCondition.status = parseInt(status);
+    let projects = []
+    
+    if (developer_id) {
+      const appliedProjects = await ProjectApplicationsModel.findAll({
+        attributes: ['project_id'],
+        where: {
+          developer_id
+        },
+        raw: true
+      })
+
+      const appliedProjectIds = appliedProjects.map(p => p.project_id)
+
+      projects = await ProjectsModel.findAll({
+        where: {
+          status: 1,
+          id: {
+            [Op.notIn]: appliedProjectIds
+          }
+        },
+        include: [
+          { model: CategoriesModel, as: 'category' },
+          {
+            model: CompaniesModel,
+            as: 'company_profile',
+            include: [
+              {
+                model: UsersModel,
+                as: 'user',
+                attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+              }
+            ]
+          }
+        ]
+      })
+
+    }
+    else {
+      projects = await ProjectsModel.findAll({
+        include: [
+          { model: CategoriesModel, as: 'category' },
+          {
+            model: CompaniesModel,
+            as: 'company_profile',
+            include: [
+              {
+                model: UsersModel,
+                as: 'user',
+                attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
+              }
+            ]
+          }
+        ],
+        order: [['createdAt', 'DESC']]
+      });
     }
 
-    const projects = await ProjectsModel.findAll({
-      where: whereCondition,
-      include: [
-        { model: CategoriesModel, as: 'category' },
-        {
-          model: CompaniesModel,
-          as: 'company_profile',
-          include: [
-            {
-              model: UsersModel,
-              as: 'user',
-              attributes: ['id', 'name', 'email', 'address', 'phone', 'account_type', 'status', 'last_login']
-            }
-          ]
+    const projectsWithRemainingDaysAndSignedUrls = await Promise.all(
+      projects.map(async (project) => {
+        let daysRemaining = null;
+
+        if (project.status === 1 && project.updatedAt) {
+          const activatedAt = new Date(project.updatedAt);
+          const today = new Date();
+          const elapsedDays = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
+          daysRemaining = project.days_available - elapsedDays;
+          if (daysRemaining < 0) daysRemaining = 0;
         }
-      ],
-      order: [['createdAt', 'DESC']]
-    });
 
-    const projectsWithRemainingDays = projects.map(project => {
-      let daysRemaining = null;
+        let documentsWithSignedUrls = [];
+        if (project.documents && project.documents.length > 0) {
+          documentsWithSignedUrls = await Promise.all(
+            project.documents.map(async (doc) => {
 
-      if (project.status === 1 && project.updatedAt) {
-        const activatedAt = new Date(project.updatedAt);
-        const today = new Date();
-        const elapsedDays = Math.floor((today - activatedAt) / (1000 * 60 * 60 * 24));
-        daysRemaining = project.days_available - elapsedDays;
-        if (daysRemaining < 0) daysRemaining = 0;
-      }
+              const signedUrl = await signDocument(doc)
+              
+              return {
+                ...doc,
+                signedUrl,
+                url: undefined,
+              };
+            })
+          );
+        }
 
-      return {
-        id: project.id,
-        project_name: project.project_name,
-        description: project.description,
-        budget: project.budget,
-        days_available: project.days_available,
-        days_remaining: daysRemaining,
-        status: project.status,
-        long_description: project.long_description,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-        category: project.category ? {
-          id: project.category.id,
-          name: project.category.name,
-          createdAt: project.category.createdAt,
-          updatedAt: project.category.updatedAt
-        } : null,
-        company: project.company_profile ? {
-          id: project.company_profile.id,
-          nrc_number: project.company_profile.nrc_number,
-          business_type: project.company_profile.business_type,
-          createdAt: project.company_profile.createdAt,
-          updatedAt: project.company_profile.updatedAt,
-          user: project.company_profile.user ? {
-            id: project.company_profile.user.id,
-            name: project.company_profile.user.name,
-            email: project.company_profile.user.email,
-            address: project.company_profile.user.address,
-            phone: project.company_profile.user.phone,
-            account_type: project.company_profile.user.account_type,
-            status: project.company_profile.user.status,
-            last_login: project.company_profile.user.last_login
+        return {
+          id: project.id,
+          project_name: project.project_name,
+          description: project.description,
+          budget: project.budget,
+          days_available: project.days_available,
+          days_remaining: daysRemaining,
+          status: project.status,
+          long_description: project.long_description,
+          deactivation_reason: project.deactivation_reason ?? null,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+          documents: documentsWithSignedUrls, 
+          category: project.category ? {
+            id: project.category.id,
+            name: project.category.name,
+            createdAt: project.category.createdAt,
+            updatedAt: project.category.updatedAt
+          } : null,
+          company: project.company_profile ? {
+            id: project.company_profile.id,
+            nrc_number: project.company_profile.nrc_number,
+            business_type: project.company_profile.business_type,
+            createdAt: project.company_profile.createdAt,
+            updatedAt: project.company_profile.updatedAt,
+            user: project.company_profile.user ? {
+              id: project.company_profile.user.id,
+              name: project.company_profile.user.name,
+              email: project.company_profile.user.email,
+              address: project.company_profile.user.address,
+              phone: project.company_profile.user.phone,
+              account_type: project.company_profile.user.account_type,
+              status: project.company_profile.user.status,
+              last_login: project.company_profile.user.last_login
+            } : null
           } : null
-        } : null
-      };
-    });
+        };
+      })
+    );
 
     res.status(200).json({
       message: "Projects retrieved successfully",
       status: 200,
-      projects: projectsWithRemainingDays
+      projects: projectsWithRemainingDaysAndSignedUrls
     });
 
   } catch (error) {
@@ -508,6 +569,22 @@ export const DetailsProjectId = async (req, res) => {
       if (daysRemaining < 0) daysRemaining = 0;
     }
 
+    let documentsWithSignedUrls = [];
+    if (project.documents && project.documents.length > 0) {
+      documentsWithSignedUrls = await Promise.all(
+        project.documents.map(async (doc) => {
+
+          const signedUrl = await signDocument(doc)
+          
+          return {
+            ...doc,
+            signedUrl,
+            url: undefined,
+          };
+        })
+      );
+    }
+
     res.status(200).json({
       message: "Project retrieved successfully",
       project: {
@@ -520,6 +597,8 @@ export const DetailsProjectId = async (req, res) => {
         days_available: project.days_available,
         status: project.status,
         long_description: project.long_description,
+        deactivation_reason: project.deactivation_reason ?? null,
+        documents: documentsWithSignedUrls,
         createProject: project.createdAt,
         updateProject: project.updatedAt,
         category: {
@@ -806,5 +885,181 @@ export const getProjectsHistoryByDeveloper = async (req, res) => {
       message: "Error retrieving projects history",
       error: error.message
     })
+  }
+}
+
+/**
+ * Upload documents to AWS S3.
+ * @param {object} req - Request object.
+ * @param {object} res - Response object. 
+ * @returns {object} Uploaded documents.
+ */
+export const uploadProjectDocuments = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      status: 400,
+      message: "Id de proyecto requerido",
+      error: "missing_project_id"
+    });
+  }
+
+  uploadDocuments(req, res, async (err) => {
+    try {
+      if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ 
+            status: 413,
+            message: "Tamaño de archivo excedido"
+          });
+        }
+        if (err.message.includes('Extensión no permitida')) {
+          return res.status(400).json({
+            status: 400,
+            message: err.message
+          });
+        }
+        return res.status(500).json({
+          status: 500,
+          message: "Error al subir los archivos",
+          error: err.message
+        });
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          status: 400,
+          message: "Ningún archivo subido"
+        });
+      }
+
+      const project = await ProjectsModel.findByPk(id);
+      if (!project) {
+        // Eliminar archivos subidos si el proyecto no existe
+        await Promise.all(req.files.map(file => {
+          return s3Client.deleteObject({
+            Bucket: process.env.BUCKET_NAME,
+            Key: file.key
+          }).promise();
+        }));
+        
+        return res.status(404).json({
+          status: 404,
+          message: "Proyecto no encontrado"
+        });
+      }
+
+      const newDocuments = req.files.map(file => ({
+        name: file.originalname,
+        s3Key: file.key,
+        url: file.location,
+        size: file.size,
+        type: file.mimetype,
+        uploadedAt: new Date()
+      }));
+
+      project.documents = [...(project.documents || []), ...newDocuments];
+      await project.save();
+
+      return res.status(200).json({
+        status: 200,
+        message: "Archivos subidos exitosamente",
+        count: newDocuments.length,
+        documents: newDocuments.map(doc => ({
+          name: doc.name,
+          url: doc.url,
+          size: doc.size,
+          type: doc.type
+        }))
+      });
+    } catch (error) {
+      console.error("Error al subir los archivos:", error);
+      return res.status(500).json({
+        status: 500,
+        message: "Internal server error",
+        error: error.message
+      });
+    }
+  });
+};
+
+/**
+ * Delete documents from project
+ *
+ * function to delete documents from project
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ * @returns {Object} deleted documents
+ */
+export const deleteDocuments = async (req, res) => {
+  const { id } = req.params
+  const { documentKeys } = req.body
+
+  if (!id) {
+    return res.status(400).json({
+      status: 400,
+      message: "Id de proyecto requerido",
+      error: "missing_project_id"
+    });
+  }
+
+  if (!documentKeys || !Array.isArray(documentKeys)) {
+    console.log('documentKeys no es array:', documentKeys);
+    return res.status(400).json({
+      status: 400,
+      message: "Se requiere un array con al menos un archivo",
+      received: documentKeys,
+      type: typeof documentKeys
+    });
+  }
+
+  try {
+    const project = await ProjectsModel.findByPk(id);
+
+    if (!project) {
+      return res.status(404).json({
+        status: 404,
+        message: "Proyecto no encontrado"
+      });
+    }
+
+    const projectDocuments = project.documents || []
+
+    const existingDocuments = projectDocuments.filter(doc => 
+      documentKeys.includes(doc.s3Key)
+    )
+
+    if (existingDocuments.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "No se encontraron archivos coincidentes"
+      });
+    }
+
+    // await Promise.all(
+    //   existingDocuments.map(doc => 
+    //     s3Client.deleteObject({
+    //       Bucket: process.env.BUCKET_NAME,
+    //       Key: doc.s3Key
+    //     }).promise()
+    //   )
+    // )
+
+    project.documents = projectDocuments.filter(doc => 
+      !documentKeys.includes(doc.s3Key)
+    )
+    await project.save()
+
+    res.status(200).json({
+      status: 200,
+      message: "Archivos eliminados exitosamente"
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: "Error al eliminar los archivos",
+      error: error.message
+    });
   }
 }

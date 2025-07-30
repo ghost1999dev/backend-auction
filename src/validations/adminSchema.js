@@ -105,11 +105,14 @@ export const schemaParams = Joi.object({
       })
     });
 export const schemaBody = Joi.object({
-      newStatus: Joi.number().valid(0, 1, 3, 4).required().messages({
-        'any.required': 'El nuevo estado es obligatorio',
-        'number.base': 'El estado debe ser un número',
-        'any.only': 'El estado debe ser uno de los siguientes valores: 0, 1, 3, 4'
-      })
+      newStatus: Joi.number().valid(0,1,3,4).required(),
+      reason: Joi.string().when('newStatus', {
+      is: 3,
+      then: Joi.string().min(5).required().messages({
+      'any.required': 'La justificación es requerida cuando el proyecto es rechazado.',
+     }),
+      otherwise: Joi.string().optional().allow(null, ''),
+  })
     });
 
 export const resetPasswordSchema = Joi.object({

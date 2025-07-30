@@ -7,7 +7,7 @@ import NotificationsModel from '../models/NotificationsModel.js';
 import signImage from '../helpers/signImage.js';
 
 //logo para enviar en los correos 
-const logoUrl = await signImage('logo-white.svg'); 
+const logoUrl = "https://i.imgur.com/qC2uF4a.jpeg"; 
 //console.log('URL firmada del logo:', logoUrl);
 
 
@@ -42,9 +42,10 @@ const transporter = nodemailer.createTransport({
  * @param {string} params.projectName
  * @param {string} params.statusName 
  * @param {number} params.status 
+ * @param {string} params.reason
  * @returns {Promise} 
  */
-export const sendProjectStatusEmail = async ({ email, name, projectName, statusName, status }) => {
+export const sendProjectStatusEmail = async ({ email, name, projectName, statusName, status, reason }) => {
 
   let subject = `Actualización de estado de tu proyecto: ${projectName}`;
   let bodyContent = '';
@@ -63,6 +64,9 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
     case 3:
       bodyContent = `<p>Hola ${name},</p>
                      <p>Lamentamos informarte que tu proyecto <strong>${projectName}</strong> ha sido <strong>Rechazado</strong>.</p>
+                      <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #f44336; margin-bottom: 20px;">
+                      <em>${reason}</em>
+                      </div>
                      <p>Por favor, contacta con nuestro equipo para obtener más información y discutir los próximos pasos.</p>`;
       break;
     case 4:
@@ -77,36 +81,43 @@ export const sendProjectStatusEmail = async ({ email, name, projectName, statusN
   }
 
 
-  const htmlTemplate = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #f8f9fa; padding: 15px; text-align: center; }
-        .content { padding: 20px; background-color: #ffffff; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-        <img src="${logoUrl}" alt="Logo de Bluepixel" class="logo" />
-          <h2>Actualización de Proyecto</h2>
-        </div>
-        <div class="content">
-          ${bodyContent}
-        </div>
-        <div class="footer">
-          <p>Este es un mensaje automático, por favor no responda a este correo.</p>
-          <p>© ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.</p>
-        </div>
+const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;line-height:1.6;color:#333;">
+  <div style="max-width:600px;margin:0 auto;padding:20px;">
+    <div style="position:relative;text-align:center;">
+      <!-- Imagen del logo pequeña -->
+      <img src="${logoUrl}" alt="Imagen del proyecto" style="width:150px;height:auto;display:block;margin:0 auto;" />
+      <!-- Texto superpuesto al centro -->
+      <div style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%, -50%);
+        font-size:14px;
+        font-weight:bold;
+        color:#800080;
+        padding:0 10px;
+      ">
+        Actualización de Proyecto
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+    <div style="background-color:#ffffff;padding:20px;margin-top:10px;">
+      ${bodyContent}
+    </div>
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:#666;">
+      <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+      <p>© ${new Date().getFullYear()} Bluepixel. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
 
   const mailOptions = {
     from: `"Sistema de Proyectos" <${emailConfig.user}>`,
@@ -460,9 +471,11 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink) => 
     to: email,
     subject: 'Bienvenido a la plataforma de administración',
     html: `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
-        <h2 style="color: #0d6efd;">Bienvenido/a, ${fullName}</h2>
-        <p>Nos complace darte la bienvenida al sistema de administración de Subastas.</p>
+       <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
+         <img src="${logoUrl}" alt="Logo Bluepixel" style="width: 100px; height: auto; margin-bottom: 10px;" />
+
+         <h2 style="color: #0d6efd; font-size: 22px; margin-top: 10px;">¡Bienvenido/a, ${fullName}!</h2>
+         <p style="font-size: 16px;">Nos complace darte la bienvenida al sistema de administración de Subastas.</p>
 
         <p><strong>Tus credenciales de acceso son:</strong></p>
         <ul>

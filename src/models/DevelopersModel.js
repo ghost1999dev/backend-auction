@@ -1,6 +1,5 @@
 import sequelize from "../config/connection.js"
 import { DataTypes } from "sequelize"
-import UsersModel from "./UsersModel.js"
 
 /**
  * Developers model.
@@ -41,6 +40,9 @@ const DevelopersModel = sequelize.define(
     }
 )
 
-DevelopersModel.belongsTo(UsersModel, { foreignKey: "user_id" })
+import("./UsersModel.js").then((module) => {
+    const UsersModel = module.default
+    DevelopersModel.belongsTo(UsersModel, { foreignKey: "user_id", as: "user" })
+})
 
 export default DevelopersModel

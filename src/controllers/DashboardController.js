@@ -336,25 +336,27 @@ export const getMyRatingsDistribution = async (req, res) => {
     }
 
     if (profile_type === 'Developer') {
-      const developer = await DevelopersModel.findOne({ where: { id: profile_id, user_id: userId } });
+      const developer = await DevelopersModel.findOne({
+        where: { id: profile_id, user_id: userId }
+      });
       if (!developer) {
-        return res.status(403).json({ message: "No autorizado: el perfil de desarrollador no pertenece al usuario" });
+        return res.status(403).json({ message: "No autorizado para Developer" });
       }
-    } else if (profile_type === 'Company') {
-      const company = await CompaniesModel.findOne({ where: { id: profile_id, user_id: userId } });
+    } else {
+      const company = await CompaniesModel.findOne({
+        where: { id: profile_id, user_id: userId }
+      });
       if (!company) {
-        return res.status(403).json({ message: "No autorizado: el perfil de empresa no pertenece al usuario" });
+        return res.status(403).json({ message: "No autorizado para Company" });
       }
     }
 
-    const whereClause = {
-      isVisible: true,
-    };
+    const whereClause = { isVisible: true };
 
     if (profile_type === 'Developer') {
       whereClause.developer_id = userId;
     } else if (profile_type === 'Company') {
-      whereClause.company_id = userId;
+      whereClause.company_id = profile_id;
     }
 
     const ratings = await RatingModel.findAll({
@@ -364,25 +366,16 @@ export const getMyRatingsDistribution = async (req, res) => {
       order: [['score', 'ASC']]
     });
 
-    const distribution = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0
-    };
-
+    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     ratings.forEach(r => {
-      if (distribution.hasOwnProperty(r.score)) {
-        distribution[r.score] = parseInt(r.dataValues.total);
-      }
+      distribution[r.score] = parseInt(r.dataValues.total);
     });
 
     return res.json({ distribution });
 
   } catch (error) {
-    console.error("Error al obtener distribución de ratings:", error);
-    return res.status(500).json({ message: "Error al obtener la distribución de ratings" });
+    console.error("Error en distribución ratings:", error);
+    return res.status(500).json({ message: "Error interno" });
   }
 };
 

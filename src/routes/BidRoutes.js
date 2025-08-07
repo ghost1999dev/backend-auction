@@ -9,7 +9,9 @@ import {
   listBids,
   getBid,
   updateBid,
-  deleteBid
+  deleteBid,
+  createBidDual,
+  listBidsDual
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -135,6 +137,68 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteBid);
+
+/**
+ * @swagger
+ * /bids/dual-create:
+ *   post:
+ *     tags: [Bids]
+ *     summary: Crear una nueva puja en PostgreSQL o Firebase
+ *     parameters:
+ *       - in: query
+ *         name: storage
+ *         schema:
+ *           type: string
+ *           enum: [postgresql, firebase]
+ *           default: postgresql
+ *         description: Base de datos donde almacenar la puja
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BidCreate'
+ *     responses:
+ *       201:
+ *         description: Puj​a creada exitosamente
+ *       422:
+ *         description: Datos inválidos
+ *       500:
+ *         description: Error del servidor
+ */
+router.post("/dual-create", validate(createBidSchema), createBidDual);
+
+/**
+ * @swagger
+ * /bids/dual-list:
+ *   get:
+ *     tags: [Bids]
+ *     summary: Listar pujas desde PostgreSQL, Firebase o ambos
+ *     parameters:
+ *       - in: query
+ *         name: auction_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de subasta
+ *       - in: query
+ *         name: developer_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de desarrollador
+ *       - in: query
+ *         name: storage
+ *         schema:
+ *           type: string
+ *           enum: [postgresql, firebase, both]
+ *           default: both
+ *         description: Base(s) de datos de donde obtener las pujas
+ *     responses:
+ *       200:
+ *         description: Lista de pujas obtenida exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/dual-list", listBidsDual);
 
 export default router;
 

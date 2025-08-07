@@ -24,7 +24,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import {loginRouter} from "./routes/authRoutes.js";
 import AuctionRoutes from "./routes/AuctionRoutes.js";
 import ApplicationRoutes from "./routes/ApplicationRoutes.js";
-//import BidRoutes from "./routes/bidRoutes.js";
+import BidRoutes from "./routes/BidRoutes.js";
 
 import { jwtRouter } from "./routes/jwtAuthRoutes.js";
 import sequelize from "./config/connection.js";
@@ -109,11 +109,11 @@ class Server {
     this.app.use("/admins", adminRoutes);
     this.app.use("/auctions", authRoutes, AuctionRoutes);
     this.app.use("/application-projects", authRoutes, ApplicationRoutes);
+    this.app.use("/bids", BidRoutes);
     this.app.use("/ratings", authRoutes, ratingRoutes);
     this.app.use("/reports", authRoutes, reportRoutes);
     this.app.use("/favorite-projects", authRoutes, favoriteProjectsRoutes);
     this.app.use("/dashboard", authRoutes, dashboardRoutes);
-    //this.app.use("/bids", BidRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
  
@@ -127,10 +127,6 @@ class Server {
       res.json({ message: "Acceso autorizado", user: req.user });
     });
   }
-  
-  /**
-   * Starts the server and listens on the specified port.
-   */
   listen() {
     this.app.listen(this.PORT, () => {
       console.log(`Server Running on http://localhost:${this.PORT}`);

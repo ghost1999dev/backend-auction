@@ -4,6 +4,27 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+/** 
+ * Lista de variables de entorno requeridas para la configuración de Firebase
+ */
+const requiredEnvVars = [
+  "FIREBASE_API_KEY",
+  "FIREBASE_PROJECT_ID",
+  "FIREBASE_DATABASE_URL"
+];
+
+/** 
+ * Verificar que las variables de entorno estén definidas
+ */
+requiredEnvVars.forEach(envVar => {
+  if (!process.env[envVar]) {
+    throw new Error(`Falta las variables de entorno ${envVar} en el archivo .env`);
+  }
+});
+
+
+
+
 // Configuración de Firebase
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,

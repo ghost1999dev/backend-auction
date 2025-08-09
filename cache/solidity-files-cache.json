@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\Anderson\\OneDrive\\Escritorio\\AUCTION\\backend-auction\\src\\contracts\\BidRegistry.sol": {
+      "lastModificationDate": 1754683302497,
+      "contentHash": "e0bab787096bdc93f914d2376e2d379d",
+      "sourceName": "src/contracts/BidRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "BidRegistry"
+      ]
+    }
+  }
+}

@@ -2,6 +2,7 @@ import BidsModel      from "../models/BidsModel.js";
 import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
 import FirebaseService from "../services/firebaseService.js";
+import BlockchainService from "../services/blockchainService.mjs";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -128,6 +129,8 @@ export const createBid = async (req, res, next) => {
   try {
     const { auction_id, developer_id, amount } = req.body;
 
+  
+
     const validationError = validateBidData({ auction_id, developer_id, amount });
     if (validationError) {
       return res.status(validationError.status).json(validationError);
@@ -162,6 +165,8 @@ export const createBid = async (req, res, next) => {
       });
     }
 
+    const blockchainBid = await BlockchainService.createBidOnChain({ auction_id, developer_id, amount })
+
     // Crear la puja
     const bid = await BidsModel.create({ 
       auction_id: Number(auction_id), 
@@ -172,6 +177,7 @@ export const createBid = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Puja creada exitosamente",
+      bid: blockchainBid,
       data: {
         id: bid.id,
         auction_id: bid.auction_id,
@@ -392,6 +398,7 @@ export const createBidDual = async (req, res, next) => {
       developer_id: Number(developer_id),
       amount: Number(amount)
     };
+    
 
     if (normalizedStorage === "firebase") {
       const existingBid = await FirebaseService.findExistingBid(numericData.auction_id, numericData.developer_id);
@@ -412,7 +419,26 @@ export const createBidDual = async (req, res, next) => {
         storage: "firebase"
       });
 
-    } else { 
+    } else if (normalizedStorage === "blockchain") {
+    const existingOnChain = await BlockchainService.getBidsByAuction(numericData.auction_id);
+    if (existingOnChain.some(b => b.developer_id === numericData.developer_id)) {
+      return res.status(409).json({
+        success: false,
+        message: "Ya existe una puja para esta subasta en Blockchain",
+        error: "bid_exists",
+        details: {}
+      });
+    } 
+  
+    const blockchainBid = await BlockchainService.createBidOnChain(numericData);
+    return res.status(201).json({
+      success: true,
+      message: "Puja creada exitosamente en Blockchain",
+      data: blockchainBid,
+      storage: "blockchain"
+    });
+
+  } else { 
       const existingBid = await BidsModel.findOne({ 
         where: { auction_id: numericData.auction_id, developer_id: numericData.developer_id },
         attributes: ['id', 'amount']
@@ -475,7 +501,7 @@ export const listBidsDual = async (req, res, next) => {
     } = req.query;
 
 
-    const validStorageTypes = ['postgresql', 'firebase', 'both'];
+    const validStorageTypes = ['postgresql', 'firebase', 'blockchain', 'both'];
     if (!validStorageTypes.includes(storage.toLowerCase())) {
       return res.status(400).json({
         success: false,
@@ -589,6 +615,39 @@ export const listBidsDual = async (req, res, next) => {
         });
       }
     }
+
+    if (normalizedStorage === "blockchain" || normalizedStorage === "both") {
+      try {
+        let blockchainBids = [];
+        if (firebaseFilters.auction_id) {
+          blockchainBids = await BlockchainService.getBidsByAuction(firebaseFilters.auction_id);
+        } else if (firebaseFilters.developer_id) {
+          blockchainBids = await BlockchainService.getBidsByDeveloper(firebaseFilters.developer_id);
+        } else {
+          blockchainBids = await BlockchainService.getAllBids();
+        }
+
+        const paginated = blockchainBids
+          .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(numOffset, numOffset + numLimit);
+
+        result.data.blockchain = paginated;
+        if (normalizedStorage === "both") {
+          result.data.combined = [...result.data.combined, ...result.data.blockchain];
+        }
+      } catch (bcError) {
+        console.error("Error al obtener pujas de Blockchain:", bcError.message);
+        if (normalizedStorage === "blockchain") {
+          return res.status(500).json({
+            success: false,
+            message: "Error al obtener pujas de Blockchain",
+            error: process.env.NODE_ENV === 'development' ? bcError.message : 'Blockchain error'
+          });
+        }
+        result.errors = result.errors || [];
+        result.errors.push({ source: "blockchain", error: "Error al obtener datos de Blockchain" });
+      }
+    }    
 
     
     if (normalizedStorage === "both" && result.data.combined.length > 0) {

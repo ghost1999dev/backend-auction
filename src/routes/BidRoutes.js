@@ -9,7 +9,8 @@ import {
   listBids,
   getBid,
   updateBid,
-  deleteBid
+  deleteBid,
+  listBidsByAuction
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -65,6 +66,8 @@ router.post("/create", validate(createBidSchema), createBid);
  *         description: Error del servidor
  */
 router.get("/show/all", listBids);
+
+router.get("/show/by-auction/:id", listBidsByAuction);
 
 /**
  * @swagger

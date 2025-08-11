@@ -248,6 +248,80 @@ export const listBids = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Listar pujas por subasta
+ * @route   GET /bids/show/by-auction
+ * @access  Public
+ * @param   {number} req.query.auction_id - Filtrar por subasta
+ * @param   {number} req.query.developer_id - Filtrar por desarrollador
+ * @returns {Object} Lista de pujas o mensaje de error
+ */
+export const listBidsByAuction = async (req, res, next) => {
+  try {
+    const { id: auction_id } = req.params;
+    const { developer_id } = req.query;
+
+    if (!auction_id) {
+      return res.status(400).json({
+        success: false,
+        message: "El parámetro auction_id es obligatorio",
+        error: "missing_auction_id"
+      });
+    }
+
+    const where = { auction_id };
+    if (developer_id) {
+      where.developer_id = developer_id;
+    }
+
+    const bids = await BidsModel.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: AuctionsModel,
+          as: "auction",
+          attributes: [
+            "id", "status", "project_id", "bidding_started_at", "bidding_deadline"
+          ],
+          include: [
+            {
+              model: ProjectsModel,
+              as: "project",
+              attributes: ["id", "project_name", "description", "budget"]
+            }
+          ]
+        },
+        {
+          model: DevelopersModel,
+          as: "developer_profile",
+          attributes: ["id", "user_id"],
+          include: [{
+            model: UsersModel,
+            as: "user",
+            attributes: ["id", "name", "email"]
+          }]
+        }
+      ]
+    });
+
+    return res.json({
+      success: true,
+      count: bids.length,
+      data: bids
+    });
+  } catch (err) {
+    console.error("Error en listBidsByAuction:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error al obtener las pujas",
+      error: process.env.NODE_ENV === "development" ? err.message : "Internal server error"
+    });
+  }
+};
+
+
+
 export const getBid = async (req, res, next) => {
   try {
     const bid = await BidsModel.findByPk(req.params.id, {
@@ -255,7 +329,14 @@ export const getBid = async (req, res, next) => {
         { 
           model: AuctionsModel, 
           as: "auction", 
-          attributes: ["id", "status", "project_id"] 
+          attributes: ["id", "status", "project_id", "bidding_started_at", "bidding_deadline"],
+          include: [
+            {
+              model: ProjectsModel,
+              as: "project",
+              attributes: ["id", "project_name", "description", "budget"]
+            }
+          ]
         },
         { 
           model: DevelopersModel, 
@@ -269,9 +350,11 @@ export const getBid = async (req, res, next) => {
         }
       ]
     });
+
     if (!bid) {
       return res.status(404).json({ success: false, message: "Puja no encontrada", error: "bid_not_found" });
     }
+
     return res.json({ success: true, data: bid });
   } catch (err) {
     console.error('Error en getBid:', err);

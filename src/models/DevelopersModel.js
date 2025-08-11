@@ -45,4 +45,10 @@ import("./UsersModel.js").then((module) => {
     DevelopersModel.belongsTo(UsersModel, { foreignKey: "user_id", as: "user" })
 })
 
+// Agregar la relación con BidsModel
+import("./BidsModel.js").then((module) => {
+    const BidsModel = module.default;
+    DevelopersModel.hasMany(BidsModel, { foreignKey: 'developer_id', as: 'bids' });
+})
+
 export default DevelopersModel

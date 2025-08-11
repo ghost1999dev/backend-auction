@@ -55,6 +55,15 @@ export const createAuction = async (req, res) => {
     
     try {
         const project = await ProjectsModel.findByPk(project_id);
+        
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Proyecto no encontrado",
+                error: "project_not_found"
+            });
+        }
 
         const company = await CompaniesModel.findOne({
             attributes: [],
@@ -71,15 +80,6 @@ export const createAuction = async (req, res) => {
                 status: 403,
                 message: "No puedes realizar ninguna accion mientras estas bloqueado",
             })
-        }
-
-        if (!project) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "Proyecto no encontrado",
-                error: "project_not_found"
-            });
         }
 
         const existingAuction = await AuctionsModel.findOne({
@@ -402,7 +402,7 @@ export const deleteAuction = async (req, res, next) => {
             });
         }
 
-        if (![STATUS.PENDING, STATUS.CANCELLED].includes(Number(auction.status))) {
+        if (![AUCTION_STATUS.PENDING, AUCTION_STATUS.CANCELLED].includes(Number(auction.status))) {
             return res.status(422).json({
                 success: false,
                 message: "Solo se pueden eliminar subastas en estado pendiente o cancelado"

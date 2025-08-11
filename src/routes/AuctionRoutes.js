@@ -1,6 +1,7 @@
 // routes/subastas.js
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
+import authRoutes from "../middlewares/authRoutes.js"; 
 import {
   createAuction,
   listAuctions,

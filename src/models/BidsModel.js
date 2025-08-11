@@ -38,7 +38,11 @@ const BidsModel = sequelize.define(
     amount: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false
-    }
+    },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
   },
   {
     timestamps: true,         // mappea a createdAt / updatedAt

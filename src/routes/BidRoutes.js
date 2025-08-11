@@ -10,7 +10,8 @@ import {
   getBid,
   updateBid,
   deleteBid,
-  listBidsByAuction
+  listBidsByAuction,
+  finalizarSubasta
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -138,6 +139,8 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteBid);
+
+router.post("/finalize", finalizarSubasta);
 
 export default router;
 

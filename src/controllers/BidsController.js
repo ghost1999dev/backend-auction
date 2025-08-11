@@ -501,8 +501,6 @@ export const finalizarSubasta = async (req, res, next) => {
         error: "invalid_auction_id",
       });
     }
-
-    // Actualizar estado de la subasta a 2 (finalizada)
     const auction = await AuctionsModel.findByPk(auction_id);
     if (!auction) {
       return res.status(404).json({
@@ -513,7 +511,6 @@ export const finalizarSubasta = async (req, res, next) => {
     }
     await auction.update({ status: 2 });
 
-    // Obtener todas las pujas de la subasta ordenadas ascendentemente por amount
     const bids = await BidsModel.findAll({
       where: { auction_id: Number(auction_id) },
       order: [["amount", "ASC"]],
@@ -526,10 +523,9 @@ export const finalizarSubasta = async (req, res, next) => {
       });
     }
 
-    // Actualizar estado de las pujas
     for (let i = 0; i < bids.length; i++) {
       const bid = bids[i];
-      const newStatus = i < 3 ? 1 : 2; // Los primeros 3 ganadores (1), los demás perdedores (2)
+      const newStatus = i < 3 ? 1 : 2; 
       await bid.update({ status: newStatus });
     }
 

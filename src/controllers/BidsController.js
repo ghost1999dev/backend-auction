@@ -3,6 +3,7 @@ import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
 // import BlockchainService from "../services/blockchainService.mjs";
 import DevelopersModel from "../models/DevelopersModel.js";
+import ProjectsModel from "../models/ProjectsModel.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -210,7 +211,14 @@ export const listBids = async (req, res, next) => {
         { 
           model: AuctionsModel, 
           as: "auction", 
-          attributes: ["id", "status", "project_id"] 
+          attributes: ["id", "status", "project_id", "bidding_started_at", "bidding_deadline"],
+          include: [
+            {
+              model: ProjectsModel,
+              as: "project",
+              attributes: ["id", "project_name", "description", "budget"]
+            }
+          ]
         },
         { 
           model: DevelopersModel, 

@@ -11,7 +11,8 @@ import {
   updateBid,
   deleteBid,
   listBidsByAuction,
-  finalizarSubasta
+  finalizarSubasta,
+  getResultadosSubasta
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -141,6 +142,7 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
 router.delete("/delete/:id", deleteBid);
 
 router.post("/finalize", finalizarSubasta);
+router.get("/resultados/:id", getResultadosSubasta);
 
 export default router;
 

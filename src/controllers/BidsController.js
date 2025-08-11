@@ -144,8 +144,21 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    const auction = await ensureLiveAuction(req, res, auction_id);
-    if (!auction) return;
+    const auction = await AuctionsModel.findByPk(auction_id);
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: 'La subasta no existe',
+        error: 'auction_not_found'
+      });
+    }
+    if (auction.status !== 1) {
+      return res.status(409).json({
+        success: false,
+        message: 'La subasta ya no está abierta para pujas, ya hay ganadores',
+        error: 'auction_closed'
+      });
+    }
 
     const devProfile = await DevelopersModel.findOne({ where: { user_id } });
     if (!devProfile) {
@@ -542,3 +555,63 @@ export const finalizarSubasta = async (req, res, next) => {
     });
   }
 };
+
+export const getResultadosSubasta = async (req, res, next) => {
+  try {
+    const { auction_id } = req.query;
+    if (!auction_id || isNaN(Number(auction_id))) {
+      return res.status(400).json({
+        success: false,
+        message: "El auction_id es obligatorio y debe ser un número válido",
+        error: "invalid_auction_id",
+      });
+    }
+
+    const bids = await BidsModel.findAll({
+      where: { 
+        auction_id, 
+        status: [1, 2] 
+      },
+      order: [["amount", "ASC"]],
+      include: [
+        {
+          model: DevelopersModel,
+          as: "developer_profile",
+          include: [
+            {
+              model: UsersModel,
+              as: "user",
+              attributes: ["id", "name", "email"],
+            },
+          ],
+          attributes: ["id", "user_id"],
+        },
+      ],
+    });
+
+    const resultados = bids.map(bid => ({
+      id: bid.id,
+      auction_id: bid.auction_id,
+      developer_id: bid.developer_id,
+      amount: bid.amount,
+      status: bid.status === 1 ? "Ganador" : "Perdedor",
+      createdAt: bid.createdAt,
+      updatedAt: bid.updatedAt,
+      developer_profile: bid.developer_profile
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: resultados.length,
+      data: resultados,
+    });
+  } catch (err) {
+    console.error("Error en getResultadosSubasta:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error interno al obtener resultados de la subasta",
+      error: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
+    });
+  }
+};
+

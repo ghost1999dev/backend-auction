@@ -3,19 +3,16 @@
   "version": "1.0.0",
   "description": "Backend API para sistema de subastas en línea",
   "main": "src/index.js",
-"scripts": {
+  "scripts": {
     "hardhat-node": "hardhat node",
     "deploy": "hardhat run src/scripts/deploy.js --network localhost",
     "start-backend": "node src/app.js",
     "compile": "hardhat compile",
-    
     "dev": "node src/scripts/dev.js",
     "dev-verbose": "concurrently \"npm run hardhat-node\" \"wait-on -t 30000 http://127.0.0.1:8545 && npm run deploy && npm run start-backend\"",
     "dev-simple": "concurrently --raw \"npm run hardhat-node\" \"wait-on -t 30000 http://127.0.0.1:8545 && npm run deploy && npm run start-backend\"",
-    
     "clean": "rimraf cache artifacts deployments",
     "reset": "npm run clean && npm run compile",
-    
     "blockchain": "hardhat node",
     "deploy-only": "hardhat run src/scripts/deploy.js --network localhost",
     "backend-only": "node src/app.js"
@@ -45,7 +42,6 @@
     "ethers": "^6.15.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
-    "firebase": "^12.0.0",
     "googleapis": "^146.0.0",
     "helmet": "^8.0.0",
     "joi": "^17.13.3",

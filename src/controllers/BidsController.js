@@ -126,8 +126,22 @@ async function ensureLiveAuction(req, res, auctionId) {
 export const createBid = async (req, res, next) => {
   try {
     const { auction_id, user_id, amount } = req.body;
-    const validationError = validateBidData({ auction_id, user_id, amount });
-    if (validationError) return res.status(validationError.status).json(validationError);
+    if (!auction_id || !user_id || amount === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Faltan datos obligatorios: auction_id, user_id y amount',
+        error: 'missing_data'
+      });
+    }
+
+    const amountNumber = Number(amount);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'El monto de la puja debe ser un número positivo mayor que cero',
+        error: 'invalid_amount'
+      });
+    }
 
     const auction = await ensureLiveAuction(req, res, auction_id);
     if (!auction) return;
@@ -141,25 +155,24 @@ export const createBid = async (req, res, next) => {
       });
     }
 
- 
     const highestBid = await BidsModel.findOne({
       where: { auction_id, developer_id: user_id },
-      order: [['amount', 'DESC']]
+      order: [['amount', 'ASC']]  
     });
 
     if (highestBid) {
-      if (Number(amount) === highestBid.amount) {
+      if (amountNumber === Number(highestBid.amount)) {
         return res.status(409).json({
           success: false,
           message: 'Ya realizaste una puja con esa misma cantidad para esta subasta',
           error: 'same_amount_bid_exists'
         });
       }
-      if (Number(amount) < highestBid.amount) {
+      if (amountNumber > Number(highestBid.amount)) {
         return res.status(409).json({
           success: false,
-          message: `El monto de la nueva puja debe ser mayor que tu puja anterior (${highestBid.amount})`,
-          error: 'lower_amount_not_allowed'
+          message: `El monto de la nueva puja debe ser menor que tu puja anterior (${highestBid.amount})`,
+          error: 'higher_amount_not_allowed'
         });
       }
     }
@@ -167,7 +180,7 @@ export const createBid = async (req, res, next) => {
     const bid = await BidsModel.create({
       auction_id: Number(auction_id),
       developer_id: Number(user_id),
-      amount: Number(amount)
+      amount: amountNumber
     });
 
     return res.status(201).json({

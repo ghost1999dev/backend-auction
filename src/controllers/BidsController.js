@@ -18,7 +18,6 @@ const AUCTION_STATUS = {
  */
 const validateBidData = (data) => {
   const { auction_id, user_id, amount } = data;
-
   if (!auction_id || !user_id || amount == null) {
     return {
       status: 400,
@@ -37,7 +36,6 @@ const validateBidData = (data) => {
       error: "invalid_amount"
     };
   }
-
   if (!Number.isInteger(Number(auction_id)) || !Number.isInteger(Number(user_id))) {
     return {
       status: 400,
@@ -46,7 +44,6 @@ const validateBidData = (data) => {
       error: "invalid_ids"
     };
   }
-
   return null;
 };
 
@@ -74,7 +71,7 @@ async function ensureLiveAuction(req, res, auctionId) {
 
     if (auction.status !== AUCTION_STATUS.ACTIVE) {
       res.status(400).json({ 
-        success: false, 
+        success: false,
         message: "La subasta no está activa", 
         error: "auction_not_active",
         details: { current_status: auction.status, required_status: AUCTION_STATUS.ACTIVE }
@@ -98,7 +95,7 @@ async function ensureLiveAuction(req, res, auctionId) {
 
     if (end && now > end) {
       res.status(422).json({ 
-        success: false, 
+        success: false,
         message: "La subasta ya ha finalizado", 
         error: "auction_ended",
         details: { end_time: end, current_time: now }
@@ -128,25 +125,14 @@ async function ensureLiveAuction(req, res, auctionId) {
  */
 export const createBid = async (req, res, next) => {
   try {
-    // Aceptar tanto user_id como developer_id para flexibilidad
-    const { auction_id, user_id, developer_id, amount } = req.body;
-    const finalUserId = developer_id || user_id;
-
-    if (!finalUserId) {
-      return res.status(422).json({
-        success: false,
-        message: 'developer_id es obligatorio',
-        error: 'missing_developer_id'
-      });
-    }
-
-    const validationError = validateBidData({ auction_id, user_id: finalUserId, amount });
+    const { auction_id, user_id, amount } = req.body;
+    const validationError = validateBidData({ auction_id, user_id, amount });
     if (validationError) return res.status(validationError.status).json(validationError);
 
     const auction = await ensureLiveAuction(req, res, auction_id);
     if (!auction) return;
 
-    const devProfile = await DevelopersModel.findOne({ where: { user_id: finalUserId } });
+    const devProfile = await DevelopersModel.findOne({ where: { user_id } });
     if (!devProfile) {
       return res.status(400).json({
         success: false,
@@ -156,7 +142,7 @@ export const createBid = async (req, res, next) => {
     }
 
     const existingBid = await BidsModel.findOne({
-      where: { auction_id, developer_id: devProfile.id }
+      where: { auction_id, developer_id: user_id }
     });
     if (existingBid) {
       return res.status(409).json({
@@ -165,13 +151,11 @@ export const createBid = async (req, res, next) => {
         error: 'bid_exists'
       });
     }
-
     const bid = await BidsModel.create({
       auction_id: Number(auction_id),
-      developer_id: Number(devProfile.id),
+      developer_id: Number(user_id),
       amount: Number(amount)
     });
-
     return res.status(201).json({
       success: true,
       message: 'Puja creada exitosamente',

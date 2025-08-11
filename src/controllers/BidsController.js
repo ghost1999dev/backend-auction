@@ -346,7 +346,7 @@ export const deleteBid = async (req, res, next) => {
   }
 };
 
-/**
+/*
  * @desc    Crear puja usando PostgreSQL y Firebase en la misma ruta
  * @route   POST /bids/dual-create
  * @access  Private
@@ -356,7 +356,7 @@ export const deleteBid = async (req, res, next) => {
  * @param   {string} req.query.storage - "postgresql" o "firebase" para especificar la base de datos
  * @returns {Object} Puja creada o mensaje de error
  */
-export const createBidDual = async (req, res, next) => {
+/*export const createBidDual = async (req, res, next) => {
   try {
     const { auction_id, developer_id, amount } = req.body;
     const { storage = "postgresql" } = req.query;
@@ -476,8 +476,9 @@ export const createBidDual = async (req, res, next) => {
       error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
     });
   }
-};
+};*/
 
+/*
 /**
  * @desc    Listar pujas desde PostgreSQL y Firebase en la misma ruta
  * @route   GET /bids/dual-list
@@ -489,7 +490,7 @@ export const createBidDual = async (req, res, next) => {
  * @param   {number} req.query.offset - Offset para paginación (por defecto 0)
  * @returns {Object} Lista de pujas o mensaje de error
  */
-export const listBidsDual = async (req, res, next) => {
+/*export const listBidsDual = async (req, res, next) => {
   try {
     const { 
       auction_id, 
@@ -693,4 +694,4 @@ export const listBidsDual = async (req, res, next) => {
       error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
     });
   }
-};
+};*/

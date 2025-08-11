@@ -3,6 +3,7 @@ import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import AuctionsModel from "./AuctionsModel.js";
 import UsersModel   from "./UsersModel.js";
+import DevelopersModel from "./DevelopersModel.js";
 
 /**
  * Bid model.
@@ -51,9 +52,12 @@ BidsModel.belongsTo(AuctionsModel, {
   as: "auction" 
 });
 
-BidsModel.belongsTo(UsersModel, { 
+/*BidsModel.belongsTo(UsersModel, { 
   foreignKey: "developer_id", 
   as: "developer" 
-});
+});*/
+
+BidsModel.belongsTo(DevelopersModel, { foreignKey: 'developer_id', as: 'developer_profile' });
+
 
 export default BidsModel;

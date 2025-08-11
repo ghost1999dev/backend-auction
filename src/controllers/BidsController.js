@@ -2,6 +2,7 @@ import BidsModel      from "../models/BidsModel.js";
 import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
 import BlockchainService from "../services/blockchainService.mjs";
+import DevelopersModel from "../models/DevelopersModel.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -15,13 +16,13 @@ const AUCTION_STATUS = {
  * @returns {Object|null} Error de validación o null si es válido
  */
 const validateBidData = (data) => {
-  const { auction_id, developer_id, amount } = data;
+  const { auction_id, user_id, amount } = data;
 
-  if (!auction_id || !developer_id || amount == null) {
+  if (!auction_id || !user_id || amount == null) {
     return {
       status: 400,
       success: false,
-      message: "Faltan campos requeridos (auction_id, developer_id, amount)",
+      message: "Faltan campos requeridos (auction_id, user_id, amount)",
       error: "missing_fields"
     };
   }
@@ -36,7 +37,7 @@ const validateBidData = (data) => {
     };
   }
 
-  if (!Number.isInteger(Number(auction_id)) || !Number.isInteger(Number(developer_id))) {
+  if (!Number.isInteger(Number(auction_id)) || !Number.isInteger(Number(user_id))) {
     return {
       status: 400,
       success: false,
@@ -126,76 +127,56 @@ async function ensureLiveAuction(req, res, auctionId) {
  */
 export const createBid = async (req, res, next) => {
   try {
-    const { auction_id, developer_id, amount } = req.body;
+    const { auction_id, user_id, amount } = req.body;
 
-  
-
-    const validationError = validateBidData({ auction_id, developer_id, amount });
-    if (validationError) {
-      return res.status(validationError.status).json(validationError);
-    }
+    const validationError = validateBidData({ auction_id, user_id, amount });
+    if (validationError) return res.status(validationError.status).json(validationError);
 
     const auction = await ensureLiveAuction(req, res, auction_id);
     if (!auction) return;
 
-    const developer = await UsersModel.findByPk(developer_id, {
-      attributes: ['id', 'name', 'email', 'status']
-    });
-    
-    if (!developer) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Desarrollador no encontrado", 
-        error: "developer_not_found" 
+    const devProfile = await DevelopersModel.findOne({ where: { user_id } });
+    if (!devProfile) {
+      return res.status(400).json({
+        success: false,
+        message: 'El usuario no tiene perfil de desarrollador, no se puede crear la puja',
+        error: 'dev_profile_not_found'
       });
     }
 
-    const existingBid = await BidsModel.findOne({ 
-      where: { auction_id, developer_id },
-      attributes: ['id', 'amount']
+    const existingBid = await BidsModel.findOne({
+      where: { auction_id, developer_id: user_id }
     });
-    
     if (existingBid) {
-      return res.status(409).json({ 
-        success: false, 
-        message: "Ya existe una puja para esta subasta", 
-        error: "bid_exists",
-        details: { existing_bid_id: existingBid.id, existing_amount: existingBid.amount }
+      return res.status(409).json({
+        success: false,
+        message: 'Ya existe una puja para esta subasta',
+        error: 'bid_exists'
       });
     }
 
-    const blockchainBid = await BlockchainService.createBidOnChain({ auction_id, developer_id, amount })
-
-    // Crear la puja
-    const bid = await BidsModel.create({ 
-      auction_id: Number(auction_id), 
-      developer_id: Number(developer_id), 
-      amount: Number(amount) 
+    const bid = await BidsModel.create({
+      auction_id: Number(auction_id),
+      developer_id: Number(user_id),
+      amount: Number(amount)
     });
 
     return res.status(201).json({
       success: true,
-      message: "Puja creada exitosamente",
-      bid: blockchainBid,
-      data: {
-        id: bid.id,
-        auction_id: bid.auction_id,
-        developer_id: bid.developer_id,
-        amount: bid.amount,
-        createdAt: bid.createdAt,
-        updatedAt: bid.updatedAt
-      }
+      message: 'Puja creada exitosamente',
+      data: bid
     });
 
   } catch (err) {
     console.error('Error en createBid:', err);
     return res.status(500).json({
       success: false,
-      message: "Error interno del servidor al crear la puja",
+      message: 'Error interno del servidor al crear la puja',
       error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
     });
   }
 };
+
 
 /**
  * @desc    Obtener listado de pujas

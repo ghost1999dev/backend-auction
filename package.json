@@ -6,7 +6,7 @@
   "scripts": {
     "hardhat-node": "hardhat node",
     "deploy": "hardhat run src/scripts/deploy.js --network localhost",
-    "start-backend": "node src/app.js",
+    "start-backend": "nodemon src/app.js",
     "compile": "hardhat compile",
     "dev": "node src/scripts/dev.js",
     "dev-verbose": "concurrently \"npm run hardhat-node\" \"wait-on -t 30000 http://127.0.0.1:8545 && npm run deploy && npm run start-backend\"",
@@ -15,7 +15,7 @@
     "reset": "npm run clean && npm run compile",
     "blockchain": "hardhat node",
     "deploy-only": "hardhat run src/scripts/deploy.js --network localhost",
-    "backend-only": "node src/app.js"
+    "backend-only": "nodemon src/app.js"
   },
   "keywords": [
     "auction",

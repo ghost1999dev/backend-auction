@@ -2,7 +2,6 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
 import AuctionsModel from "./AuctionsModel.js";
-import UsersModel   from "./UsersModel.js";
 import DevelopersModel from "./DevelopersModel.js";
 
 /**
@@ -30,7 +29,7 @@ const BidsModel = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "users",
+        model: "dev_profile",
         key: "id"
       },
       onDelete: "CASCADE"
@@ -52,12 +51,15 @@ BidsModel.belongsTo(AuctionsModel, {
   as: "auction" 
 });
 
-/*BidsModel.belongsTo(UsersModel, { 
-  foreignKey: "developer_id", 
-  as: "developer" 
-});*/
+BidsModel.belongsTo(DevelopersModel, { 
+  foreignKey: 'developer_id', 
+  as: 'developer_profile' 
+});
 
-BidsModel.belongsTo(DevelopersModel, { foreignKey: 'developer_id', as: 'developer_profile' });
-
+// Configurar las relaciones inversas después de la importación
+import("./AuctionsModel.js").then((module) => {
+  const AuctionsModel = module.default;
+  AuctionsModel.hasMany(BidsModel, { foreignKey: 'auction_id', as: 'bids' });
+});
 
 export default BidsModel;

@@ -1,8 +1,9 @@
 import BidsModel      from "../models/BidsModel.js";
 import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
-import BlockchainService from "../services/blockchainService.mjs";
+// import BlockchainService from "../services/blockchainService.mjs";
 import DevelopersModel from "../models/DevelopersModel.js";
+import ProjectsModel from "../models/ProjectsModel.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -127,15 +128,25 @@ async function ensureLiveAuction(req, res, auctionId) {
  */
 export const createBid = async (req, res, next) => {
   try {
-    const { auction_id, user_id, amount } = req.body;
+    // Aceptar tanto user_id como developer_id para flexibilidad
+    const { auction_id, user_id, developer_id, amount } = req.body;
+    const finalUserId = developer_id || user_id;
 
-    const validationError = validateBidData({ auction_id, user_id, amount });
+    if (!finalUserId) {
+      return res.status(422).json({
+        success: false,
+        message: 'developer_id es obligatorio',
+        error: 'missing_developer_id'
+      });
+    }
+
+    const validationError = validateBidData({ auction_id, user_id: finalUserId, amount });
     if (validationError) return res.status(validationError.status).json(validationError);
 
     const auction = await ensureLiveAuction(req, res, auction_id);
     if (!auction) return;
 
-    const devProfile = await DevelopersModel.findOne({ where: { user_id } });
+    const devProfile = await DevelopersModel.findOne({ where: { user_id: finalUserId } });
     if (!devProfile) {
       return res.status(400).json({
         success: false,
@@ -145,7 +156,7 @@ export const createBid = async (req, res, next) => {
     }
 
     const existingBid = await BidsModel.findOne({
-      where: { auction_id, developer_id: user_id }
+      where: { auction_id, developer_id: devProfile.id }
     });
     if (existingBid) {
       return res.status(409).json({
@@ -157,7 +168,7 @@ export const createBid = async (req, res, next) => {
 
     const bid = await BidsModel.create({
       auction_id: Number(auction_id),
-      developer_id: Number(user_id),
+      developer_id: Number(devProfile.id),
       amount: Number(amount)
     });
 
@@ -197,14 +208,43 @@ export const listBids = async (req, res, next) => {
       where,
       order: [["createdAt", "DESC"]],
       include: [
-        { model: AuctionsModel, as: "auction",   attributes: ["id","status"] },
-        { model: UsersModel,   as: "developer", attributes: ["id","name","email"] }
+        { 
+          model: AuctionsModel, 
+          as: "auction", 
+          attributes: ["id", "status", "project_id", "bidding_started_at", "bidding_deadline"],
+          include: [
+            {
+              model: ProjectsModel,
+              as: "project",
+              attributes: ["id", "project_name", "description", "budget"]
+            }
+          ]
+        },
+        { 
+          model: DevelopersModel, 
+          as: "developer_profile", 
+          attributes: ["id", "user_id"],
+          include: [{
+            model: UsersModel,
+            as: "user",
+            attributes: ["id", "name", "email"]
+          }]
+        }
       ]
     });
 
-    return res.json({ success: true, count: bids.length, data: bids });
+    return res.json({ 
+      success: true, 
+      count: bids.length, 
+      data: bids 
+    });
   } catch (err) {
-    next(err);
+    console.error('Error en listBids:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al obtener las pujas',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 };
 
@@ -212,8 +252,21 @@ export const getBid = async (req, res, next) => {
   try {
     const bid = await BidsModel.findByPk(req.params.id, {
       include: [
-        { model: AuctionsModel, as: "auction",   attributes: ["id","status"] },
-        { model: UsersModel,   as: "developer", attributes: ["id","name","email"] }
+        { 
+          model: AuctionsModel, 
+          as: "auction", 
+          attributes: ["id", "status", "project_id"] 
+        },
+        { 
+          model: DevelopersModel, 
+          as: "developer_profile", 
+          attributes: ["id", "user_id"],
+          include: [{
+            model: UsersModel,
+            as: "user",
+            attributes: ["id", "name", "email"]
+          }]
+        }
       ]
     });
     if (!bid) {
@@ -221,7 +274,12 @@ export const getBid = async (req, res, next) => {
     }
     return res.json({ success: true, data: bid });
   } catch (err) {
-    next(err);
+    console.error('Error en getBid:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al obtener la puja',
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
   }
 };
 

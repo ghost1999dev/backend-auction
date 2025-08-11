@@ -206,7 +206,7 @@ export const listBids = async (req, res, next) => {
 
     const bids = await BidsModel.findAll({
       where,
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "ASC"]],
       include: [
         { 
           model: AuctionsModel, 

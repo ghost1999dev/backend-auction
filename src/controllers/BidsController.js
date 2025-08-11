@@ -141,21 +141,35 @@ export const createBid = async (req, res, next) => {
       });
     }
 
-    const existingBid = await BidsModel.findOne({
-      where: { auction_id, developer_id: user_id }
+ 
+    const highestBid = await BidsModel.findOne({
+      where: { auction_id, developer_id: user_id },
+      order: [['amount', 'DESC']]
     });
-    if (existingBid) {
-      return res.status(409).json({
-        success: false,
-        message: 'Ya existe una puja para esta subasta',
-        error: 'bid_exists'
-      });
+
+    if (highestBid) {
+      if (Number(amount) === highestBid.amount) {
+        return res.status(409).json({
+          success: false,
+          message: 'Ya realizaste una puja con esa misma cantidad para esta subasta',
+          error: 'same_amount_bid_exists'
+        });
+      }
+      if (Number(amount) < highestBid.amount) {
+        return res.status(409).json({
+          success: false,
+          message: `El monto de la nueva puja debe ser mayor que tu puja anterior (${highestBid.amount})`,
+          error: 'lower_amount_not_allowed'
+        });
+      }
     }
+
     const bid = await BidsModel.create({
       auction_id: Number(auction_id),
       developer_id: Number(user_id),
       amount: Number(amount)
     });
+
     return res.status(201).json({
       success: true,
       message: 'Puja creada exitosamente',
@@ -173,6 +187,7 @@ export const createBid = async (req, res, next) => {
 };
 
 
+
 /**
  * @desc    Obtener listado de pujas
  * @route   GET /bids/show/all
@@ -186,11 +201,11 @@ export const listBids = async (req, res, next) => {
     const { auction_id, developer_id } = req.query;
     const where = {};
     if (auction_id)   where.auction_id   = auction_id;
-    if (developer_id) where.developer_id = developer_id;
+    if (developer_id) where.developer_id = developer_id; 
 
     const bids = await BidsModel.findAll({
       where,
-      order: [["createdAt", "ASC"]],
+      order: [["createdAt", "DESC"]],
       include: [
         { 
           model: AuctionsModel, 
@@ -231,6 +246,7 @@ export const listBids = async (req, res, next) => {
     });
   }
 };
+
 
 /**
  * @desc    Listar pujas por subasta

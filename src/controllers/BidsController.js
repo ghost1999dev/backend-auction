@@ -1,7 +1,6 @@
 import BidsModel      from "../models/BidsModel.js";
 import AuctionsModel  from "../models/AuctionsModel.js";
 import UsersModel    from "../models/UsersModel.js";
-import FirebaseService from "../services/firebaseService.js";
 import BlockchainService from "../services/blockchainService.mjs";
 
 const AUCTION_STATUS = {

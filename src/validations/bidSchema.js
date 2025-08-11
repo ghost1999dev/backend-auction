@@ -9,12 +9,12 @@ export const createBidSchema = Joi.object({
       "any.required": "auction_id es obligatorio"
     }),
 
-  developer_id: Joi.number()
+  user_id: Joi.number()
     .integer()
     .required()
     .messages({
-      "number.base":  "developer_id debe ser numérico",
-      "any.required": "developer_id es obligatorio"
+      "number.base":  "user_id debe ser numérico",
+      "any.required": "user_id es obligatorio"
     }),
 
   amount: Joi.number()

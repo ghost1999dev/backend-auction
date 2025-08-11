@@ -201,7 +201,7 @@ export const listBids = async (req, res, next) => {
     const { auction_id, developer_id } = req.query;
     const where = {};
     if (auction_id)   where.auction_id   = auction_id;
-    if (developer_id) where.developer_id = developer_id;
+    if (developer_id) where.developer_id = developer_id; 
 
     const bids = await BidsModel.findAll({
       where,
@@ -246,6 +246,7 @@ export const listBids = async (req, res, next) => {
     });
   }
 };
+
 
 /**
  * @desc    Listar pujas por subasta

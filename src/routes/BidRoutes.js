@@ -10,8 +10,8 @@ import {
   getBid,
   updateBid,
   deleteBid,
-  createBidDual,
-  listBidsDual
+  //createBidDual,
+  //listBidsDual
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -166,7 +166,7 @@ router.delete("/delete/:id", deleteBid);
  *       500:
  *         description: Error del servidor
  */
-router.post("/dual-create", validate(createBidSchema), createBidDual);
+//router.post("/dual-create", validate(createBidSchema), createBidDual);
 
 /**
  * @swagger
@@ -198,7 +198,7 @@ router.post("/dual-create", validate(createBidSchema), createBidDual);
  *       500:
  *         description: Error del servidor
  */
-router.get("/dual-list", listBidsDual);
+//router.get("/dual-list", listBidsDual);
 
 export default router;
 

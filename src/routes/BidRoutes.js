@@ -140,16 +140,18 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteBid);
-// /**
-//  * @swagger
-//  * /bids/finalize:
-//  *   post:
-//  *     tags: [Bids]
-//  *     summary: Finalizar una subasta
-//  *     responses:
-//  *       200:
-//  *         description: Subasta finalizada
-//  *       500:
+ /**
+  * @swagger
+  * /bids/finalize:
+  *   post:
+  *     tags: [Bids]
+  *     summary: Finalizar una subasta
+  *     responses:
+  *       200:
+  *         description: Subasta finalizada
+  *       500:
+  *         description: Error del servidor
+  */
 router.post("/finalize", finalizarSubasta);
 /**
  * @swagger     

@@ -68,7 +68,24 @@ router.post("/create", validate(createBidSchema), createBid);
  *         description: Error del servidor
  */
 router.get("/show/all", listBids);
-
+/**
+ * @swagger
+ * /bids/show/by-auction/{id}:
+ *   get:
+ *     tags: [Bids]
+ *     summary: Listar pujas por subasta
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Lista de pujas
+ *       500:
+ *         description: Error del servidor    
+ */
 router.get("/show/by-auction/:id", listBidsByAuction);
 
 /**

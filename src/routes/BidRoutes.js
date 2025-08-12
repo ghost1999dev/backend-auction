@@ -7,14 +7,16 @@ import {
 import {
   createBid,
   listBids,
-  getBid,
+//getBid,
   updateBid,
   deleteBid,
   listBidsByAuction,
   finalizarSubasta,
   getResultadosSubasta,
-  chooseWinner
+  chooseWinner,
+  getHistorialGanadores
 } from "../controllers/BidsController.js";
+import  authenticateToken  from '../middlewares/authenticateToken.js';
 
 const router = Router();
 
@@ -109,7 +111,8 @@ router.get("/show/by-auction/:id", listBidsByAuction);
  *       500:
  *         description: Error del servidor
  */
-router.get("/:id", getBid);
+
+//router.get("/:id", getBid);
 
 /**
  * @swagger
@@ -214,6 +217,8 @@ router.get("/resultados/:id", getResultadosSubasta);
  *         description: Error del servidor    
  */
 router.post("/choose-winner", chooseWinner);
+
+router.get("/historial-ganadores",authenticateToken, getHistorialGanadores);
 
 export default router;
 

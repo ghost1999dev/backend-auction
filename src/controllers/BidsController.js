@@ -749,3 +749,55 @@ export const chooseWinner = async (req, res) => {
   }
 };
 
+
+export const getHistorialGanadores = async (req, res) => {
+  try {
+    const winners = await WinnerModel.findAll({
+      include: [
+        {
+          model: BidsModel,
+          as: 'bid',
+          attributes: ['id', 'amount', 'status', 'createdAt'],
+          include: [
+            {
+              model: DevelopersModel,
+              as: 'developer_profile',
+              include: [
+                {
+                  model: UsersModel,
+                  as: 'users',
+                  attributes: ['id', 'name', 'email'],
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: AuctionsModel,
+          as: 'auction',
+          attributes: ['id', 'status', 'bidding_started_at', 'bidding_deadline'],
+          include: [
+            {
+              model: ProjectsModel,
+              as: 'project',
+              attributes: ['id', 'project_name', 'description', 'budget'],
+            },
+          ],
+        },
+        {
+          model: UsersModel,
+          as: 'winner',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+
+    res.json(winners);
+  } catch (error) {
+    console.error('Error obteniendo historial de ganadores:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
+
+

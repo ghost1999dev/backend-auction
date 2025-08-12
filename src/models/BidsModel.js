@@ -45,8 +45,8 @@ const BidsModel = sequelize.define(
     },
   },
   {
-    timestamps: true,         // mappea a createdAt / updatedAt
-    underscored: false        // usa camelCase para createdAt, updatedAt
+    timestamps: true,        
+    underscored: false        
   }
 );
 
@@ -69,7 +69,6 @@ BidsModel.belongsTo(AuctionsModel, {
 BidsModel.belongsTo(DevelopersModel, { as: 'developer_profile', foreignKey: 'developer_id', targetKey: 'user_id' });
 DevelopersModel.belongsTo(UsersModel, { as: 'users', foreignKey: 'user_id' });
 
-// En BidsModel.js
 BidsModel.belongsTo(UsersModel, { foreignKey: 'developer_id', as: 'user' });
 UsersModel.hasMany(BidsModel, { foreignKey: 'developer_id', as: 'bids' });
 

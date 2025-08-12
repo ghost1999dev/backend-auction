@@ -509,7 +509,18 @@ export const deleteBid = async (req, res, next) => {
     next(err);
   }
 };
-
+/**
+ * @swagger
+ * /bids/finalize:
+ *   post:
+ *     tags: [Bids]
+ *     summary: Finalizar una subasta
+ *     responses:
+ *       200:
+ *         description: Subasta finalizada
+ *       500:
+ *         description: Error del servidor
+ */
 export const finalizarSubasta = async (req, res, next) => {
   try {
     const { auction_id } = req.body;
@@ -561,7 +572,24 @@ export const finalizarSubasta = async (req, res, next) => {
     });
   }
 };
-
+/**
+ * @swagger
+ * /bids/resultados/{id}:
+ *   get:
+ *     tags: [Bids]
+ *     summary: Obtener resultados de una subasta
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Resultados de la subasta
+ *       404:
+ *         description: Subasta no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
 export const getResultadosSubasta = async (req, res, next) => {
   try {
     const { auction_id } = req.query;

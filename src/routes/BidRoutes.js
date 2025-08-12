@@ -140,8 +140,35 @@ router.put("/update/:id", validate(updateBidSchema), updateBid);
  *         description: Error del servidor
  */
 router.delete("/delete/:id", deleteBid);
-
+// /**
+//  * @swagger
+//  * /bids/finalize:
+//  *   post:
+//  *     tags: [Bids]
+//  *     summary: Finalizar una subasta
+//  *     responses:
+//  *       200:
+//  *         description: Subasta finalizada
+//  *       500:
 router.post("/finalize", finalizarSubasta);
+/**
+ * @swagger     
+ * /bids/resultados/{id}:
+ *   get:
+ *     tags: [Bids]
+ *     summary: Obtener resultados de una subasta
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Resultados de la subasta
+ *       404:
+ *         description: Subasta no encontrada
+ *       500:
+ *         description: Error del servidor
+ */ 
 router.get("/resultados/:id", getResultadosSubasta);
 
 export default router;

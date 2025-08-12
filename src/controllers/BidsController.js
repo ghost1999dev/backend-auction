@@ -573,11 +573,8 @@ export const getResultadosSubasta = async (req, res, next) => {
       });
     }
 
-    const bids = await BidsModel.findAll({
-      where: { 
-        auction_id, 
-        status: [1, 2] 
-      },
+    const allBids = await BidsModel.findAll({
+      where: { auction_id },
       order: [["amount", "ASC"]],
       include: [
         {
@@ -595,16 +592,41 @@ export const getResultadosSubasta = async (req, res, next) => {
       ],
     });
 
-    const resultados = bids.map(bid => ({
-      id: bid.id,
-      auction_id: bid.auction_id,
-      developer_id: bid.developer_id,
-      amount: bid.amount,
-      status: bid.status === 1 ? "Ganador" : "Perdedor",
-      createdAt: bid.createdAt,
-      updatedAt: bid.updatedAt,
-      developer_profile: bid.developer_profile
-    }));
+    const ganadores = [];
+    const perdedores = [];
+    const developersGanadoresIds = new Set();
+
+
+    for (const bid of allBids) {
+      if (ganadores.length >= 3) break;
+      const devId = bid.developer_id;
+      if (!developersGanadoresIds.has(devId)) {
+        ganadores.push({
+          ...bid.toJSON(),
+          status: "Ganador",
+        });
+        developersGanadoresIds.add(devId);
+      }
+    }
+
+    const perdedoresIds = new Set(
+      allBids
+        .filter(bid => !developersGanadoresIds.has(bid.developer_id))
+        .map(bid => bid.developer_id)
+    );
+
+    for (const devId of perdedoresIds) {
+      const devBids = allBids.filter(bid => bid.developer_id === devId);
+      if (devBids.length > 0) {
+        const lowestBid = devBids[0];
+        perdedores.push({
+          ...lowestBid.toJSON(),
+          status: "Perdedor",
+        });
+      }
+    }
+
+    const resultados = [...ganadores, ...perdedores];
 
     return res.status(200).json({
       success: true,

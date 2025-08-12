@@ -190,7 +190,29 @@ router.post("/finalize", finalizarSubasta);
  *         description: Error del servidor
  */ 
 router.get("/resultados/:id", getResultadosSubasta);
-
+/**
+ * @swagger
+ * /bids/choose-winner:
+ *   post:
+ *     tags: [Bids]
+ *     summary: Elegir ganador de una subasta
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             auction_id:
+ *               type: integer
+ *             winner_bid:
+ *               type: integer
+ *     responses:
+ *       200:
+ *         description: Mensaje de error o ganador elegido
+ *       500:
+ *         description: Error del servidor    
+ */
 router.post("/choose-winner", chooseWinner);
 
 export default router;

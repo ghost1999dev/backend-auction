@@ -1,5 +1,8 @@
 import sequelize from "../config/connection.js";
 import { DataTypes } from "sequelize";
+import AuctionsModel from "./AuctionsModel.js";
+import UsersModel from "./UsersModel.js";
+import BidsModel from "./BidsModel.js";
 
 const WinnerModel = sequelize.define('winners', {
   id: {
@@ -7,7 +10,14 @@ const WinnerModel = sequelize.define('winners', {
     autoIncrement: true,
     primaryKey: true
   },
-  auction_id: {
+  bid_id: { 
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'bids',
+      key: 'id'
+    }
+  },  auction_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
@@ -34,5 +44,9 @@ const WinnerModel = sequelize.define('winners', {
 }, {
   timestamps: false   
 });
+
+WinnerModel.belongsTo(AuctionsModel, { foreignKey: 'auction_id', as: 'auction' });
+WinnerModel.belongsTo(UsersModel, { foreignKey: 'winner_id', as: 'winner' });
+WinnerModel.belongsTo(BidsModel, { foreignKey: 'bid_id', as: 'bid' });
 
 export default WinnerModel;

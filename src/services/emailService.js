@@ -511,3 +511,101 @@ export const sendWelcomeEmail = async (email, fullName, username, resetLink) => 
   console.log('Correo enviado:', info.messageId);
   return info;
 };
+
+export const sendWinnerEmail = async ({ email, name, project_name, company_name, bid_amount }) => {
+  const htmlTemplate = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <title>Subasta ganadora</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: #f4f4f4;
+          margin: 0;
+          padding: 0;
+        }
+        .email-container {
+          max-width: 600px;
+          margin: 20px auto;
+          background: #ffffff;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.05);
+          position: relative;
+          overflow: hidden;
+        }
+        h2 {
+          color: #2c3e50;
+        }
+        p {
+          color: #34495e;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .button {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 12px 20px;
+          background-color: #3498db;
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+        }
+        .footer {
+          margin-top: 30px;
+          font-size: 13px;
+          color: #999;
+          text-align: center;
+        }
+        .logo {
+          max-width: 150px;
+          margin: 0 auto 20px;
+          display: block;
+        }
+        .confetti {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('https://path-to-your-confetti-image.gif') no-repeat center center;
+          background-size: cover;
+          opacity: 0.2;
+          pointer-events: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <!-- Confetti Animation -->
+        <div class="confetti"></div>
+        <img src="${logoUrl}" alt="Logo de la empresa" class="logo" />
+        
+        <h2>¡Felicidades, ganaste la subasta!</h2>
+        <p>Hola <strong>${name}</strong>,</p>
+        <p>¡Felicidades! Has ganado la subasta <strong>"${project_name}"</strong> para la empresa <strong>"${company_name}"</strong> 
+         con una puja de <strong>$${bid_amount}</strong>.</p>
+        <p>Gracias por confiar en nuestra plataforma.</p>
+        
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} CodeBin. Todos los derechos reservados.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"CodeBid" <${process.env.SENDEMAIL}>`,
+    to: email,
+    subject: `¡Felicidades, ganaste la subasta!`,
+    html: htmlTemplate,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`Correo de ganadora enviado a ${email}: ${info.messageId}`);
+  return info;
+};

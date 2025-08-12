@@ -5,6 +5,8 @@ import UsersModel    from "../models/UsersModel.js";
 import DevelopersModel from "../models/DevelopersModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
+import WinnerModel from "../models/WinnerModel.js";
+import { sendWinnerEmail } from "../services/emailService.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -354,9 +356,13 @@ export const listBidsByAuction = async (req, res, next) => {
     });
   }
 };
-
-
-
+/**
+ * @desc    Obtener listado de pujas
+ * @route   GET /bids/show/by-auction
+ * @access  Public
+ * @param   {number} req.query.auction_id - Filtrar por subasta
+ * @returns {Object} Lista de pujas o mensaje de error
+ */
 export const getBid = async (req, res, next) => {
   try {
     const bid = await BidsModel.findByPk(req.params.id, {
@@ -612,6 +618,84 @@ export const getResultadosSubasta = async (req, res, next) => {
       message: "Error interno al obtener resultados de la subasta",
       error: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
     });
+  }
+};
+
+/**
+ * @desc    Elegir ganador de una subasta
+ * @route   POST /bids/choose-winner
+ * @access  Private
+ * @param   {number} req.body.auction_id - ID de la subasta
+ * @param   {number} req.body.winner_bid_id - ID de la puja ganadora
+ * @returns {Object} Mensaje de error o ganador elegido
+ */
+export const chooseWinner = async (req, res) => {
+  try {
+    const { auction_id, winner_bid } = req.body;
+
+    if (!auction_id || !winner_bid) {
+      return res.status(400).json({
+        success: false,
+        message: 'auction_id y winner_bid son obligatorios'
+      });
+    }
+
+    const auction = await AuctionsModel.findByPk(auction_id,
+      {
+        include: [
+          {
+            model: ProjectsModel,
+            as: "project",
+            attributes: ["id", "project_name", "description", "budget", "company_id"],
+            include: [
+              {
+                model: UsersModel,
+                as: "company",
+                attributes: ["id", "name", "email"]
+              }
+            ]
+          }
+        ]
+      }
+    );
+    if (!auction) {
+      return res.status(404).json({ success: false, message: 'Subasta no encontrada' });
+    }
+
+    const winningBid = await BidsModel.findOne({
+      where: { id: winner_bid, auction_id },
+      include: [{ model: UsersModel, as: 'user', attributes: ['id', 'name', 'email'] }]
+    });
+
+    if (!winningBid) {
+      return res.status(404).json({ success: false, message: 'Puja no encontrada para esta subasta' });
+    }
+    await sendWinnerEmail({
+      email: winningBid.user.email,
+      name: winningBid.user.name,
+      project_name: auction.project.project_name,
+      company_name: auction.project.company.name,
+      bid_amount: winningBid.amount
+    });
+
+    await WinnerModel.create({
+      bid_id: winningBid.id,
+      auction_id: auction_id,
+      winner_id: winningBid.user.id,
+      bid_amount: winningBid.amount
+    });
+
+    auction.status = 2;
+    await auction.save();
+
+    return res.json({
+      success: true,
+      message: 'Ganador seleccionado, estados actualizados, correo enviado y registro guardado'
+    });
+
+  } catch (error) {
+    console.error('Error al elegir ganador:', error);
+    return res.status(500).json({ success: false, message: 'Error interno', error: error.message });
   }
 };
 

@@ -12,7 +12,8 @@ import {
   deleteBid,
   listBidsByAuction,
   finalizarSubasta,
-  getResultadosSubasta
+  getResultadosSubasta,
+  chooseWinner
 } from "../controllers/BidsController.js";
 
 const router = Router();
@@ -189,6 +190,8 @@ router.post("/finalize", finalizarSubasta);
  *         description: Error del servidor
  */ 
 router.get("/resultados/:id", getResultadosSubasta);
+
+router.post("/choose-winner", chooseWinner);
 
 export default router;
 

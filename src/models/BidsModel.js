@@ -67,8 +67,12 @@ BidsModel.belongsTo(AuctionsModel, {
   AuctionsModel.hasMany(BidsModel, { foreignKey: 'auction_id', as: 'bids' });
 });*/
 BidsModel.belongsTo(DevelopersModel, { as: 'developer_profile', foreignKey: 'developer_id', targetKey: 'user_id' });
-
 DevelopersModel.belongsTo(UsersModel, { as: 'users', foreignKey: 'user_id' });
+
+// En BidsModel.js
+BidsModel.belongsTo(UsersModel, { foreignKey: 'developer_id', as: 'user' });
+UsersModel.hasMany(BidsModel, { foreignKey: 'developer_id', as: 'bids' });
+
 
 
 

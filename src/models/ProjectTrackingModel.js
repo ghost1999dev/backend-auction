@@ -30,6 +30,7 @@ const ProjectTrackingModel = sequelize.define('project_tracking', {
     defaultValue: DataTypes.NOW
   }
 }, {
+  tableName: 'project_tracking',  
   timestamps: false
 });
 

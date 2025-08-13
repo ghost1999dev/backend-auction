@@ -8,6 +8,7 @@ import CompaniesModel from "../models/CompaniesModel.js";
 import WinnerModel from "../models/WinnerModel.js";
 import { sendWinnerEmail } from "../services/emailService.js";
 import signImage from "../helpers/signImage.js";
+import ProjectTrackingModel from "../models/ProjectTrackingModel.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -754,7 +755,7 @@ export const chooseWinner = async (req, res) => {
     await ProjectTrackingModel.create({
       project_id: auction.project_id,
       status: 1,
-      notes: 'Proyecto asignado al ganador'
+      notes: 'Proyecto Asignado'
     }); 
 
     auction.status = 2;

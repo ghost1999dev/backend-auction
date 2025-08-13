@@ -34,6 +34,7 @@ import ratingRoutes from "./routes/ratingsRoutes.js";
 import reportRoutes from "./routes/reportsRoutes.js";
 import favoriteProjectsRoutes from "./routes/favoriteProjectsRoute.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import projectTrackingRoutes from "./routes/projectTrackingRoutes.js";
 
 import authRoutes from "./middlewares/authRoutes.js";
 
@@ -114,6 +115,7 @@ class Server {
     this.app.use("/reports", authRoutes, reportRoutes);
     this.app.use("/favorite-projects", authRoutes, favoriteProjectsRoutes);
     this.app.use("/dashboard", authRoutes, dashboardRoutes);
+    this.app.use("/project-tracking", authRoutes, projectTrackingRoutes);
     this.app.use("/passport", jwtRouter);
     this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
  

@@ -751,12 +751,18 @@ export const chooseWinner = async (req, res) => {
       bid_amount: winningBid.amount
     });
 
+    await ProjectTrackingModel.create({
+      project_id: auction.project_id,
+      status: 1,
+      notes: 'Proyecto asignado al ganador'
+    }); 
+
     auction.status = 2;
     await auction.save();
 
     return res.json({
       success: true,
-      message: 'Ganador seleccionado, estados actualizados, correo enviado y registro guardado'
+      message: 'Ganador seleccionado, estados actualizados, correo enviado y seguimiento iniciado'
     });
 
   } catch (error) {

@@ -7,6 +7,7 @@ import ProjectsModel from "../models/ProjectsModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import WinnerModel from "../models/WinnerModel.js";
 import { sendWinnerEmail } from "../services/emailService.js";
+import signImage from "../helpers/signImage.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -612,7 +613,7 @@ export const getResultadosSubasta = async (req, res, next) => {
             {
               model: UsersModel,
               as: "user",
-              attributes: ["id", "name", "email"],
+              attributes: ["id", "name", "email", "image"],
             },
           ],
           attributes: ["id", "user_id"],
@@ -624,13 +625,20 @@ export const getResultadosSubasta = async (req, res, next) => {
     const perdedores = [];
     const developersGanadoresIds = new Set();
 
-
     for (const bid of allBids) {
       if (ganadores.length >= 3) break;
       const devId = bid.developer_id;
       if (!developersGanadoresIds.has(devId)) {
+        const bidData = bid.toJSON();
+
+        if (bidData.developer_profile?.user?.image) {
+          bidData.developer_profile.user.image = await signImage(
+            bidData.developer_profile.user.image
+          );
+        }
+
         ganadores.push({
-          ...bid.toJSON(),
+          ...bidData,
           status: "Ganador",
         });
         developersGanadoresIds.add(devId);
@@ -646,9 +654,16 @@ export const getResultadosSubasta = async (req, res, next) => {
     for (const devId of perdedoresIds) {
       const devBids = allBids.filter(bid => bid.developer_id === devId);
       if (devBids.length > 0) {
-        const lowestBid = devBids[0];
+        const lowestBidData = devBids[0].toJSON();
+
+        if (lowestBidData.developer_profile?.user?.image) {
+          lowestBidData.developer_profile.user.image = await signImage(
+            lowestBidData.developer_profile.user.image
+          );
+        }
+
         perdedores.push({
-          ...lowestBid.toJSON(),
+          ...lowestBidData,
           status: "Perdedor",
         });
       }
@@ -666,7 +681,10 @@ export const getResultadosSubasta = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Error interno al obtener resultados de la subasta",
-      error: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
+      error:
+        process.env.NODE_ENV === "development"
+          ? err.message
+          : "Internal server error",
     });
   }
 };

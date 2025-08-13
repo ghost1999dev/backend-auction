@@ -625,17 +625,19 @@ export const getResultadosSubasta = async (req, res, next) => {
     const perdedores = [];
     const developersGanadoresIds = new Set();
 
+    const procesarImagen = async (user) => {
+      if (user?.image && !user.image.startsWith("http")) {
+        user.image = await signImage(user.image);
+      }
+    };
+
     for (const bid of allBids) {
       if (ganadores.length >= 3) break;
       const devId = bid.developer_id;
       if (!developersGanadoresIds.has(devId)) {
         const bidData = bid.toJSON();
 
-        if (bidData.developer_profile?.user?.image) {
-          bidData.developer_profile.user.image = await signImage(
-            bidData.developer_profile.user.image
-          );
-        }
+        await procesarImagen(bidData.developer_profile?.user);
 
         ganadores.push({
           ...bidData,
@@ -656,11 +658,7 @@ export const getResultadosSubasta = async (req, res, next) => {
       if (devBids.length > 0) {
         const lowestBidData = devBids[0].toJSON();
 
-        if (lowestBidData.developer_profile?.user?.image) {
-          lowestBidData.developer_profile.user.image = await signImage(
-            lowestBidData.developer_profile.user.image
-          );
-        }
+        await procesarImagen(lowestBidData.developer_profile?.user);
 
         perdedores.push({
           ...lowestBidData,

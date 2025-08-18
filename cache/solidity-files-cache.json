@@ -1,8 +1,8 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\Anderson\\OneDrive\\Escritorio\\AUCTION\\backend-auction\\src\\contracts\\BidRegistry.sol": {
-      "lastModificationDate": 1754683302497,
+    "C:\\Users\\marlo\\Desktop\\backend-auction\\src\\contracts\\BidRegistry.sol": {
+      "lastModificationDate": 1755293282625,
       "contentHash": "e0bab787096bdc93f914d2376e2d379d",
       "sourceName": "src/contracts/BidRegistry.sol",
       "solcConfig": {

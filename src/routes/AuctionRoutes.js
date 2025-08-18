@@ -8,7 +8,8 @@ import {
   getAuction,
   updateAuction,
   updateAuctionDeadline,
-  deleteAuction
+  deleteAuction,
+  getAuctionsByDeveloper
 } from "../controllers/AuctionsController.js";
 
 const router = Router();
@@ -189,6 +190,32 @@ router.put("/update-deadline/:id", updateAuctionDeadline);
  *      500: { description: Error del servidor }
  */
 router.delete("/delete/:id", deleteAuction);
+
+/* ---------- Obtener por desarrollador ---------- */
+/**
+ * @swagger
+ * /auctions/get-winner-history/{id}:
+ *  get:
+ *    tags: [Auctions]
+ *    summary: Obtener las subastas de un desarrollador
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        schema: { type: integer }
+ *        required: true
+ *        description: ID del usuario
+ *    responses:
+ *      200:
+ *        description: Subastas obtenidas exitosamente
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Auction'
+ *      500: { description: Error del servidor }
+ */
+router.get("/get-winner-history/:id", getAuctionsByDeveloper);
 
 export default router;
 

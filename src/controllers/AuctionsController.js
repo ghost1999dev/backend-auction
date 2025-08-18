@@ -2,6 +2,8 @@ import AuctionsModel from "../models/AuctionsModel.js";
 import ProjectsModel from "../models/ProjectsModel.js";
 import CompaniesModel from "../models/CompaniesModel.js";
 import UsersModel from "../models/UsersModel.js";
+import DevelopersModel from "../models/DevelopersModel.js";
+import WinnerModel from "../models/WinnerModel.js";
 import { Op } from "sequelize";
 
 import { createAuctionSchema } from "../validations/auctionSchema.js";
@@ -420,3 +422,54 @@ export const deleteAuction = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAuctionsByDeveloper = async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Falta el ID del desarrollador",
+            error: "missing_fields",
+            status: 400
+        })
+    }
+
+    try {
+        const data = await WinnerModel.findAll({
+            where: { winner_id: id },
+            include: [
+            {
+                model: UsersModel,
+                as: 'winner',
+                attributes: ['id', 'name', 'email']
+            },{
+                model: AuctionsModel,
+                as: 'auction',
+                attributes: ['project_id', 'bidding_started_at', 'bidding_deadline', 'status'],
+                include: [{
+                    model: ProjectsModel,
+                    as: 'project',
+                    attributes: ['id', 'project_name', 'description', 'budget', 'company_id'],
+                    include: [{
+                        model: UsersModel,
+                        as: 'company',
+                        attributes: ['id', 'name', 'email']
+                    }]
+                }]
+            }]
+        })
+
+    res.status(200).json({
+        success: true,
+        message: "Auctions obtenidas exitosamente",
+        data
+    })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Error al obtener las subastas",
+            error: error.message
+        });
+    }
+}

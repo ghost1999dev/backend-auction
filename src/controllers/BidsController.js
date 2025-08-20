@@ -9,6 +9,7 @@ import WinnerModel from "../models/WinnerModel.js";
 import { sendWinnerEmail } from "../services/emailService.js";
 import signImage from "../helpers/signImage.js";
 import ProjectTrackingModel from "../models/ProjectTrackingModel.js";
+import createBidApi from "../services/apiBidsService.js";
 
 const AUCTION_STATUS = {
   PENDING: 0,
@@ -201,6 +202,8 @@ export const createBid = async (req, res, next) => {
       amount: amountNumber,
       status: 0
     });
+
+    createBidApi({ auction_id, user_id, amount: amountNumber });
 
     return res.status(201).json({
       success: true,

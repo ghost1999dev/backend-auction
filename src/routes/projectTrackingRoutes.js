@@ -2,7 +2,8 @@ import express from "express";
 import { 
     createTracking, 
     getProjectHistory, 
-    getCurrentStatus } 
+    getCurrentStatus, 
+    getAllStatus} 
     from "../controllers/ProjectTrackingController.js";
 
 const router = express.Router();
@@ -72,6 +73,9 @@ router.get("/get-history/:project_id", getProjectHistory);
  *         description: Error al obtener el estado actual
  */
 router.get("/get-current-status/:project_id", getCurrentStatus);
+
+router.get("/get-all-status/:project_id", getAllStatus);
+
 
 export default router;
 /**

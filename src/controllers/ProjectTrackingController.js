@@ -83,3 +83,20 @@ export const getCurrentStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Error al obtener estado actual" });
   }
 };
+
+
+export const getAllStatus = async (req, res) => {
+  try {
+    const { project_id } = req.params;
+
+    const current = await ProjectTrackingModel.findAll({
+      where: { project_id },
+      order: [['updated_at', 'DESC']]
+    });
+
+    res.json({ success: true, current });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error al obtener estado actual" });
+  }
+};

@@ -710,24 +710,29 @@ export const chooseWinner = async (req, res) => {
       });
     }
 
-    const auction = await AuctionsModel.findByPk(auction_id,
-      {
-        include: [
+  const auction = await AuctionsModel.findByPk(auction_id, {
+      include: [
           {
             model: ProjectsModel,
             as: "project",
             attributes: ["id", "project_name", "description", "budget", "company_id"],
             include: [
               {
-                model: UsersModel,
-                as: "company",
-                attributes: ["id", "name", "email"]
+                model: CompaniesModel,
+                as: "company_profile",
+                attributes: ["id", "business_type"],
+                include: [
+                  {
+                    model: UsersModel,
+                    as: "user",
+                    attributes: ["id", "name", "email"]
+                  }
+                ]
               }
             ]
           }
         ]
-      }
-    );
+      });
     if (!auction) {
       return res.status(404).json({ success: false, message: 'Subasta no encontrada' });
     }
@@ -807,7 +812,21 @@ export const getHistorialGanadores = async (req, res) => {
               model: ProjectsModel,
               as: 'project',
               attributes: ['id', 'project_name', 'description', 'budget'],
-            },
+              include: [
+                {
+                  model: CompaniesModel,
+                  as: 'company_profile',
+                  attributes: ['id', 'nrc_number', 'business_type'],
+                  include: [
+                    {
+                      model: UsersModel,
+                      as: 'user',
+                      attributes: ['id', 'name', 'email']
+                    }
+                  ]
+                }
+              ]
+            }
           ],
         },
         {
@@ -825,5 +844,6 @@ export const getHistorialGanadores = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
 
 

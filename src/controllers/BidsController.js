@@ -736,7 +736,7 @@ export const chooseWinner = async (req, res) => {
     if (!auction) {
       return res.status(404).json({ success: false, message: 'Subasta no encontrada' });
     }
-
+    
     const winningBid = await BidsModel.findOne({
       where: { id: winner_bid, auction_id },
       include: [{ model: UsersModel, as: 'user', attributes: ['id', 'name', 'email'] }]
@@ -745,6 +745,7 @@ export const chooseWinner = async (req, res) => {
     if (!winningBid) {
       return res.status(404).json({ success: false, message: 'Puja no encontrada para esta subasta' });
     }
+
     await sendWinnerEmail({
       email: winningBid.user.email,
       name: winningBid.user.name,
@@ -845,5 +846,74 @@ export const getHistorialGanadores = async (req, res) => {
   }
 };
 
+
+export const getWinnerByIdAuction = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const winner = await WinnerModel.findAll({
+      where: [{
+        auction_id: id
+      }],
+      include: [
+        {
+          model: BidsModel,
+          as: 'bid',
+          attributes: ['id', 'amount', 'status', 'createdAt'],
+          include: [
+            {
+              model: DevelopersModel,
+              as: 'developer_profile',
+              include: [
+                {
+                  model: UsersModel,
+                  as: 'users',
+                  attributes: ['id', 'name', 'email'],
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: AuctionsModel,
+          as: 'auction',
+          attributes: ['id', 'status', 'bidding_started_at', 'bidding_deadline'],
+          include: [
+            {
+              model: ProjectsModel,
+              as: 'project',
+              attributes: ['id', 'project_name', 'description', 'budget'],
+              include: [
+                {
+                  model: CompaniesModel,
+                  as: 'company_profile',
+                  attributes: ['id', 'nrc_number', 'business_type'],
+                  include: [
+                    {
+                      model: UsersModel,
+                      as: 'user',
+                      attributes: ['id', 'name', 'email']
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+        },
+        {
+          model: UsersModel,
+          as: 'winner',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+
+    res.json(winner);
+  } catch (error) {
+    console.error('Error obteniendo historial de ganadores:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
 
 

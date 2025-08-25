@@ -14,7 +14,8 @@ import {
   finalizarSubasta,
   getResultadosSubasta,
   chooseWinner,
-  getHistorialGanadores
+  getHistorialGanadores,
+  getWinnerByIdAuction
 } from "../controllers/BidsController.js";
 import  authenticateToken  from '../middlewares/authenticateToken.js';
 
@@ -218,7 +219,9 @@ router.get("/resultados/:id", getResultadosSubasta);
  */
 router.post("/choose-winner", chooseWinner);
 
-router.get("/historial-ganadores",authenticateToken, getHistorialGanadores);
+router.get("/historial-ganadores", authenticateToken, getHistorialGanadores);
+
+router.get("/winner/auction/:id", authenticateToken, getWinnerByIdAuction);
 
 export default router;
 

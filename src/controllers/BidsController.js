@@ -710,36 +710,41 @@ export const chooseWinner = async (req, res) => {
       });
     }
 
-  const auction = await AuctionsModel.findByPk(auction_id, {
+    const auction = await AuctionsModel.findByPk(auction_id, {
       include: [
-          {
-            model: ProjectsModel,
-            as: "project",
-            attributes: ["id", "project_name", "description", "budget", "company_id"],
-            include: [
-              {
-                model: CompaniesModel,
-                as: "company_profile",
-                attributes: ["id", "business_type"],
-                include: [
-                  {
-                    model: UsersModel,
-                    as: "user",
-                    attributes: ["id", "name", "email"]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      });
+        {
+          model: ProjectsModel,
+          as: "project",
+          attributes: ["id", "project_name", "description", "budget", "company_id"],
+          include: [
+            {
+              model: CompaniesModel,
+              as: "company_profile", 
+              attributes: ["id", "business_type"],
+              include: [
+                {
+                  model: UsersModel,
+                  as: "user", 
+                  attributes: ["id", "name", "email"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
     if (!auction) {
       return res.status(404).json({ success: false, message: 'Subasta no encontrada' });
     }
     
     const winningBid = await BidsModel.findOne({
       where: { id: winner_bid, auction_id },
-      include: [{ model: UsersModel, as: 'user', attributes: ['id', 'name', 'email'] }]
+      include: [{ 
+        model: UsersModel, 
+        as: 'user', 
+        attributes: ['id', 'name', 'email'] 
+      }]
     });
 
     if (!winningBid) {
@@ -750,7 +755,7 @@ export const chooseWinner = async (req, res) => {
       email: winningBid.user.email,
       name: winningBid.user.name,
       project_name: auction.project.project_name,
-      company_name: auction.project.company.name,
+      company_name: auction.project.company_profile.user.name, 
       bid_amount: winningBid.amount
     });
 
@@ -777,10 +782,13 @@ export const chooseWinner = async (req, res) => {
 
   } catch (error) {
     console.error('Error al elegir ganador:', error);
-    return res.status(500).json({ success: false, message: 'Error interno', error: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error interno', 
+      error: error.message 
+    });
   }
 };
-
 
 export const getHistorialGanadores = async (req, res) => {
   try {

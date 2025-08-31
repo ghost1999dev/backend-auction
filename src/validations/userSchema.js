@@ -34,9 +34,9 @@ export const updateUserSchema = Joi.object({
     })
 });
 
-export const passwordUserchema = Joi.object({
+export const passwordUserchema = Joi.object({   
     currentPassword: Joi.string().optional().allow('',null),
-    newPassword: Joi.string()
+    Newpassword: Joi.string()
       .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{6,20}$/)
       .required()
       .messages({

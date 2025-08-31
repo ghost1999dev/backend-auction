@@ -71,6 +71,7 @@ export const createAuction = async (req, res) => {
             attributes: [],
             include: [{
                 model: UsersModel,
+                as: 'user',
                 attributes: ['id', 'status'],
             }],
             where: { id: project.company_id },

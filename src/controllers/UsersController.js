@@ -318,7 +318,7 @@ export const updatePassword = async (req, res) => {
     });
   }
 
-  const { currentPassword, newPassword } = value;
+  const { currentPassword, Newpassword } = value;
   
   try {
     const user = await UsersModel.findByPk(id);
@@ -341,7 +341,7 @@ export const updatePassword = async (req, res) => {
     }
 
     if (user.password !== null && user.password === hashPassword(currentPassword)) {
-      user.password = hashPassword(newPassword);
+      user.password = hashPassword(Newpassword);
       
       await user.save();
       

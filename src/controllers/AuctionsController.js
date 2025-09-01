@@ -102,7 +102,7 @@ export const createAuction = async (req, res) => {
             project_id,
             bidding_started_at,
             bidding_deadline,
-            status: AUCTION_STATUS.PENDING
+            status: AUCTION_STATUS.ACTIVE
         });
 
         return res.status(201).json({
@@ -170,10 +170,11 @@ export const listAuctions = async (req, res, next) => {
 export const getAuction = async (req, res, next) => {
     try {
         const auction = await AuctionsModel.findByPk(req.params.id, {
+            attributes: ['id', 'project_id', 'bidding_started_at', 'bidding_deadline', 'status', 'createdAt', 'updatedAt'],
             include: [{
                 model: ProjectsModel,
                 as: 'project',
-                attributes: ['project_name', 'description', 'budget']
+                attributes: ['project_name', 'description', 'budget'] 
             }]
         });
         

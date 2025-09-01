@@ -119,6 +119,7 @@ export const getAllReports = async (req, res) => {
         status: report.status,
         createdAt: report.createdAt,
         updatedAt: report.updatedAt,
+        admin_response: report.admin_response,
         reporter_name: report.reporter?.name || null,
         reportedUser_name: report.reportedUser?.name || null,
         project_name: report.project?.project_name || null,

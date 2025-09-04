@@ -202,7 +202,8 @@ export const createBid = async (req, res, next) => {
       amount: amountNumber,
       status: 0
     });
-
+    console.log('AFTER ORM');
+    
     createBidApi({ auction_id, user_id, amount: amountNumber });
 
     return res.status(201).json({

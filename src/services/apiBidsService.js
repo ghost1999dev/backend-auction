@@ -10,6 +10,10 @@ async function createBidApi(bid){
         },
         body: JSON.stringify(bid)
     })
+    console.log('RESULT FROM CREATEDBID');
+    
+    console.log(`RESULT ${res}`);
+    
     const json = await res.json()
     if (!res.ok || !json.success) throw new Error(json.message || `HTTP ${res.status}`)
     return json.data

@@ -58,7 +58,7 @@ passport.use(
           });
 
           if (!external) {
-            await ExternalAccount.create({
+            await ExternalAccountsModel.create({
               user_id: user.id,
               provider_id: profile.id,
               provider: "github",

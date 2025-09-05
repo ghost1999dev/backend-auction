@@ -66,7 +66,13 @@ passport.use(
           }
         }
 
-        done(null, user);
+        done(null, {
+          id: user.id,
+          email: user.email,
+          role_id: user.role_id,
+          profileId: profile.id,
+          profileType: "github",
+        });
       } catch (error) {
         console.error("Error GitHub login:", error);
         done(error, null);
@@ -146,7 +152,13 @@ passport.use(
           { expiresIn: '1h' } 
         );
         
-        done(null, user);
+        done(null, {
+          id: user.id,
+          email: user.email,
+          role_id: user.role_id,
+          profileId: profile.id,
+          profileType: "google",
+        });
       } catch (error) {
         console.error("Error durante la autenticación con Google:", error);
         done(error, null);

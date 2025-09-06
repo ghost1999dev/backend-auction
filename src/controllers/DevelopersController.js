@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import path from "path"
 import { fileURLToPath } from "url"
 import signImage from "../helpers/signImage.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config()
 
@@ -33,6 +34,20 @@ export const AddNewDeveloper = async (req, res) => {
             occupation,
             portfolio,
         })
+       
+        await UsersModel.update({ role_id: 2 }, { where: { id: user_id } });
+        const user = await UsersModel.findByPk(user_id);
+
+        const token = jwt.sign(
+        { id: user.id,
+          email: user.email,
+          role: 2,
+          profile_id: developer.id,
+          profile_type: "Developer" },
+         process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+        
+    );
 
         res.status(201).json(
             { 
@@ -41,14 +56,14 @@ export const AddNewDeveloper = async (req, res) => {
                 developer 
             }
         )
-    } catch (error) {
-        res.status(500).json(
-            { 
-                status: 500,
-                message: "Error creating developer", error 
-            }
-        )
-    }
+} catch (error) {
+    console.error("Error creating developer:", error);
+    res.status(500).json({
+      status: 500,
+      message: "Error creating developer",
+      error: error.message || error,
+    });
+  }
 }
 
 /**

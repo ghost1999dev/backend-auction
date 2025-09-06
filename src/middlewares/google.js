@@ -4,6 +4,8 @@ import { Strategy as GitHubStrategy } from "passport-github2";
 import { config } from "dotenv";
 import UsersModel from "../models/UsersModel.js";
 import ExternalAccountsModel from "../models/ExternalAccountsModel.js";
+import DevelopersModel from "../models/DevelopersModel.js";
+import CompaniesModel from "../models/CompaniesModel.js";
 import jwt from 'jsonwebtoken';
 
 config();
@@ -30,15 +32,15 @@ passport.use(
         if (!user) {
           user = await UsersModel.create({
             role_id: 2,
-            name: name,
-            email: email,
+            name,
+            email,
             image: photo,
             account_type: 2,
             status: 1,
             last_login: new Date(),
           });
 
-          await ExternalAccount.create({
+          await ExternalAccountsModel.create({
             user_id: user.id,
             provider_id: profile.id,
             provider: "github",
@@ -66,7 +68,35 @@ passport.use(
           }
         }
 
-        done(null, user);
+        let profile_id = null;
+        let profile_type = null;
+        let role_id = null;
+
+        const developer = await DevelopersModel.findOne({ where: { user_id: user.id } });
+        if (developer) {
+          profile_id = developer.id;
+          profile_type = "Developer";
+          role_id = 2;
+        }
+
+        const company = await CompaniesModel.findOne({ where: { user_id: user.id } });
+        if (company) {
+          profile_id = company.id;
+          profile_type = "Company";
+          role_id = 1;
+        }
+
+        if (role_id && user.role_id !== role_id) {
+          await UsersModel.update({ role_id }, { where: { id: user.id } });
+        }
+        
+        done(null, {
+          id: user.id,
+          email: user.email,
+          role_id: role_id || user.role_id,
+          profileId: profile_id,
+          profileType: profile_type,
+        });
       } catch (error) {
         console.error("Error GitHub login:", error);
         done(error, null);
@@ -99,8 +129,8 @@ passport.use(
         if (!user) {
           user = await UsersModel.create({
             role_id: 2, 
-            name: name,
-            email: email,
+             name,
+             email,
             image: profilePhoto,
             account_type: 3, 
             status: 1, 
@@ -139,14 +169,36 @@ passport.use(
           }
           
         }
+
+        let profile_id = null;
+        let profile_type = null;
+        let role_id = null;
+
+        const developer = await DevelopersModel.findOne({ where: { user_id: user.id } });
+        if (developer) {
+          profile_id = developer.id;
+          profile_type = "Developer";
+          role_id = 2;
+        }
+
+        const company = await CompaniesModel.findOne({ where: { user_id: user.id } });
+        if (company) {
+          profile_id = company.id;
+          profile_type = "Company";
+          role_id = 1;
+        }
+
+        if (role_id && user.role_id !== role_id) {
+          await UsersModel.update({ role_id }, { where: { id: user.id } });
+        }
         
-        const token = jwt.sign(
-          { userId: user.id, email: user.email },
-          process.env.JWT_SECRET, 
-          { expiresIn: '1h' } 
-        );
-        
-        done(null, user);
+        done(null, {
+          id: user.id,
+          email: user.email,
+          role_id: role_id || user.role_id,
+          profileId: profile_id,
+          profileType: profile_type,
+        });
       } catch (error) {
         console.error("Error durante la autenticación con Google:", error);
         done(error, null);

@@ -15,11 +15,13 @@ jwtRouter.get(
   passport.authenticate("auth-google", { session: false, failureRedirect: "/login" }),
   (req, res) => {
     const payload = {
-      id: user.id,
-      email: user.email,
-      role: user.role_id,
-      profile_id: profileId,
-      profile_type: profileType,
+     id: req.user.id,
+     email: req.user.email,
+     role: req.user.role_id,
+     profile_id: req.user.profileId,
+     profile_type: req.user.profileType,
+
+
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     res.redirect(`https://stirring-raindrop-a222c3.netlify.app/#/auth/passport?token=${token}`);
@@ -37,11 +39,12 @@ jwtRouter.get(
   passport.authenticate("auth-github", { session: false, failureRedirect: "/login" }),
   (req, res) => {
     const payload = {
-      id: user.id,
-      email: user.email,
-      role: user.role_id,
-      profile_id: profileId,
-      profile_type: profileType,
+     id: req.user.id,
+     email: req.user.email,
+     role: req.user.role_id,
+     profile_id: req.user.profileId,
+     profile_type: req.user.profileType,
+
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
     res.redirect(`https://stirring-raindrop-a222c3.netlify.app/#/auth/passport?token=${token}`);

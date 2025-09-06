@@ -7,7 +7,7 @@ import sequelize from "../config/connection.js";
 import dotenv from "dotenv";
 import RolesModel from "../models/RolesModel.js";
 import signImage from "../helpers/signImage.js";
-
+import jwt from "jsonwebtoken"
 dotenv.config()
 
 /**
@@ -45,11 +45,24 @@ export const AddNewCompany = async (req, res) => {
 
     const company = await CompaniesModel.create({
       user_id,
-      nrc_number: nrc_number || null, // Guarda null si viene vacío
+      nrc_number: nrc_number || null, 
       business_type,
       web_site,
-      nit_number: nit_number || null, // Guarda null si viene vacío
+      nit_number: nit_number || null, 
     });
+
+    await UsersModel.update({ role_id: 1 }, { where: { id: user_id } });
+    const user = await UsersModel.findByPk(user_id);
+
+    const token = jwt.sign(
+      { id: user.id,
+        email: user.email,
+        role: 1,
+        profile_id: company.id,
+        profile_type: "Company" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     res.status(201).json({
       status: 201,
@@ -60,7 +73,7 @@ export const AddNewCompany = async (req, res) => {
     res.status(500).json({ 
       status: 500,
       message: "Error al crear la empresa", 
-      error: error.message // Mejor práctica: mostrar solo el mensaje de error
+      error: error.message 
     });
   }
 };
